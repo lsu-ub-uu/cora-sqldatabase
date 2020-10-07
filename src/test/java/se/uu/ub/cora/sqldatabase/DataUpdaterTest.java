@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.postgresql.util.PGobject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -130,4 +131,27 @@ public class DataUpdaterTest {
 		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
 		assertTrue(preparedStatementSpy.usedSetTimestamps.get("2") instanceof Timestamp);
 	}
+
+	@Test
+	public void testSetJsonObjectBuilderAsJsonPreparedStatement() throws Exception {
+		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
+		values.add("SE");
+
+		JsonObjectSpy jsonObject = new JsonObjectSpy();
+
+		values.add(jsonObject);
+		dataUpdater.executeUsingSqlAndValues(sql, values);
+		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
+		assertTrue(preparedStatementSpy.usedSetObjects.get("2") instanceof PGobject);
+		PGobject pgObject = (PGobject) preparedStatementSpy.usedSetObjects.get("2");
+		assertEquals(pgObject.getType(), "json");
+		assertEquals(pgObject.getValue(), jsonObject.jsonFormattedStringToReturn);
+	}
+
+	// String query = "INSERT INTO table (json_field) VALUES (to_json(?::json))"
+	//
+	// And set the parameter as a String.
+	//
+	// pStmt.setString(1, json);
+
 }

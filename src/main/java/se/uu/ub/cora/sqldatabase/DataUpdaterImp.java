@@ -24,7 +24,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.postgresql.util.PGobject;
+
 import se.uu.ub.cora.connection.SqlConnectionProvider;
+import se.uu.ub.cora.json.parser.JsonObject;
 
 public class DataUpdaterImp implements DataUpdater {
 
@@ -63,11 +66,29 @@ public class DataUpdaterImp implements DataUpdater {
 		for (Object value : values) {
 			if (value instanceof Timestamp) {
 				preparedStatement.setTimestamp(position, (Timestamp) value);
+			} else if (value instanceof JsonObject) {
+				PGobject pgObject = createPgObjectUsingValue(value);
+				preparedStatement.setObject(position, pgObject);
 			} else {
 				preparedStatement.setObject(position, value);
 			}
 			position++;
 		}
+	}
+
+	private PGobject createPgObjectUsingValue(Object value) throws SQLException {
+		String jsonFormattedString = extractJson(value);
+
+		PGobject pgObject = new PGobject();
+		pgObject.setType("json");
+		pgObject.setValue(jsonFormattedString);
+		return pgObject;
+	}
+
+	private String extractJson(Object value) {
+		JsonObject jsonObject = (JsonObject) value;
+		String jsonFormattedString = jsonObject.toJsonFormattedString();
+		return jsonFormattedString;
 	}
 
 	public SqlConnectionProvider getSqlConnectionProvider() {
