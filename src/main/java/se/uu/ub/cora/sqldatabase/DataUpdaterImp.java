@@ -67,7 +67,7 @@ public class DataUpdaterImp implements DataUpdater {
 			if (value instanceof Timestamp) {
 				preparedStatement.setTimestamp(position, (Timestamp) value);
 			} else if (value instanceof JsonObject) {
-				PGobject pgObject = createPgObjectUsingValue(value);
+				PGobject pgObject = createPgObjectFromJsonValue(value);
 				preparedStatement.setObject(position, pgObject);
 			} else {
 				preparedStatement.setObject(position, value);
@@ -76,19 +76,21 @@ public class DataUpdaterImp implements DataUpdater {
 		}
 	}
 
-	private PGobject createPgObjectUsingValue(Object value) throws SQLException {
-		String jsonFormattedString = extractJson(value);
+	private PGobject createPgObjectFromJsonValue(Object value) throws SQLException {
+		String jsonFormattedString = getJsonValueAsString(value);
+		return createPgObject(jsonFormattedString);
+	}
 
+	private String getJsonValueAsString(Object value) {
+		JsonObject jsonObject = (JsonObject) value;
+		return jsonObject.toJsonFormattedString();
+	}
+
+	private PGobject createPgObject(String jsonFormattedString) throws SQLException {
 		PGobject pgObject = new PGobject();
 		pgObject.setType("json");
 		pgObject.setValue(jsonFormattedString);
 		return pgObject;
-	}
-
-	private String extractJson(Object value) {
-		JsonObject jsonObject = (JsonObject) value;
-		String jsonFormattedString = jsonObject.toJsonFormattedString();
-		return jsonFormattedString;
 	}
 
 	public SqlConnectionProvider getSqlConnectionProvider() {
