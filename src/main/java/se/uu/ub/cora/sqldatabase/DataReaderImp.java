@@ -19,6 +19,7 @@
 
 package se.uu.ub.cora.sqldatabase;
 
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -97,16 +98,26 @@ public final class DataReaderImp implements DataReader {
 		try (Connection connection = sqlConnectionProvider.getConnection();
 				PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
 
-			addParameterValuesToPreparedStatement(values, prepareStatement);
+			addParameterValuesToPreparedStatement(values, prepareStatement, connection);
 			return getResultUsingQuery(prepareStatement);
 		}
 	}
 
 	private void addParameterValuesToPreparedStatement(List<Object> values,
-			PreparedStatement prepareStatement) throws SQLException {
+			PreparedStatement prepareStatement, Connection connection) throws SQLException {
 		int position = 1;
 		for (Object value : values) {
-			prepareStatement.setObject(position, value);
+			if (value instanceof List) {
+				Integer[] ids = { 2, 14, 4 };
+				List<Integer> integerList = (List<Integer>) value;
+				// Array array = connection.createArrayOf("integer", integerList.toArray());
+				Array array = connection.createArrayOf("integer", ids);
+
+				// prepareStatement.setObject(position, ids);
+				prepareStatement.setArray(position, array);
+			} else {
+				prepareStatement.setObject(position, value);
+			}
 			position++;
 		}
 	}

@@ -29,10 +29,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.NamingException;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.connection.ConnectionSpy;
+import se.uu.ub.cora.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.connection.PreparedStatementSpy;
 import se.uu.ub.cora.connection.ResultSetSpy;
 import se.uu.ub.cora.logger.LoggerProvider;
@@ -423,6 +426,34 @@ public class DataReaderImpTest {
 		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
 		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
 		assertEquals(preparedStatementSpy.usedSetObjects.get("2"), "SWE");
+	}
+
+	@Test(enabled = false)
+	public void tempTest() throws NamingException {
+
+		ParameterConnectionProviderImp connectionProvider = cretateConnectionProvider(
+				"jdbc:postgresql://diva-cora-docker-postgresql:5432/diva", "diva", "diva");
+
+		DataReaderImp realDataReader = DataReaderImp.usingSqlConnectionProvider(connectionProvider);
+		String sql = "with recursive org_tree as (select distinct organisation_id, relation"
+				+ " from organisation_relations where organisation_id in (?) " + "union all"
+				+ " select distinct relation.organisation_id, relation.relation from organisation_relations as relation"
+				+ " join org_tree as child on child.relation = relation.organisation_id)"
+				+ " select * from org_tree where relation = ?";
+		List<Object> values = new ArrayList<>();
+		List<Integer> ids = new ArrayList<>();
+		ids.add(1111);
+		ids.add(1150);
+		values.add(ids);
+		values.add(1110);
+		realDataReader.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		assertTrue(true);
+	}
+
+	private static ParameterConnectionProviderImp cretateConnectionProvider(String dbToReadFromUrl,
+			String dbToReadFromUserId, String dbToReadFromPassword) {
+		return ParameterConnectionProviderImp.usingUriAndUserAndPassword(dbToReadFromUrl,
+				dbToReadFromUserId, dbToReadFromPassword);
 	}
 
 }
