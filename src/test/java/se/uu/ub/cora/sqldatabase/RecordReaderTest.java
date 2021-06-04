@@ -219,4 +219,36 @@ public class RecordReaderTest {
 		assertSame(result, dataReader.oneRowResult);
 	}
 
+	@Test
+	public void testReadNumberOfRows() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		int numberOfRows = recordReader.readNumberOfRows(type, conditions);
+
+		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		// assertTrue(dataReader.values.isEmpty());
+		assertEquals(dataReader.sql, "select count(*) from organisation where domain = ?");
+		List<Object> values = dataReader.values;
+		assertEquals(values.size(), 1);
+		assertEquals(values.get(0), "uu");
+		assertEquals(numberOfRows, dataReader.oneRowResult.get("count"));
+
+	}
+
+	@Test
+	public void testReadNumberOfRowsNoConditions() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+
+		int numberOfRows = recordReader.readNumberOfRows(type, conditions);
+
+		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		assertEquals(dataReader.sql, "select count(*) from organisation");
+		assertTrue(dataReader.values.isEmpty());
+		assertEquals(numberOfRows, dataReader.oneRowResult.get("count"));
+
+	}
+
 }
