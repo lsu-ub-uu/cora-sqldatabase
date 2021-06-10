@@ -36,6 +36,6 @@ public interface RecordReader {
 
 	List<Map<String, Object>> readAllFromTable(String tableName, ResultDelimiter resultDelimiter);
 
-	int readNumberOfRows(String tableName, Map<String, Object> conditions);
+	long readNumberOfRows(String tableName, Map<String, Object> conditions);
 
 }

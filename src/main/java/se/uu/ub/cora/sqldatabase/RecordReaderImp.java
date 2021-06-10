@@ -152,11 +152,11 @@ public final class RecordReaderImp implements RecordReader {
 	}
 
 	@Override
-	public int readNumberOfRows(String tableName, Map<String, Object> conditions) {
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
 		String sql = assembleSqlForNumberOfRows(tableName, conditions);
 		List<Object> values = getConditionsAsValues(conditions);
 		Map<String, Object> countResult = dataReader.readOneRowOrFailUsingSqlAndValues(sql, values);
-		return (int) countResult.get("count");
+		return (long) countResult.get("count");
 
 	}
 

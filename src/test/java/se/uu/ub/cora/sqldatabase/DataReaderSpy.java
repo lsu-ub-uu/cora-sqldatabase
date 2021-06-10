@@ -72,7 +72,7 @@ public class DataReaderSpy implements DataReader {
 
 		oneRowResult = new HashMap<>();
 		if (sql.startsWith("select count")) {
-			oneRowResult.put("count", 453);
+			oneRowResult.put("count", 453L);
 		} else {
 			oneRowResult = createResult();
 		}

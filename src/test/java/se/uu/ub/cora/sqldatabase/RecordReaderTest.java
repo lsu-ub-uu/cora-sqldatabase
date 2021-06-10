@@ -225,7 +225,7 @@ public class RecordReaderTest {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
-		int numberOfRows = recordReader.readNumberOfRows(type, conditions);
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions);
 
 		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
 		// assertTrue(dataReader.values.isEmpty());
@@ -242,7 +242,7 @@ public class RecordReaderTest {
 		String type = "organisation";
 		Map<String, Object> conditions = new HashMap<>();
 
-		int numberOfRows = recordReader.readNumberOfRows(type, conditions);
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions);
 
 		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
 		assertEquals(dataReader.sql, "select count(*) from organisation");
