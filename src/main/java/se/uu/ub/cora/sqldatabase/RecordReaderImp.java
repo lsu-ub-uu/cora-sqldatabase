@@ -39,16 +39,20 @@ public final class RecordReaderImp implements RecordReader {
 
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName) {
+		String sql = createSelectAllFor(tableName);
+		return readAllFromTableUsingSql(tableName, sql);
+	}
+
+	private List<Map<String, Object>> readAllFromTableUsingSql(String tableName, String sql) {
 		try {
-			return tryToReadAllFromTable(tableName);
+			return tryToReadAllFromTable(sql);
 		} catch (SqlStorageException e) {
 			throw SqlStorageException.withMessageAndException(ERROR_READING_DATA_FROM + tableName,
 					e);
 		}
 	}
 
-	private List<Map<String, Object>> tryToReadAllFromTable(String tableName) {
-		String sql = createSelectAllFor(tableName);
+	private List<Map<String, Object>> tryToReadAllFromTable(String sql) {
 		return dataReader.executePreparedStatementQueryUsingSqlAndValues(sql,
 				Collections.emptyList());
 
@@ -123,6 +127,57 @@ public final class RecordReaderImp implements RecordReader {
 	public Map<String, Object> readNextValueFromSequence(String sequenceName) {
 		return dataReader.readOneRowOrFailUsingSqlAndValues(
 				"select nextval('" + sequenceName + "')", Collections.emptyList());
+	}
+
+	@Override
+	public List<Map<String, Object>> readAllFromTable(String tableName,
+			ResultDelimiter resultDelimiter) {
+		String sql = createSelectAllFor(tableName);
+		sql = possiblyAddDelimiter(sql, resultDelimiter);
+		return readAllFromTableUsingSql(tableName, sql);
+	}
+
+	private String possiblyAddDelimiter(String sql, ResultDelimiter resultDelimiter) {
+		sql += possiblySetLimit(resultDelimiter);
+		sql += possiblySetOffset(resultDelimiter);
+		return sql;
+	}
+
+	private String possiblySetLimit(ResultDelimiter resultDelimiter) {
+		return resultDelimiter.limit != null ? " limit " + resultDelimiter.limit : "";
+	}
+
+	private String possiblySetOffset(ResultDelimiter resultDelimiter) {
+		return resultDelimiter.offset != null ? " offset " + resultDelimiter.offset : "";
+	}
+
+	@Override
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
+		String sql = assembleSqlForNumberOfRows(tableName, conditions);
+		List<Object> values = getConditionsAsValues(conditions);
+		Map<String, Object> countResult = dataReader.readOneRowOrFailUsingSqlAndValues(sql, values);
+		return (long) countResult.get("count");
+
+	}
+
+	private String assembleSqlForNumberOfRows(String type, Map<String, Object> conditions) {
+		String sql = "select count(*) from " + type;
+		sql = possiblyAddConditionsToSql(conditions, sql);
+		return sql;
+	}
+
+	private List<Object> getConditionsAsValues(Map<String, Object> conditions) {
+		List<Object> values = new ArrayList<>();
+		values.addAll(conditions.values());
+		return values;
+	}
+
+	private String possiblyAddConditionsToSql(Map<String, Object> conditions, String sql) {
+		if (!conditions.isEmpty()) {
+			String conditionPart = createConditionPartOfSql(conditions);
+			sql += " where " + conditionPart;
+		}
+		return sql;
 	}
 
 }

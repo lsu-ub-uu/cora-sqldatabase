@@ -58,11 +58,45 @@ public class RecordReaderTest {
 
 	@Test(expectedExceptions = SqlStorageException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error reading data from someTableName")
-	public void testReadSqlErrorThrowsError() throws Exception {
+	public void testReadAllFromTableSqlErrorThrowsError() throws Exception {
 		dataReader.throwError = true;
 		sqlConnectionProviderSpy.returnErrorConnection = true;
 		recordReader = RecordReaderImp.usingDataReader(dataReader);
 		recordReader.readAllFromTable("someTableName");
+	}
+
+	@Test
+	public void testReadAllResultsReturnsResultFromDataReaderWithFilter() throws Exception {
+		String tableName = "someTableName";
+		ResultDelimiter resultDelimiter = new ResultDelimiter(100, 10);
+
+		List<Map<String, Object>> results = recordReader.readAllFromTable(tableName,
+				resultDelimiter);
+		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
+		assertEquals(dataReader.sql, "select * from someTableName limit 100 offset 10");
+		assertTrue(dataReader.values.isEmpty());
+
+		assertEquals(results, dataReader.result);
+	}
+
+	@Test
+	public void testReadAllSqlWhenLimitIsNull() throws Exception {
+		String tableName = "someTableName";
+		ResultDelimiter resultDelimiter = new ResultDelimiter(null, 10);
+
+		recordReader.readAllFromTable(tableName, resultDelimiter);
+		assertEquals(dataReader.sql, "select * from someTableName offset 10");
+
+	}
+
+	@Test
+	public void testReadAllSqlWhenOffsetIsNull() throws Exception {
+		String tableName = "someTableName";
+		ResultDelimiter resultDelimiter = new ResultDelimiter(100, null);
+
+		recordReader.readAllFromTable(tableName, resultDelimiter);
+		assertEquals(dataReader.sql, "select * from someTableName limit 100");
+
 	}
 
 	@Test
@@ -183,6 +217,38 @@ public class RecordReaderTest {
 		assertEquals(dataReader.sql, "select nextval('someSequence')");
 
 		assertSame(result, dataReader.oneRowResult);
+	}
+
+	@Test
+	public void testReadNumberOfRows() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions);
+
+		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		// assertTrue(dataReader.values.isEmpty());
+		assertEquals(dataReader.sql, "select count(*) from organisation where domain = ?");
+		List<Object> values = dataReader.values;
+		assertEquals(values.size(), 1);
+		assertEquals(values.get(0), "uu");
+		assertEquals(numberOfRows, dataReader.oneRowResult.get("count"));
+
+	}
+
+	@Test
+	public void testReadNumberOfRowsNoConditions() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions);
+
+		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		assertEquals(dataReader.sql, "select count(*) from organisation");
+		assertTrue(dataReader.values.isEmpty());
+		assertEquals(numberOfRows, dataReader.oneRowResult.get("count"));
+
 	}
 
 }

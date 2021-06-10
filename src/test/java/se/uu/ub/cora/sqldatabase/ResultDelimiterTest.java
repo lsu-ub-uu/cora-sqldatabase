@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,26 +16,21 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package se.uu.ub.cora.sqldatabase;
 
-import java.util.List;
-import java.util.Map;
+import static org.testng.Assert.assertEquals;
 
-public interface RecordReader {
+import org.testng.annotations.Test;
 
-	List<Map<String, Object>> readAllFromTable(String tableName);
+public class ResultDelimiterTest {
 
-	List<Map<String, Object>> readFromTableUsingConditions(String tableName,
-			Map<String, Object> conditions);
-
-	Map<String, Object> readOneRowFromDbUsingTableAndConditions(String tableName,
-			Map<String, Object> conditions);
-
-	Map<String, Object> readNextValueFromSequence(String sequenceName);
-
-	List<Map<String, Object>> readAllFromTable(String tableName, ResultDelimiter resultDelimiter);
-
-	long readNumberOfRows(String tableName, Map<String, Object> conditions);
+	@Test
+	public void testInit() {
+		Integer limit = 15;
+		Integer offset = 0;
+		ResultDelimiter delimiter = new ResultDelimiter(limit, offset);
+		assertEquals(delimiter.limit, limit);
+		assertEquals(delimiter.offset, offset);
+	}
 
 }

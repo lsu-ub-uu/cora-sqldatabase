@@ -43,7 +43,12 @@ public class DataReaderSpy implements DataReader {
 			throw SqlStorageException.withMessage(
 					"Error from executePreparedStatementQueryUsingSqlAndValues in DataReaderSpy");
 		}
+		// Map<String, Object> innerResult = new HashMap<>();
+		// if (sql.startsWith("select count")) {
+		// innerResult.put("count", 453);
+		// } else {
 		Map<String, Object> innerResult = createResult();
+		// }
 		result.add(innerResult);
 		return result;
 	}
@@ -64,7 +69,13 @@ public class DataReaderSpy implements DataReader {
 			throw SqlStorageException
 					.withMessage("Error from readOneRowOrFailUsingSqlAndValues in DataReaderSpy");
 		}
-		oneRowResult = createResult();
+
+		oneRowResult = new HashMap<>();
+		if (sql.startsWith("select count")) {
+			oneRowResult.put("count", 453L);
+		} else {
+			oneRowResult = createResult();
+		}
 		return oneRowResult;
 	}
 

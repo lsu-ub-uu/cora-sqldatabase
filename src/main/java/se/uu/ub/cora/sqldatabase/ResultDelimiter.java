@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,26 +16,16 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package se.uu.ub.cora.sqldatabase;
 
-import java.util.List;
-import java.util.Map;
+public class ResultDelimiter {
 
-public interface RecordReader {
+	public Integer limit;
+	public Integer offset;
 
-	List<Map<String, Object>> readAllFromTable(String tableName);
-
-	List<Map<String, Object>> readFromTableUsingConditions(String tableName,
-			Map<String, Object> conditions);
-
-	Map<String, Object> readOneRowFromDbUsingTableAndConditions(String tableName,
-			Map<String, Object> conditions);
-
-	Map<String, Object> readNextValueFromSequence(String sequenceName);
-
-	List<Map<String, Object>> readAllFromTable(String tableName, ResultDelimiter resultDelimiter);
-
-	long readNumberOfRows(String tableName, Map<String, Object> conditions);
+	public ResultDelimiter(Integer limit, Integer offset) {
+		this.limit = limit;
+		this.offset = offset;
+	}
 
 }
