@@ -133,14 +133,12 @@ public final class RecordReaderImp implements RecordReader {
 	public List<Map<String, Object>> readAllFromTable(String tableName,
 			ResultDelimiter resultDelimiter) {
 		String sql = createSelectAllFor(tableName);
-		sql = possiblyAddDelimiter(sql, resultDelimiter);
+		sql += possiblyCreateDelimiter(resultDelimiter);
 		return readAllFromTableUsingSql(tableName, sql);
 	}
 
-	private String possiblyAddDelimiter(String sql, ResultDelimiter resultDelimiter) {
-		sql += possiblySetLimit(resultDelimiter);
-		sql += possiblySetOffset(resultDelimiter);
-		return sql;
+	private String possiblyCreateDelimiter(ResultDelimiter resultDelimiter) {
+		return possiblySetLimit(resultDelimiter) + possiblySetOffset(resultDelimiter);
 	}
 
 	private String possiblySetLimit(ResultDelimiter resultDelimiter) {
