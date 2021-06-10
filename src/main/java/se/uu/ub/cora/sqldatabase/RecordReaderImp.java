@@ -159,9 +159,7 @@ public final class RecordReaderImp implements RecordReader {
 	}
 
 	private String assembleSqlForNumberOfRows(String type, Map<String, Object> conditions) {
-		String sql = "select count(*) from " + type;
-		sql = possiblyAddConditionsToSql(conditions, sql);
-		return sql;
+		return "select count(*) from " + type + possiblyAddConditionsToSql(conditions);
 	}
 
 	private List<Object> getConditionsAsValues(Map<String, Object> conditions) {
@@ -170,12 +168,12 @@ public final class RecordReaderImp implements RecordReader {
 		return values;
 	}
 
-	private String possiblyAddConditionsToSql(Map<String, Object> conditions, String sql) {
+	private String possiblyAddConditionsToSql(Map<String, Object> conditions) {
 		if (!conditions.isEmpty()) {
 			String conditionPart = createConditionPartOfSql(conditions);
-			sql += " where " + conditionPart;
+			return " where " + conditionPart;
 		}
-		return sql;
+		return "";
 	}
 
 }
