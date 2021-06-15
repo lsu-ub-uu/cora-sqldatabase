@@ -176,4 +176,27 @@ public final class RecordReaderImp implements RecordReader {
 		return "";
 	}
 
+	@Override
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions, Integer fromNo,
+			Integer toNo) {
+		long numberOfRows = readNumberOfRows(tableName, conditions);
+		long maxToNumber = toNoIsNullOrTooLarge(toNo, numberOfRows) ? numberOfRows : toNo;
+		long minFromNumber = fromNo < 1 ? 1 : fromNo;
+
+		return fromLargerThanTo(minFromNumber, maxToNumber) ? 0
+				: calculateDifference(minFromNumber, maxToNumber);
+	}
+
+	private boolean toNoIsNullOrTooLarge(Integer toNo, long numberOfRows) {
+		return toNo == null || toNo > numberOfRows;
+	}
+
+	private boolean fromLargerThanTo(long minFromNumber, long maxToNumber) {
+		return minFromNumber > maxToNumber;
+	}
+
+	private long calculateDifference(long minFromNumber, long maxToNumber) {
+		return maxToNumber - minFromNumber + 1L;
+	}
+
 }

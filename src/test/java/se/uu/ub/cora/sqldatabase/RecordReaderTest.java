@@ -248,6 +248,94 @@ public class RecordReaderTest {
 		assertEquals(dataReader.sql, "select count(*) from organisation");
 		assertTrue(dataReader.values.isEmpty());
 		assertEquals(numberOfRows, dataReader.oneRowResult.get("count"));
+	}
+
+	@Test
+	public void testReadNumberOfRowsWithFromAndTo() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 2, 11);
+
+		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		assertEquals(dataReader.sql, "select count(*) from organisation where domain = ?");
+		List<Object> values = dataReader.values;
+		assertEquals(values.size(), 1);
+		assertEquals(values.get(0), "uu");
+		assertEquals(numberOfRows, 10);
+
+	}
+
+	@Test
+	public void testReadNumberOfRowsWithFromAndToWhenToLargerThanNumOfRows() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 440, 476);
+
+		assertEquals(numberOfRows, 14);
+
+	}
+
+	@Test
+	public void testReadNumberOfRowsWithFromAndToWhenFromLargerThanNumOfRows() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 460, 476);
+
+		assertEquals(numberOfRows, 0);
+
+	}
+
+	@Test
+	public void testReadNumberOfRowsWithFromAndToWhenFromLargerThanTo() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 300, 150);
+
+		assertEquals(numberOfRows, 0);
+
+	}
+
+	@Test
+	public void testReadNumberOfRowsWithFromAndToWhenFromAndToIsSameAndMax() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 453, 453);
+
+		assertEquals(numberOfRows, 1);
+
+	}
+
+	@Test
+	public void testReadNumberOfRowsWithFromAndToWhenToIsNull() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 400, null);
+
+		assertEquals(numberOfRows, 54);
+
+	}
+
+	@Test
+	public void testReadNumberOfRowsWithFromAndToWhenFromIs0Use1AsFrom() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 0, 10);
+
+		assertEquals(numberOfRows, 10);
 
 	}
 
