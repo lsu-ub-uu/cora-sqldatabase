@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 public final class RecordReaderImp implements RecordReader {
+	private static final int MIN_FROM_NUMBER = 1;
 	private static final String ERROR_READING_DATA_FROM = "Error reading data from ";
 	private DataReader dataReader;
 
@@ -181,7 +182,7 @@ public final class RecordReaderImp implements RecordReader {
 			Integer toNo) {
 		long numberOfRows = readNumberOfRows(tableName, conditions);
 		long maxToNumber = toNoIsNullOrTooLarge(toNo, numberOfRows) ? numberOfRows : toNo;
-		long minFromNumber = fromNo < 1 ? 1 : fromNo;
+		long minFromNumber = fromNo < MIN_FROM_NUMBER ? MIN_FROM_NUMBER : fromNo;
 
 		return fromLargerThanTo(minFromNumber, maxToNumber) ? 0
 				: calculateDifference(minFromNumber, maxToNumber);
@@ -196,7 +197,7 @@ public final class RecordReaderImp implements RecordReader {
 	}
 
 	private long calculateDifference(long minFromNumber, long maxToNumber) {
-		return maxToNumber - minFromNumber + 1L;
+		return maxToNumber - minFromNumber + 1;
 	}
 
 }

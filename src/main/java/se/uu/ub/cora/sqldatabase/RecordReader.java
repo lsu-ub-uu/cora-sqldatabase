@@ -36,12 +36,21 @@ public interface RecordReader {
 
 	List<Map<String, Object>> readAllFromTable(String tableName, ResultDelimiter resultDelimiter);
 
+	/**
+	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions.
+	 * 
+	 * @param tableName,
+	 *            the table to read from
+	 * 
+	 * @param conditions,
+	 *            the conditions to use in the query. If empty, no conditions are added to query
+	 */
 	long readNumberOfRows(String tableName, Map<String, Object> conditions);
 
 	/**
 	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions, limited by
-	 * fromNo and toNo. Minimum fromNo is 1. If toNo is null or is larger than result size, the toNo
-	 * will be set to the result size.
+	 * fromNo and toNo. Minimum fromNo is 1. If toNo is null or is larger than result size, the
+	 * result size will be used as toNo when limiting.
 	 * 
 	 * @param tableName,
 	 *            the table to read from
