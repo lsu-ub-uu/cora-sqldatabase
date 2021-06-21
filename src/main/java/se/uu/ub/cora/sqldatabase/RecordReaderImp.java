@@ -132,23 +132,23 @@ public final class RecordReaderImp implements RecordReader {
 
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName,
-			ResultDelimiter resultDelimiter) {
+			DbQueryInfo queryInfo) {
 		String sql = createSelectAllFor(tableName);
-		sql += possiblyCreateDelimiter(resultDelimiter);
+		sql += possiblyCreateDelimiter(queryInfo);
 		return readAllFromTableUsingSql(tableName, sql);
 	}
 
-	private String possiblyCreateDelimiter(ResultDelimiter resultDelimiter) {
-		return possiblySetLimit(resultDelimiter) + possiblySetOffset(resultDelimiter);
+	private String possiblyCreateDelimiter(DbQueryInfo queryInfo) {
+		return queryInfo.getDelimiter();
 	}
 
-	private String possiblySetLimit(ResultDelimiter resultDelimiter) {
-		return resultDelimiter.limit != null ? " limit " + resultDelimiter.limit : "";
-	}
-
-	private String possiblySetOffset(ResultDelimiter resultDelimiter) {
-		return resultDelimiter.offset != null ? " offset " + resultDelimiter.offset : "";
-	}
+	// private String possiblySetLimit(ResultDelimiter resultDelimiter) {
+	// return resultDelimiter.limit != null ? " limit " + resultDelimiter.limit : "";
+	// }
+	//
+	// private String possiblySetOffset(ResultDelimiter resultDelimiter) {
+	// return resultDelimiter.offset != null ? " offset " + resultDelimiter.offset : "";
+	// }
 
 	@Override
 	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {

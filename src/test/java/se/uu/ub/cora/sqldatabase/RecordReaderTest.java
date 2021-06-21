@@ -69,11 +69,11 @@ public class RecordReaderTest {
 	public void testReadAllResultsReturnsResultFromDataReaderWithFilter() throws Exception {
 		String tableName = "someTableName";
 		ResultDelimiter resultDelimiter = new ResultDelimiter(100, 10);
+		DbQueryInfo queryInfo = new DbQueryInfo(10, 109);
 
-		List<Map<String, Object>> results = recordReader.readAllFromTable(tableName,
-				resultDelimiter);
+		List<Map<String, Object>> results = recordReader.readAllFromTable(tableName, queryInfo);
 		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
-		assertEquals(dataReader.sql, "select * from someTableName limit 100 offset 10");
+		assertEquals(dataReader.sql, "select * from someTableName limit 100 offset 9");
 		assertTrue(dataReader.values.isEmpty());
 
 		assertEquals(results, dataReader.result);
@@ -83,9 +83,10 @@ public class RecordReaderTest {
 	public void testReadAllSqlWhenLimitIsNull() throws Exception {
 		String tableName = "someTableName";
 		ResultDelimiter resultDelimiter = new ResultDelimiter(null, 10);
+		DbQueryInfo queryInfo = new DbQueryInfo(10, null);
 
-		recordReader.readAllFromTable(tableName, resultDelimiter);
-		assertEquals(dataReader.sql, "select * from someTableName offset 10");
+		recordReader.readAllFromTable(tableName, queryInfo);
+		assertEquals(dataReader.sql, "select * from someTableName offset 9");
 
 	}
 
@@ -93,8 +94,9 @@ public class RecordReaderTest {
 	public void testReadAllSqlWhenOffsetIsNull() throws Exception {
 		String tableName = "someTableName";
 		ResultDelimiter resultDelimiter = new ResultDelimiter(100, null);
+		DbQueryInfo queryInfo = new DbQueryInfo(null, 100);
 
-		recordReader.readAllFromTable(tableName, resultDelimiter);
+		recordReader.readAllFromTable(tableName, queryInfo);
 		assertEquals(dataReader.sql, "select * from someTableName limit 100");
 
 	}

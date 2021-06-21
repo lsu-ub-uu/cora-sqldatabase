@@ -34,7 +34,7 @@ public interface RecordReader {
 
 	Map<String, Object> readNextValueFromSequence(String sequenceName);
 
-	List<Map<String, Object>> readAllFromTable(String tableName, ResultDelimiter resultDelimiter);
+	List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo queryInfo);
 
 	/**
 	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions.
