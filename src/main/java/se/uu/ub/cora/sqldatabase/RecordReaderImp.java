@@ -131,24 +131,15 @@ public final class RecordReaderImp implements RecordReader {
 	}
 
 	@Override
-	public List<Map<String, Object>> readAllFromTable(String tableName,
-			DbQueryInfo queryInfo) {
+	public List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo queryInfo) {
 		String sql = createSelectAllFor(tableName);
-		sql += possiblyCreateDelimiter(queryInfo);
+		sql += possiblyAddDelimiter(queryInfo);
 		return readAllFromTableUsingSql(tableName, sql);
 	}
 
-	private String possiblyCreateDelimiter(DbQueryInfo queryInfo) {
+	private String possiblyAddDelimiter(DbQueryInfo queryInfo) {
 		return queryInfo.getDelimiter();
 	}
-
-	// private String possiblySetLimit(ResultDelimiter resultDelimiter) {
-	// return resultDelimiter.limit != null ? " limit " + resultDelimiter.limit : "";
-	// }
-	//
-	// private String possiblySetOffset(ResultDelimiter resultDelimiter) {
-	// return resultDelimiter.offset != null ? " offset " + resultDelimiter.offset : "";
-	// }
 
 	@Override
 	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
@@ -178,14 +169,25 @@ public final class RecordReaderImp implements RecordReader {
 	}
 
 	@Override
-	public long readNumberOfRows(String tableName, Map<String, Object> conditions, Integer fromNo,
-			Integer toNo) {
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions,
+			DbQueryInfo queryInfo) {
 		long numberOfRows = readNumberOfRows(tableName, conditions);
-		long maxToNumber = toNoIsNullOrTooLarge(toNo, numberOfRows) ? numberOfRows : toNo;
-		long minFromNumber = fromNo < MIN_FROM_NUMBER ? MIN_FROM_NUMBER : fromNo;
 
-		return fromLargerThanTo(minFromNumber, maxToNumber) ? 0
-				: calculateDifference(minFromNumber, maxToNumber);
+		if (queryInfo.delimiterIsPresent()) {
+			long maxToNumber = toNoIsNullOrTooLarge(queryInfo.getToNo(), numberOfRows)
+					? numberOfRows
+					: queryInfo.getToNo();
+			long minFromNumber = fromNoIsNullOrLessThanMinNumber(queryInfo) ? MIN_FROM_NUMBER
+					: queryInfo.getFromNo();
+
+			return fromLargerThanTo(minFromNumber, maxToNumber) ? 0
+					: calculateDifference(minFromNumber, maxToNumber);
+		}
+		return numberOfRows;
+	}
+
+	private boolean fromNoIsNullOrLessThanMinNumber(DbQueryInfo queryInfo) {
+		return queryInfo.getFromNo() == null || queryInfo.getFromNo() < MIN_FROM_NUMBER;
 	}
 
 	private boolean toNoIsNullOrTooLarge(Integer toNo, long numberOfRows) {

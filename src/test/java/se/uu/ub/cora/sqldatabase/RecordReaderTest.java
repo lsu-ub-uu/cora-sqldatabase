@@ -20,6 +20,7 @@
 package se.uu.ub.cora.sqldatabase;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
@@ -69,7 +70,7 @@ public class RecordReaderTest {
 	public void testReadAllResultsReturnsResultFromDataReaderWithFilter() throws Exception {
 		String tableName = "someTableName";
 		ResultDelimiter resultDelimiter = new ResultDelimiter(100, 10);
-		DbQueryInfo queryInfo = new DbQueryInfo(10, 109);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(10, 109);
 
 		List<Map<String, Object>> results = recordReader.readAllFromTable(tableName, queryInfo);
 		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
@@ -82,8 +83,7 @@ public class RecordReaderTest {
 	@Test
 	public void testReadAllSqlWhenLimitIsNull() throws Exception {
 		String tableName = "someTableName";
-		ResultDelimiter resultDelimiter = new ResultDelimiter(null, 10);
-		DbQueryInfo queryInfo = new DbQueryInfo(10, null);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(10, null);
 
 		recordReader.readAllFromTable(tableName, queryInfo);
 		assertEquals(dataReader.sql, "select * from someTableName offset 9");
@@ -93,8 +93,7 @@ public class RecordReaderTest {
 	@Test
 	public void testReadAllSqlWhenOffsetIsNull() throws Exception {
 		String tableName = "someTableName";
-		ResultDelimiter resultDelimiter = new ResultDelimiter(100, null);
-		DbQueryInfo queryInfo = new DbQueryInfo(null, 100);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(null, 100);
 
 		recordReader.readAllFromTable(tableName, queryInfo);
 		assertEquals(dataReader.sql, "select * from someTableName limit 100");
@@ -227,16 +226,19 @@ public class RecordReaderTest {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
-		long numberOfRows = recordReader.readNumberOfRows(type, conditions);
+		DbQueryInfoSpy queryInfo = new DbQueryInfoSpy();
+		queryInfo.delimiterIsPresentValue = false;
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
-		// assertTrue(dataReader.values.isEmpty());
 		assertEquals(dataReader.sql, "select count(*) from organisation where domain = ?");
 		List<Object> values = dataReader.values;
 		assertEquals(values.size(), 1);
 		assertEquals(values.get(0), "uu");
 		assertEquals(numberOfRows, dataReader.oneRowResult.get("count"));
 
+		assertFalse(queryInfo.getToNoWasCalled);
+		assertFalse(queryInfo.getFromNoWasCalled);
 	}
 
 	@Test
@@ -258,7 +260,9 @@ public class RecordReaderTest {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
-		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 2, 11);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(2, 11);
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
 		assertEquals(dataReader.sql, "select count(*) from organisation where domain = ?");
@@ -275,7 +279,9 @@ public class RecordReaderTest {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
-		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 440, 476);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(440, 476);
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertEquals(numberOfRows, 14);
 
@@ -287,7 +293,9 @@ public class RecordReaderTest {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
-		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 460, 476);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(460, 476);
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertEquals(numberOfRows, 0);
 
@@ -299,7 +307,9 @@ public class RecordReaderTest {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
-		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 300, 150);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(300, 150);
+
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertEquals(numberOfRows, 0);
 
@@ -311,7 +321,8 @@ public class RecordReaderTest {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
-		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 453, 453);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(453, 453);
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertEquals(numberOfRows, 1);
 
@@ -323,19 +334,21 @@ public class RecordReaderTest {
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
-		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 400, null);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(400, null);
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertEquals(numberOfRows, 54);
 
 	}
 
 	@Test
-	public void testReadNumberOfRowsWithFromAndToWhenFromIs0Use1AsFrom() {
+	public void testReadNumberOfRowsWithFromAndToWhenFromIsZeroUseOneAsFrom() {
 		String type = "organisation";
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
-		long numberOfRows = recordReader.readNumberOfRows(type, conditions, 0, 10);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(0, 10);
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertEquals(numberOfRows, 10);
 

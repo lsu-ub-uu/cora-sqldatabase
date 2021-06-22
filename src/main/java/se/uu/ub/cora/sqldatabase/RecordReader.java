@@ -65,7 +65,6 @@ public interface RecordReader {
 	 *            the number in the result to count to. If null, result size will be used as toNo
 	 * 
 	 */
-	long readNumberOfRows(String tableName, Map<String, Object> conditions, Integer fromNo,
-			Integer toNo);
+	long readNumberOfRows(String tableName, Map<String, Object> conditions, DbQueryInfo queryInfo);
 
 }

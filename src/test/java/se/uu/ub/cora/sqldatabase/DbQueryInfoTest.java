@@ -19,23 +19,34 @@
 package se.uu.ub.cora.sqldatabase;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
 public class DbQueryInfoTest {
 
 	@Test
+	public void testGetFromAndTo() {
+		DbQueryInfo queryInfo = new DbQueryInfoImp(2, 78);
+		assertEquals(queryInfo.getFromNo(), Integer.valueOf(2));
+		assertEquals(queryInfo.getToNo(), Integer.valueOf(78));
+
+	}
+
+	@Test
 	public void testDefaultOffsetDefaultLimit() {
-		DbQueryInfo queryInfo = new DbQueryInfo();
+		DbQueryInfo queryInfo = new DbQueryInfoImp();
 		assertNull(queryInfo.getOffset());
 		assertNull(queryInfo.getLimit());
 		assertEquals(queryInfo.getDelimiter(), "");
+		assertFalse(queryInfo.delimiterIsPresent());
 	}
 
 	@Test
 	public void testOffset() {
-		DbQueryInfo queryInfo = new DbQueryInfo(3, null);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(3, null);
 		assertEquals(queryInfo.getOffset(), Integer.valueOf(2));
 		assertNull(queryInfo.getLimit());
 		assertEquals(queryInfo.getDelimiter(), " offset 2");
@@ -43,7 +54,7 @@ public class DbQueryInfoTest {
 
 	@Test
 	public void testOffsetWhenFromNoIsZero() {
-		DbQueryInfo queryInfo = new DbQueryInfo(0, null);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(0, null);
 		assertEquals(queryInfo.getOffset(), Integer.valueOf(0));
 		assertNull(queryInfo.getLimit());
 		assertEquals(queryInfo.getDelimiter(), " offset 0");
@@ -51,7 +62,7 @@ public class DbQueryInfoTest {
 
 	@Test
 	public void testLimitWhenNoFromNoButToNo() {
-		DbQueryInfo queryInfo = new DbQueryInfo(null, 67);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(null, 67);
 		assertEquals(queryInfo.getLimit(), Integer.valueOf(67));
 		assertNull(queryInfo.getOffset());
 		assertEquals(queryInfo.getDelimiter(), " limit 67");
@@ -59,10 +70,34 @@ public class DbQueryInfoTest {
 
 	@Test
 	public void testOffsetAndLimit() {
-		DbQueryInfo queryInfo = new DbQueryInfo(8, 19);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(8, 19);
 		assertEquals(queryInfo.getOffset(), Integer.valueOf(7));
 		assertEquals(queryInfo.getLimit(), Integer.valueOf(12));
 		assertEquals(queryInfo.getDelimiter(), " limit 12 offset 7");
+	}
+
+	@Test
+	public void testDelimiterIsPresentBothIsNull() {
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
+		assertFalse(queryInfo.delimiterIsPresent());
+	}
+
+	@Test
+	public void testDelimiterIsPresentFromNoIsPresent() {
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(4, null);
+		assertTrue(queryInfo.delimiterIsPresent());
+	}
+
+	@Test
+	public void testDelimiterIsPresentToNoIsPresent() {
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(null, 45);
+		assertTrue(queryInfo.delimiterIsPresent());
+	}
+
+	@Test
+	public void testDelimiterIsPresentBothArePresent() {
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(5, 45);
+		assertTrue(queryInfo.delimiterIsPresent());
 	}
 
 }

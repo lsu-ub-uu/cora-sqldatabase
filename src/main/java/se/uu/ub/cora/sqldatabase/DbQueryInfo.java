@@ -18,51 +18,54 @@
  */
 package se.uu.ub.cora.sqldatabase;
 
-public class DbQueryInfo {
-	private static final int MIN_OFFSET = 0;
-	private Integer fromNo;
-	private Integer toNo;
+public interface DbQueryInfo {
 
-	public DbQueryInfo() {
-	}
+	/**
+	 * getOffset returns the offset to use in a sql query, based on the fromNo set in the instance.
+	 * FromNo is expected to be 1 if the result should start with the first record. Offset however
+	 * starts at zero, and will never be lower than zero. If no fromNo is set in the instance, zero
+	 * will be returned.
+	 * 
+	 * @return Integer offset
+	 */
+	Integer getOffset();
 
-	public DbQueryInfo(Integer fromNo, Integer toNo) {
-		this.fromNo = fromNo;
-		this.toNo = toNo;
-	}
+	/**
+	 * getLimit returns the limit to use in a sql query, based on the fromNo and toNo set in the
+	 * instance.
+	 * 
+	 * @return Integer limit
+	 */
+	Integer getLimit();
 
-	public Integer getOffset() {
-		if (fromNo == null) {
-			return null;
-		}
-		return fromNo > MIN_OFFSET ? fromNo - 1 : MIN_OFFSET;
-	}
+	/**
+	 * getDelimiter composes as string to add to a sql query, to limit the result, based on the
+	 * offset and limit calculated in the instance.
+	 * 
+	 * @return String delimiter
+	 */
+	String getDelimiter();
 
-	public Integer getLimit() {
-		if (toNo == null) {
-			return null;
-		}
-		return fromNo != null ? fromToDifferencePlusOne(fromNo, toNo) : toNo;
-	}
+	/**
+	 * getFromNo returns the fromNo set in the instance
+	 * 
+	 * @return fromNo
+	 */
+	Integer getFromNo();
 
-	private int fromToDifferencePlusOne(int fromNo, int toNo) {
-		return (toNo - fromNo) + 1;
-	}
+	/**
+	 * getToNo returns the toNo set in the instance
+	 * 
+	 * @return toNo
+	 */
+	Integer getToNo();
 
-	public String getDelimiter() {
-		String limiQueryPart = getLimitPartOfQuery();
-		String offsetQueryPart = getOffsetPartOfQuery();
-		return limiQueryPart + offsetQueryPart;
-	}
-
-	private String getLimitPartOfQuery() {
-		Integer limit = getLimit();
-		return limit != null ? " limit " + limit : "";
-	}
-
-	private String getOffsetPartOfQuery() {
-		Integer offset = getOffset();
-		return offset != null ? " offset " + offset : "";
-	}
+	/**
+	 * delimiterIsPresent will return false if both offset and limit is null, true otherwise
+	 * 
+	 * @return boolean whether a delimiter is present or not
+	 * 
+	 */
+	boolean delimiterIsPresent();
 
 }
