@@ -100,4 +100,44 @@ public class DbQueryInfoTest {
 		assertTrue(queryInfo.delimiterIsPresent());
 	}
 
+	@Test
+	public void testOrderByPartOfQuery() {
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
+		queryInfo.setOrderBy("organisation_id");
+		assertEquals(queryInfo.getOrderByPartOfQuery(), "order by " + "organisation_id");
+	}
+
+	@Test
+	public void testOrderByPartOfQueryWhenOrderByIsNull() {
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
+		assertEquals(queryInfo.getOrderByPartOfQuery(), "");
+	}
+
+	@Test
+	public void testOrderByPartOfQueryWhenOrderByIsEmpty() {
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
+		queryInfo.setOrderBy("");
+		assertEquals(queryInfo.getOrderByPartOfQuery(), "");
+	}
+
+	@Test
+	public void testOrderByPartOfQueryWithSortOrder() {
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
+		queryInfo.setOrderBy("organisation_id");
+
+		queryInfo.setSortOrder(SortOrder.ASC);
+		assertEquals(queryInfo.getOrderByPartOfQuery(),
+				"order by " + "organisation_id" + " " + SortOrder.ASC.order);
+	}
+
+	@Test
+	public void testOrderByPartOfQueryWithSortOrderDesc() {
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
+		queryInfo.setOrderBy("organisation_id");
+
+		queryInfo.setSortOrder(SortOrder.DESC);
+		assertEquals(queryInfo.getOrderByPartOfQuery(),
+				"order by " + "organisation_id" + " " + SortOrder.DESC.order);
+	}
+
 }

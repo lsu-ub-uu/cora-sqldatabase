@@ -22,6 +22,8 @@ public class DbQueryInfoImp implements DbQueryInfo {
 	private static final int MIN_OFFSET = 0;
 	private Integer fromNo;
 	private Integer toNo;
+	private String orderBy;
+	private SortOrder sortOrder;
 
 	public DbQueryInfoImp() {
 	}
@@ -89,6 +91,34 @@ public class DbQueryInfoImp implements DbQueryInfo {
 
 	private boolean toNoIsPresent() {
 		return toNo != null;
+	}
+
+	@Override
+	public void setOrderBy(String orderBy) {
+		this.orderBy = orderBy;
+
+	}
+
+	@Override
+	public String getOrderByPartOfQuery() {
+		String orderByPart = valueForOrderByExists() ? "order by " + orderBy : "";
+		orderByPart += possiblyAddSortOrderPart();
+		return orderByPart;
+	}
+
+	private String possiblyAddSortOrderPart() {
+		if (sortOrder != null) {
+			return " " + sortOrder.order;
+		}
+		return "";
+	}
+
+	private boolean valueForOrderByExists() {
+		return orderBy != null && !orderBy.isEmpty();
+	}
+
+	public void setSortOrder(SortOrder sortOrder) {
+		this.sortOrder = sortOrder;
 	}
 
 }

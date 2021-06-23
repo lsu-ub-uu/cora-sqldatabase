@@ -69,7 +69,6 @@ public class RecordReaderTest {
 	@Test
 	public void testReadAllResultsReturnsResultFromDataReaderWithFilter() throws Exception {
 		String tableName = "someTableName";
-		ResultDelimiter resultDelimiter = new ResultDelimiter(100, 10);
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(10, 109);
 
 		List<Map<String, Object>> results = recordReader.readAllFromTable(tableName, queryInfo);
@@ -97,6 +96,18 @@ public class RecordReaderTest {
 
 		recordReader.readAllFromTable(tableName, queryInfo);
 		assertEquals(dataReader.sql, "select * from someTableName limit 100");
+	}
+
+	@Test
+	public void testReadAllSqlWhenOrderByAndSortOrderIsPresent() throws Exception {
+		String tableName = "someTableName";
+		DbQueryInfoSpy queryInfo = new DbQueryInfoSpy(10, 109);
+		queryInfo.setOrderBy("organistion_id");
+		queryInfo.setSortOrder(SortOrder.ASC);
+
+		recordReader.readAllFromTable(tableName, queryInfo);
+		assertEquals(dataReader.sql,
+				"select * from someTableName order by from spy delimiter from spy");
 
 	}
 
@@ -349,6 +360,19 @@ public class RecordReaderTest {
 		conditions.put("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(0, 10);
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
+
+		assertEquals(numberOfRows, 10);
+
+	}
+
+	@Test
+	public void testReadNumberOfRowsWithFromAndToWhenFromIsNullUseOneAsFrom() {
+		String type = "organisation";
+		Map<String, Object> conditions = new HashMap<>();
+		conditions.put("domain", "uu");
+
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(null, 10);
 		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertEquals(numberOfRows, 10);

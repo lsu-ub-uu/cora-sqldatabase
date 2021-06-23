@@ -22,15 +22,12 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-public class ResultDelimiterTest {
+public class SortOrderTest {
 
 	@Test
-	public void testInit() {
-		Integer limit = 15;
-		Integer offset = 0;
-		ResultDelimiter delimiter = new ResultDelimiter(limit, offset);
-		assertEquals(delimiter.limit, limit);
-		assertEquals(delimiter.offset, offset);
+	public void testSortOrder() {
+		assertEquals(SortOrder.ASC.order, "asc");
+		assertEquals(SortOrder.DESC.order, "desc");
 	}
 
 }

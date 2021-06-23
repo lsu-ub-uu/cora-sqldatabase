@@ -133,11 +133,16 @@ public final class RecordReaderImp implements RecordReader {
 	@Override
 	public List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo queryInfo) {
 		String sql = createSelectAllFor(tableName);
-		sql += possiblyAddDelimiter(queryInfo);
+		sql += getSortPart(queryInfo);
+		sql += getDelimiter(queryInfo);
 		return readAllFromTableUsingSql(tableName, sql);
 	}
 
-	private String possiblyAddDelimiter(DbQueryInfo queryInfo) {
+	private String getSortPart(DbQueryInfo queryInfo) {
+		return queryInfo.getOrderByPartOfQuery();
+	}
+
+	private String getDelimiter(DbQueryInfo queryInfo) {
 		return queryInfo.getDelimiter();
 	}
 

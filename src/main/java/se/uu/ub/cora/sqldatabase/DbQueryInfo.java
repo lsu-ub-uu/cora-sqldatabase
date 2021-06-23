@@ -68,4 +68,8 @@ public interface DbQueryInfo {
 	 */
 	boolean delimiterIsPresent();
 
+	void setOrderBy(String orderBy);
+
+	String getOrderByPartOfQuery();
+
 }

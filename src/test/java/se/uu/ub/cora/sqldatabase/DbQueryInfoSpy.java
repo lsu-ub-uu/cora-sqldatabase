@@ -24,6 +24,14 @@ public class DbQueryInfoSpy implements DbQueryInfo {
 	public boolean getToNoWasCalled = false;
 	public boolean getFromNoWasCalled = false;
 
+	public DbQueryInfoSpy(int fromNo, int toNo) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public DbQueryInfoSpy() {
+		// TODO Auto-generated constructor stub
+	}
+
 	@Override
 	public Integer getOffset() {
 		// TODO Auto-generated method stub
@@ -38,8 +46,7 @@ public class DbQueryInfoSpy implements DbQueryInfo {
 
 	@Override
 	public String getDelimiter() {
-		// TODO Auto-generated method stub
-		return null;
+		return " delimiter from spy";
 	}
 
 	@Override
@@ -57,6 +64,23 @@ public class DbQueryInfoSpy implements DbQueryInfo {
 	@Override
 	public boolean delimiterIsPresent() {
 		return delimiterIsPresentValue;
+	}
+
+	@Override
+	public void setOrderBy(String orderBy) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public String getOrderByPartOfQuery() {
+		// TODO Auto-generated method stub
+		return " order by from spy";
+	}
+
+	public void setSortOrder(SortOrder asc) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

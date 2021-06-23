@@ -18,14 +18,13 @@
  */
 package se.uu.ub.cora.sqldatabase;
 
-public class ResultDelimiter {
+public enum SortOrder {
+	ASC("asc"), DESC("desc");
 
-	public Integer limit;
-	public Integer offset;
+	public final String order;
 
-	public ResultDelimiter(Integer limit, Integer offset) {
-		this.limit = limit;
-		this.offset = offset;
+	SortOrder(String order) {
+		this.order = order;
 	}
 
 }
