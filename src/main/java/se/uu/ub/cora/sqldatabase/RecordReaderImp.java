@@ -142,12 +142,32 @@ public final class RecordReaderImp implements RecordReader {
 	}
 
 	@Override
-	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions,
+			DbQueryInfo queryInfo) {
+		long numberOfRows = readNumberOfRows(tableName, conditions);
+
+		if (queryInfo.delimiterIsPresent()) {
+			return calculateNumberOfRowsUsingDelimiter(queryInfo, numberOfRows);
+		}
+		return numberOfRows;
+	}
+
+	private long readNumberOfRows(String tableName, Map<String, Object> conditions) {
 		String sql = assembleSqlForNumberOfRows(tableName, conditions);
 		List<Object> values = getConditionsAsValues(conditions);
 		Map<String, Object> countResult = dataReader.readOneRowOrFailUsingSqlAndValues(sql, values);
 		return (long) countResult.get("count");
 
+	}
+
+	private long calculateNumberOfRowsUsingDelimiter(DbQueryInfo queryInfo, long numberOfRows) {
+		long maxToNumber = toNoIsNullOrTooLarge(queryInfo.getToNo(), numberOfRows) ? numberOfRows
+				: queryInfo.getToNo();
+		long minFromNumber = fromNoIsNullOrLessThanMinNumber(queryInfo) ? MIN_FROM_NUMBER
+				: queryInfo.getFromNo();
+
+		return fromLargerThanTo(minFromNumber, maxToNumber) ? 0
+				: calculateDifference(minFromNumber, maxToNumber);
 	}
 
 	private String assembleSqlForNumberOfRows(String type, Map<String, Object> conditions) {
@@ -166,24 +186,6 @@ public final class RecordReaderImp implements RecordReader {
 			return " where " + conditionPart;
 		}
 		return "";
-	}
-
-	@Override
-	public long readNumberOfRows(String tableName, Map<String, Object> conditions,
-			DbQueryInfo queryInfo) {
-		long numberOfRows = readNumberOfRows(tableName, conditions);
-
-		if (queryInfo.delimiterIsPresent()) {
-			long maxToNumber = toNoIsNullOrTooLarge(queryInfo.getToNo(), numberOfRows)
-					? numberOfRows
-					: queryInfo.getToNo();
-			long minFromNumber = fromNoIsNullOrLessThanMinNumber(queryInfo) ? MIN_FROM_NUMBER
-					: queryInfo.getFromNo();
-
-			return fromLargerThanTo(minFromNumber, maxToNumber) ? 0
-					: calculateDifference(minFromNumber, maxToNumber);
-		}
-		return numberOfRows;
 	}
 
 	private boolean fromNoIsNullOrLessThanMinNumber(DbQueryInfo queryInfo) {

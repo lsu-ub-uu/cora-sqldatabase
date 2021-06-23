@@ -246,7 +246,8 @@ public class RecordReaderTest {
 		String type = "organisation";
 		Map<String, Object> conditions = new HashMap<>();
 
-		long numberOfRows = recordReader.readNumberOfRows(type, conditions);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
+		long numberOfRows = recordReader.readNumberOfRows(type, conditions, queryInfo);
 
 		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
 		assertEquals(dataReader.sql, "select count(*) from organisation");

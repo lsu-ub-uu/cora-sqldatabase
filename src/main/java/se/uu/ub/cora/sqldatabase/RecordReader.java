@@ -45,7 +45,7 @@ public interface RecordReader {
 	 * @param conditions,
 	 *            the conditions to use in the query. If empty, no conditions are added to query
 	 */
-	long readNumberOfRows(String tableName, Map<String, Object> conditions);
+	// long readNumberOfRows(String tableName, Map<String, Object> conditions);
 
 	/**
 	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions, limited by

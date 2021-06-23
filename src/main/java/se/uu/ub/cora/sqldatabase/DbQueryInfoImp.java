@@ -33,7 +33,7 @@ public class DbQueryInfoImp implements DbQueryInfo {
 
 	@Override
 	public Integer getOffset() {
-		if (fromNo == null) {
+		if (!fromNoIsPresent()) {
 			return null;
 		}
 		return fromNo > MIN_OFFSET ? fromNo - 1 : MIN_OFFSET;
@@ -41,10 +41,14 @@ public class DbQueryInfoImp implements DbQueryInfo {
 
 	@Override
 	public Integer getLimit() {
-		if (toNo == null) {
+		if (!toNoIsPresent()) {
 			return null;
 		}
-		return fromNo != null ? fromToDifferencePlusOne(fromNo, toNo) : toNo;
+		return fromNoIsPresent() ? fromToDifferencePlusOne(fromNo, toNo) : toNo;
+	}
+
+	private boolean fromNoIsPresent() {
+		return fromNo != null;
 	}
 
 	private int fromToDifferencePlusOne(int fromNo, int toNo) {
@@ -80,7 +84,11 @@ public class DbQueryInfoImp implements DbQueryInfo {
 
 	@Override
 	public boolean delimiterIsPresent() {
-		return fromNo != null || toNo != null;
+		return fromNoIsPresent() || toNoIsPresent();
+	}
+
+	private boolean toNoIsPresent() {
+		return toNo != null;
 	}
 
 }
