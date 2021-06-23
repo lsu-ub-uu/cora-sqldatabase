@@ -101,7 +101,7 @@ public class DbQueryInfoImp implements DbQueryInfo {
 
 	@Override
 	public String getOrderByPartOfQuery() {
-		String orderByPart = valueForOrderByExists() ? "order by " + orderBy : "";
+		String orderByPart = valueForOrderByExists() ? " order by " + orderBy : "";
 		orderByPart += possiblyAddSortOrderPart();
 		return orderByPart;
 	}

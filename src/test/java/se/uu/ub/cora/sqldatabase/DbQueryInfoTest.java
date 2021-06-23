@@ -104,7 +104,7 @@ public class DbQueryInfoTest {
 	public void testOrderByPartOfQuery() {
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
 		queryInfo.setOrderBy("organisation_id");
-		assertEquals(queryInfo.getOrderByPartOfQuery(), "order by " + "organisation_id");
+		assertEquals(queryInfo.getOrderByPartOfQuery(), " order by " + "organisation_id");
 	}
 
 	@Test
@@ -127,7 +127,7 @@ public class DbQueryInfoTest {
 
 		queryInfo.setSortOrder(SortOrder.ASC);
 		assertEquals(queryInfo.getOrderByPartOfQuery(),
-				"order by " + "organisation_id" + " " + SortOrder.ASC.order);
+				" order by " + "organisation_id" + " " + SortOrder.ASC.order);
 	}
 
 	@Test
@@ -137,7 +137,7 @@ public class DbQueryInfoTest {
 
 		queryInfo.setSortOrder(SortOrder.DESC);
 		assertEquals(queryInfo.getOrderByPartOfQuery(),
-				"order by " + "organisation_id" + " " + SortOrder.DESC.order);
+				" order by " + "organisation_id" + " " + SortOrder.DESC.order);
 	}
 
 }
