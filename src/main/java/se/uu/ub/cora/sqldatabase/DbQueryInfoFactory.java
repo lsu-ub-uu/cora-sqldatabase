@@ -20,6 +20,17 @@ package se.uu.ub.cora.sqldatabase;
 
 public interface DbQueryInfoFactory {
 
+	/**
+	 * factorUsingFromAndToNo factores a DbQueryInfo, using fromNo and toNo. The method SHOULD
+	 * handle the possibilty that either fromNo or toNo is null, and return an instance of
+	 * DbQueryInfo regardless.
+	 * 
+	 * @param Integer
+	 *            fromNo, the from number to set in the DbQueryInfo
+	 * 
+	 * @param Integer
+	 *            toNo, the to number to set in the DbQueryInfo
+	 */
 	DbQueryInfo factorUsingFromNoAndToNo(Integer fromNo, Integer toNo);
 
 }

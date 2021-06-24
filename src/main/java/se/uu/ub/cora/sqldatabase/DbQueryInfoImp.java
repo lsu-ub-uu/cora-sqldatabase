@@ -117,6 +117,7 @@ public class DbQueryInfoImp implements DbQueryInfo {
 		return orderBy != null && !orderBy.isEmpty();
 	}
 
+	@Override
 	public void setSortOrder(SortOrder sortOrder) {
 		this.sortOrder = sortOrder;
 	}

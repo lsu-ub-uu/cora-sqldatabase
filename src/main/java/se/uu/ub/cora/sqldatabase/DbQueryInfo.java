@@ -61,15 +61,33 @@ public interface DbQueryInfo {
 	Integer getToNo();
 
 	/**
-	 * delimiterIsPresent will return false if both offset and limit is null, true otherwise
+	 * delimiterIsPresent will return true if either offset and limit is set, false if both are null
 	 * 
 	 * @return boolean whether a delimiter is present or not
 	 * 
 	 */
 	boolean delimiterIsPresent();
 
+	/**
+	 * setOrderBy sets the order by to use in a sql query
+	 * 
+	 * @param String
+	 *            orderBy, the name of the column to order by
+	 */
 	void setOrderBy(String orderBy);
 
+	/**
+	 * setSortOrder sets the sort order to use in a sql query
+	 * 
+	 * @param {@link
+	 *            SortOrder}, the sort order to set
+	 */
+	void setSortOrder(SortOrder sortOrder);
+
+	/**
+	 * getOrderByPartOfQuery uses the order by and the sort order set to compose a sort part of a
+	 * sql query. If neither are set, an empty string SHOULD be returned
+	 */
 	String getOrderByPartOfQuery();
 
 }
