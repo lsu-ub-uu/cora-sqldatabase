@@ -34,23 +34,12 @@ public interface RecordReader {
 
 	Map<String, Object> readNextValueFromSequence(String sequenceName);
 
-	List<Map<String, Object>> readAllFromTable(String tableName, ResultDelimiter resultDelimiter);
+	List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo queryInfo);
 
 	/**
-	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions.
-	 * 
-	 * @param tableName,
-	 *            the table to read from
-	 * 
-	 * @param conditions,
-	 *            the conditions to use in the query. If empty, no conditions are added to query
-	 */
-	long readNumberOfRows(String tableName, Map<String, Object> conditions);
-
-	/**
-	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions, limited by
-	 * fromNo and toNo. Minimum fromNo is 1. If toNo is null or is larger than result size, the
-	 * result size will be used as toNo when limiting.
+	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions. The number
+	 * of rows also depends on limitations set in the DbQueryInfo. The readNumberOfRows SHOULD never
+	 * return a larger number than actual result size.
 	 * 
 	 * @param tableName,
 	 *            the table to read from
@@ -58,14 +47,9 @@ public interface RecordReader {
 	 * @param conditions,
 	 *            the conditions to use in the query. If empty, no conditions are added to query
 	 * 
-	 * @param fromNo,
-	 *            the number in the result to start counting from
-	 * 
-	 * @param toNo,
-	 *            the number in the result to count to. If null, result size will be used as toNo
-	 * 
+	 * @param DbQueryInfo,
+	 *            the dbQueryInfo used to limit the query
 	 */
-	long readNumberOfRows(String tableName, Map<String, Object> conditions, Integer fromNo,
-			Integer toNo);
+	long readNumberOfRows(String tableName, Map<String, Object> conditions, DbQueryInfo queryInfo);
 
 }

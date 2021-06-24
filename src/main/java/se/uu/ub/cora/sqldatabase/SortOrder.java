@@ -18,19 +18,13 @@
  */
 package se.uu.ub.cora.sqldatabase;
 
-import static org.testng.Assert.assertEquals;
+public enum SortOrder {
+	ASC("asc"), DESC("desc");
 
-import org.testng.annotations.Test;
+	public final String order;
 
-public class ResultDelimiterTest {
-
-	@Test
-	public void testInit() {
-		Integer limit = 15;
-		Integer offset = 0;
-		ResultDelimiter delimiter = new ResultDelimiter(limit, offset);
-		assertEquals(delimiter.limit, limit);
-		assertEquals(delimiter.offset, offset);
+	SortOrder(String order) {
+		this.order = order;
 	}
 
 }

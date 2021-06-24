@@ -131,32 +131,48 @@ public final class RecordReaderImp implements RecordReader {
 	}
 
 	@Override
-	public List<Map<String, Object>> readAllFromTable(String tableName,
-			ResultDelimiter resultDelimiter) {
+	public List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo queryInfo) {
 		String sql = createSelectAllFor(tableName);
-		sql += possiblyCreateDelimiter(resultDelimiter);
+		sql += getSortPart(queryInfo);
+		sql += getDelimiter(queryInfo);
 		return readAllFromTableUsingSql(tableName, sql);
 	}
 
-	private String possiblyCreateDelimiter(ResultDelimiter resultDelimiter) {
-		return possiblySetLimit(resultDelimiter) + possiblySetOffset(resultDelimiter);
+	private String getSortPart(DbQueryInfo queryInfo) {
+		return queryInfo.getOrderByPartOfQuery();
 	}
 
-	private String possiblySetLimit(ResultDelimiter resultDelimiter) {
-		return resultDelimiter.limit != null ? " limit " + resultDelimiter.limit : "";
-	}
-
-	private String possiblySetOffset(ResultDelimiter resultDelimiter) {
-		return resultDelimiter.offset != null ? " offset " + resultDelimiter.offset : "";
+	private String getDelimiter(DbQueryInfo queryInfo) {
+		return queryInfo.getDelimiter();
 	}
 
 	@Override
-	public long readNumberOfRows(String tableName, Map<String, Object> conditions) {
+	public long readNumberOfRows(String tableName, Map<String, Object> conditions,
+			DbQueryInfo queryInfo) {
+		long numberOfRows = readNumberOfRows(tableName, conditions);
+
+		if (queryInfo.delimiterIsPresent()) {
+			return calculateNumberOfRowsUsingDelimiter(queryInfo, numberOfRows);
+		}
+		return numberOfRows;
+	}
+
+	private long readNumberOfRows(String tableName, Map<String, Object> conditions) {
 		String sql = assembleSqlForNumberOfRows(tableName, conditions);
 		List<Object> values = getConditionsAsValues(conditions);
 		Map<String, Object> countResult = dataReader.readOneRowOrFailUsingSqlAndValues(sql, values);
 		return (long) countResult.get("count");
 
+	}
+
+	private long calculateNumberOfRowsUsingDelimiter(DbQueryInfo queryInfo, long numberOfRows) {
+		long maxToNumber = toNoIsNullOrTooLarge(queryInfo.getToNo(), numberOfRows) ? numberOfRows
+				: queryInfo.getToNo();
+		long minFromNumber = fromNoIsNullOrLessThanMinNumber(queryInfo) ? MIN_FROM_NUMBER
+				: queryInfo.getFromNo();
+
+		return fromLargerThanTo(minFromNumber, maxToNumber) ? 0
+				: calculateDifference(minFromNumber, maxToNumber);
 	}
 
 	private String assembleSqlForNumberOfRows(String type, Map<String, Object> conditions) {
@@ -177,15 +193,8 @@ public final class RecordReaderImp implements RecordReader {
 		return "";
 	}
 
-	@Override
-	public long readNumberOfRows(String tableName, Map<String, Object> conditions, Integer fromNo,
-			Integer toNo) {
-		long numberOfRows = readNumberOfRows(tableName, conditions);
-		long maxToNumber = toNoIsNullOrTooLarge(toNo, numberOfRows) ? numberOfRows : toNo;
-		long minFromNumber = fromNo < MIN_FROM_NUMBER ? MIN_FROM_NUMBER : fromNo;
-
-		return fromLargerThanTo(minFromNumber, maxToNumber) ? 0
-				: calculateDifference(minFromNumber, maxToNumber);
+	private boolean fromNoIsNullOrLessThanMinNumber(DbQueryInfo queryInfo) {
+		return queryInfo.getFromNo() == null || queryInfo.getFromNo() < MIN_FROM_NUMBER;
 	}
 
 	private boolean toNoIsNullOrTooLarge(Integer toNo, long numberOfRows) {

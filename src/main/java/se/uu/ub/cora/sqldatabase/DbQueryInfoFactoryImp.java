@@ -18,14 +18,11 @@
  */
 package se.uu.ub.cora.sqldatabase;
 
-public class ResultDelimiter {
+public class DbQueryInfoFactoryImp implements DbQueryInfoFactory {
 
-	public Integer limit;
-	public Integer offset;
-
-	public ResultDelimiter(Integer limit, Integer offset) {
-		this.limit = limit;
-		this.offset = offset;
+	@Override
+	public DbQueryInfo factorUsingFromNoAndToNo(Integer fromNo, Integer toNo) {
+		return new DbQueryInfoImp(fromNo, toNo);
 	}
 
 }
