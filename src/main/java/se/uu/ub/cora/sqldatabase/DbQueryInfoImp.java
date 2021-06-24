@@ -53,7 +53,7 @@ public class DbQueryInfoImp implements DbQueryInfo {
 		return fromNo != null;
 	}
 
-	private int fromToDifferencePlusOne(int fromNo, int toNo) {
+	private int fromToDifferencePlusOne(Integer fromNo, Integer toNo) {
 		return (toNo - fromNo) + 1;
 	}
 
