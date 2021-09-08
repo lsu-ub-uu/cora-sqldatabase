@@ -22,11 +22,39 @@ package se.uu.ub.cora.sqldatabase;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DataReader reads data from a sql database using prepared statements.
+ */
 public interface DataReader {
-
+	/**
+	 * executePreparedStatementQueryUsingSqlAndValues reads rows from the database using the
+	 * supplied sql (prepared statement) and the supplied values.<br>
+	 * If no is found matching the sql and values MUST an empty list be returned.
+	 * 
+	 * @param sql
+	 *            A String with a prepared statement
+	 * @param values
+	 *            A List<Object> matching the values for the prepared statement
+	 * @return A List<Map<String, Object>> with one entry in the list for each row with a map
+	 *         containing the columnNames from the result as key and the corresponding values
+	 */
 	List<Map<String, Object>> executePreparedStatementQueryUsingSqlAndValues(String sql,
 			List<Object> values);
 
+	/**
+	 * readOneRowOrFailUsingSqlAndValues reads one row from the database using the supplied sql
+	 * (prepared statement) and the supplied values.<br>
+	 * If no row or more than one row is found matching the sql and values MUST a
+	 * {@link SqlStorageException} be thrown, indicating that the requested single row can not be
+	 * realibly read.
+	 * 
+	 * @param sql
+	 *            A String with a prepared statement
+	 * @param values
+	 *            A List<Object> matching the values for the prepared statement
+	 * @return A Map<String, Object> with the columnNames from the result as key and the
+	 *         corresponding values
+	 */
 	Map<String, Object> readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values);
 
 }

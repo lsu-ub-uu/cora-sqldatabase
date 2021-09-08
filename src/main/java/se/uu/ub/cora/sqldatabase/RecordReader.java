@@ -22,6 +22,9 @@ package se.uu.ub.cora.sqldatabase;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * RecordReader reads data from a table in a sql database using conditions on columns.
+ */
 public interface RecordReader {
 
 	List<Map<String, Object>> readAllFromTable(String tableName);
@@ -32,6 +35,10 @@ public interface RecordReader {
 	Map<String, Object> readOneRowFromDbUsingTableAndConditions(String tableName,
 			Map<String, Object> conditions);
 
+	/**
+	 * TODO: move to {@link DataReader}?? all other methods in this class deals with one table this
+	 * is more generic...
+	 */
 	Map<String, Object> readNextValueFromSequence(String sequenceName);
 
 	List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo queryInfo);
