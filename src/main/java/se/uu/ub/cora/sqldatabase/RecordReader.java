@@ -23,25 +23,40 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * RecordReader reads data from a table in a sql database using conditions on columns.
+ * RecordReader reads data from sql database without the need to write sql statements.
+ * <p>
+ * If you need to use more generic sql statements use {@link DataReader} instead.
  */
 public interface RecordReader {
 
 	List<Map<String, Object>> readAllFromTable(String tableName);
 
-	List<Map<String, Object>> readFromTableUsingConditions(String tableName,
-			Map<String, Object> conditions);
+	List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo queryInfo);
 
+	/**
+	 * readOneRowFromDbUsingTableAndConditions reads one row from the database using a tablename and
+	 * conditions.
+	 * <p>
+	 * If no row or more than one row is found matching the conditions MUST a
+	 * {@link SqlStorageException} be thrown, indicating that the requested single row can not be
+	 * realibly read.
+	 * 
+	 * @param tableName
+	 *            the table to read from
+	 * @param conditions
+	 *            A Map<String, Object> with the columnName as key and requested value as value to
+	 *            use in the query.
+	 * @return A Map<String, Object> with the columnNames from the result as key and the
+	 *         corresponding values
+	 */
 	Map<String, Object> readOneRowFromDbUsingTableAndConditions(String tableName,
 			Map<String, Object> conditions);
 
-	/**
-	 * TODO: move to {@link DataReader}?? all other methods in this class deals with one table this
-	 * is more generic...
-	 */
-	Map<String, Object> readNextValueFromSequence(String sequenceName);
+	List<Map<String, Object>> readFromTableUsingConditions(String tableName,
+			Map<String, Object> conditions);
 
-	List<Map<String, Object>> readAllFromTable(String tableName, DbQueryInfo queryInfo);
+	// List<Map<String, Object>> readFromTableUsingConditions(String tableName, Map<String, Object>
+	// conditions,DbQueryInfo queryInfo);
 
 	/**
 	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions. The number
@@ -52,11 +67,15 @@ public interface RecordReader {
 	 *            the table to read from
 	 * 
 	 * @param conditions,
-	 *            the conditions to use in the query. If empty, no conditions are added to query
+	 *            A Map<String, Object> with the columnName as key and requested value as value to
+	 *            use in the query. If the conditions map is empty, are no parameters added to the
+	 *            query.
 	 * 
 	 * @param DbQueryInfo,
 	 *            the dbQueryInfo used to limit the query
 	 */
 	long readNumberOfRows(String tableName, Map<String, Object> conditions, DbQueryInfo queryInfo);
+
+	Map<String, Object> readNextValueFromSequence(String sequenceName);
 
 }

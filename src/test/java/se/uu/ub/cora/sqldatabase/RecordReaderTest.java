@@ -24,6 +24,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +178,17 @@ public class RecordReaderTest {
 		dataReader.throwError = true;
 
 		recordReader.readOneRowFromDbUsingTableAndConditions("someTableName", conditions);
+
+	}
+
+	@Test
+	public void ReadOneRowFromDbUsingTableAndConditionsWithEmptyConditions() throws Exception {
+		Map<String, Object> emptyCondtions = Collections.emptyMap();
+
+		recordReader.readOneRowFromDbUsingTableAndConditions("someTableName", emptyCondtions);
+
+		assertEquals(dataReader.sql, "select * from someTableName");
+		assertEquals(dataReader.values, Collections.emptyList());
 	}
 
 	@Test

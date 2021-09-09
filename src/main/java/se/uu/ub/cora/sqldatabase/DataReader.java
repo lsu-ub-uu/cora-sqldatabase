@@ -24,6 +24,8 @@ import java.util.Map;
 
 /**
  * DataReader reads data from a sql database using prepared statements.
+ * <p>
+ * If you only need to read data from one table have a look at {@link RecordReader} instead.
  */
 public interface DataReader {
 	/**

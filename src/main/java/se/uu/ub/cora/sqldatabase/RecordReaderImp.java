@@ -86,10 +86,7 @@ public final class RecordReaderImp implements RecordReader {
 
 	private String createSqlForTableNameAndConditions(String tableName,
 			Map<String, Object> conditions) {
-		String sql = "select * from " + tableName + " where ";
-		String conditionPart = createConditionPartOfSql(conditions);
-		sql += conditionPart;
-		return sql;
+		return "select * from " + tableName + possiblyAddConditionsToSql(conditions);
 	}
 
 	private String createConditionPartOfSql(Map<String, Object> conditions) {

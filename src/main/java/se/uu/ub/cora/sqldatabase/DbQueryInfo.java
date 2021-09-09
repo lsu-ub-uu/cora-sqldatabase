@@ -39,6 +39,10 @@ public interface DbQueryInfo {
 	Integer getLimit();
 
 	/**
+	 * TODO: NOT delimiter, but limit of result with start and end.... fix documentation.. and
+	 * change name
+	 * <p>
+	 * 
 	 * getDelimiter composes as string to add to a sql query, to limit the result, based on the
 	 * offset and limit calculated in the instance.
 	 * 
@@ -61,6 +65,9 @@ public interface DbQueryInfo {
 	Integer getToNo();
 
 	/**
+	 * TODO: NOT delimiter, but limit of result with start and end.... fix documentation.. and
+	 * change name
+	 * <p>
 	 * delimiterIsPresent will return true if either offset and limit is set, false if both are null
 	 * 
 	 * @return boolean whether a delimiter is present or not
