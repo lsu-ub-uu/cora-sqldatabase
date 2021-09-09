@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2019 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,27 +16,22 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
+package se.uu.ub.cora.sqldatabase.data;
 
-package se.uu.ub.cora.sqldatabase;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.sql.Connection;
+public class DataUpdaterSpy implements DataUpdater {
 
-import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
-import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
-
-public class SqlConnectionProviderSpy implements SqlConnectionProvider {
-
-	public ConnectionSpy connection = new ConnectionSpy();
-	public boolean returnErrorConnection = false;
-	public boolean getConnectionHasBeenCalled = false;
+	public String sql = "";
+	public List<Object> values = new ArrayList<>();
 
 	@Override
-	public Connection getConnection() {
-		getConnectionHasBeenCalled = true;
-		if (returnErrorConnection) {
-			connection.returnErrorConnection = true;
-		}
-		return connection;
+	public int executeUsingSqlAndValues(String sql, List<Object> values) {
+		this.sql = sql;
+		this.values = values;
+
+		return 0;
 	}
 
 }

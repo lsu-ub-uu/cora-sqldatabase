@@ -16,27 +16,36 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package se.uu.ub.cora.sqldatabase;
+package se.uu.ub.cora.sqldatabase.connection;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 
-import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
-import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
-public class SqlConnectionProviderSpy implements SqlConnectionProvider {
+public final class ParameterConnectionProviderImp implements SqlConnectionProvider {
+	private String url;
+	private String user;
+	private String password;
 
-	public ConnectionSpy connection = new ConnectionSpy();
-	public boolean returnErrorConnection = false;
-	public boolean getConnectionHasBeenCalled = false;
+	public static ParameterConnectionProviderImp usingUriAndUserAndPassword(String url, String user,
+			String password) {
+		return new ParameterConnectionProviderImp(url, user, password);
+	}
+
+	private ParameterConnectionProviderImp(String url, String user, String password) {
+		this.url = url;
+		this.user = user;
+		this.password = password;
+	}
 
 	@Override
 	public Connection getConnection() {
-		getConnectionHasBeenCalled = true;
-		if (returnErrorConnection) {
-			connection.returnErrorConnection = true;
+		try {
+			return DriverManager.getConnection(url, user, password);
+		} catch (Exception e) {
+			throw SqlDatabaseException.withMessageAndException("Error getting connection", e);
 		}
-		return connection;
 	}
 
 }

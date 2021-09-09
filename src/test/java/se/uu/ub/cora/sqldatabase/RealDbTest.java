@@ -9,9 +9,10 @@ import java.util.Map;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.connection.ParameterConnectionProviderImp;
-import se.uu.ub.cora.connection.SqlConnectionProvider;
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
+import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
+import se.uu.ub.cora.sqldatabase.data.DataReaderImp;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 
 public class RealDbTest {

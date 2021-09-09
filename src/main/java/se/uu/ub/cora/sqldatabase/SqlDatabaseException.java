@@ -1,5 +1,6 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2017 Olov McKie
+ * Copyright 2018 Uppsala Universitet
  *
  * This file is part of Cora.
  *
@@ -16,27 +17,26 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package se.uu.ub.cora.sqldatabase;
 
-import java.sql.Connection;
+public class SqlDatabaseException extends RuntimeException {
 
-import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
-import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
+	private static final long serialVersionUID = 1L;
 
-public class SqlConnectionProviderSpy implements SqlConnectionProvider {
+	private SqlDatabaseException(String message) {
+		super(message);
+	}
 
-	public ConnectionSpy connection = new ConnectionSpy();
-	public boolean returnErrorConnection = false;
-	public boolean getConnectionHasBeenCalled = false;
+	public SqlDatabaseException(String message, Exception exception) {
+		super(message, exception);
+	}
 
-	@Override
-	public Connection getConnection() {
-		getConnectionHasBeenCalled = true;
-		if (returnErrorConnection) {
-			connection.returnErrorConnection = true;
-		}
-		return connection;
+	public static SqlDatabaseException withMessage(String message) {
+		return new SqlDatabaseException(message);
+	}
+
+	public static SqlDatabaseException withMessageAndException(String message, Exception exception) {
+		return new SqlDatabaseException(message, exception);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2020 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,27 +16,14 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
+package se.uu.ub.cora.sqldatabase.record;
 
-package se.uu.ub.cora.sqldatabase;
-
-import java.sql.Connection;
-
-import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 
-public class SqlConnectionProviderSpy implements SqlConnectionProvider {
+public interface RecordDeleterFactory {
 
-	public ConnectionSpy connection = new ConnectionSpy();
-	public boolean returnErrorConnection = false;
-	public boolean getConnectionHasBeenCalled = false;
+	SqlConnectionProvider getSqlConnectionProvider();
 
-	@Override
-	public Connection getConnection() {
-		getConnectionHasBeenCalled = true;
-		if (returnErrorConnection) {
-			connection.returnErrorConnection = true;
-		}
-		return connection;
-	}
+	RecordDeleter factor();
 
 }
