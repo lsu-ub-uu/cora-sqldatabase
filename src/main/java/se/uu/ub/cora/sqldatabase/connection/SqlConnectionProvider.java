@@ -20,8 +20,23 @@ package se.uu.ub.cora.sqldatabase.connection;
 
 import java.sql.Connection;
 
-public interface SqlConnectionProvider {
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
+/**
+ * SqlConnectionProvider is an iterface that provides access to different SqlConnectionProvider
+ * implementations through the getConnection metod.
+ * <p>
+ * Implementations of SqlConnectionProvider MUST be threadsafe.
+ */
+public interface SqlConnectionProvider {
+	/**
+	 * getConnection returns a {@link Connection} to the database that the implementation gives
+	 * access to.
+	 * <p>
+	 * If getting a connection fails MUST a {@link SqlDatabaseException} be thrown.
+	 * 
+	 * @return A Connection to the database.
+	 */
 	Connection getConnection();
 
 }

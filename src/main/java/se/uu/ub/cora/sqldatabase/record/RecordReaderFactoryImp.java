@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,31 +19,57 @@
 
 package se.uu.ub.cora.sqldatabase.record;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.data.DataReader;
 import se.uu.ub.cora.sqldatabase.data.DataReaderImp;
 import se.uu.ub.cora.sqldatabase.record.internal.RecordReaderImp;
 
-public final class RecordReaderFactoryImp implements RecordReaderFactory {
+public class RecordReaderFactoryImp implements RecordReaderFactory {
+	private SqlConnectionProvider sqlConnectionProvider;
+	private String name;
 
-	public static RecordReaderFactoryImp usingSqlConnectionProvider(
-			SqlConnectionProvider sqlConnectionProvider) {
-		return new RecordReaderFactoryImp(sqlConnectionProvider);
+	public static RecordReaderFactoryImp usingLookupNameFromContext(String name) {
+		return new RecordReaderFactoryImp(name);
 	}
 
-	private SqlConnectionProvider sqlConnectionProvider;
-
-	private RecordReaderFactoryImp(SqlConnectionProvider sqlConnectionProvider) {
-		this.sqlConnectionProvider = sqlConnectionProvider;
+	RecordReaderFactoryImp(String name) {
+		// package private for test reasons
+		this.name = name;
 	}
 
 	@Override
 	public RecordReader factor() {
+		createConnectionProviderIfNotCreatedSinceBefore();
 		DataReader dataReader = DataReaderImp.usingSqlConnectionProvider(sqlConnectionProvider);
 		return RecordReaderImp.usingDataReader(dataReader);
 	}
 
-	public SqlConnectionProvider getSqlConnectionProvider() {
+	private void createConnectionProviderIfNotCreatedSinceBefore() {
+		try {
+			tryToCreateConnectionProviderIfNotCreatedSinceBefore();
+		} catch (Exception e) {
+			throw SqlDatabaseException.withMessageAndException(e.getMessage(), e);
+		}
+	}
+
+	private void tryToCreateConnectionProviderIfNotCreatedSinceBefore() throws NamingException {
+		// if (null != name) {
+		InitialContext context = new InitialContext();
+		createContextConnectionProvider(name, context);
+		// }
+	}
+
+	void createContextConnectionProvider(String name, InitialContext context) {
+		sqlConnectionProvider = ContextConnectionProviderImp.usingInitialContextAndName(context,
+				name);
+	}
+
+	SqlConnectionProvider getSqlConnectionProvider() {
 		// needed for tests
 		return sqlConnectionProvider;
 	}

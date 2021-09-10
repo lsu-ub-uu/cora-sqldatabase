@@ -22,11 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.StringJoiner;
 
 import se.uu.ub.cora.sqldatabase.data.DataUpdater;
 import se.uu.ub.cora.sqldatabase.record.RecordCreator;
-
-import java.util.StringJoiner;
 
 public class RecordCreatorImp implements RecordCreator {
 

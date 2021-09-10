@@ -69,11 +69,13 @@ public class RealDbTest {
 	@Test(enabled = false)
 	private void testWithWherenot_eligible() {
 		SqlConnectionProvider sProvider = ParameterConnectionProviderImp.usingUriAndUserAndPassword(
-				"jdbc:postgresql://diva-cora-docker-postgresql:5432/diva", "diva", "diva");
+				// "jdbc:postgresql://diva-cora-docker-postgresql:5432/diva", "diva", "diva");
+				"jdbc:postgresql://diva-docker-mock-classic-postgresql:5432/diva", "diva", "diva");
 		DataReaderImp dataReaderImp = DataReaderImp.usingSqlConnectionProvider(sProvider);
-		String sql = "select * from organisation where not_eligible= ?;";
-		// String sql = "select * from organisation ;";
+		// String sql = "select * from organisation where not_eligible= ?;";
+		String sql = "select * from ? where not_eligible= ?;";
 		List<Object> values = new ArrayList<>();
+		values.add("organisation");
 		values.add(false);
 		List<Map<String, Object>> result = dataReaderImp
 				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
