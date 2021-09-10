@@ -24,6 +24,7 @@ import javax.naming.NamingException;
 
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
+import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.data.DataReader;
 import se.uu.ub.cora.sqldatabase.data.DataReaderImp;
@@ -32,6 +33,9 @@ import se.uu.ub.cora.sqldatabase.record.internal.RecordReaderImp;
 public class RecordReaderFactoryImp implements RecordReaderFactory {
 	private SqlConnectionProvider sqlConnectionProvider;
 	private String name;
+	private String url;
+	private String user;
+	private String password;
 
 	public static RecordReaderFactoryImp usingLookupNameFromContext(String name) {
 		return new RecordReaderFactoryImp(name);
@@ -40,6 +44,17 @@ public class RecordReaderFactoryImp implements RecordReaderFactory {
 	RecordReaderFactoryImp(String name) {
 		// package private for test reasons
 		this.name = name;
+	}
+
+	public static RecordReaderFactoryImp usingUriAndUserAndPassword(String url, String user,
+			String password) {
+		return new RecordReaderFactoryImp(url, user, password);
+	}
+
+	private RecordReaderFactoryImp(String url, String user, String password) {
+		this.url = url;
+		this.user = user;
+		this.password = password;
 	}
 
 	@Override
@@ -58,10 +73,13 @@ public class RecordReaderFactoryImp implements RecordReaderFactory {
 	}
 
 	private void tryToCreateConnectionProviderIfNotCreatedSinceBefore() throws NamingException {
-		// if (null != name) {
-		InitialContext context = new InitialContext();
-		createContextConnectionProvider(name, context);
-		// }
+		if (null != name) {
+			InitialContext context = new InitialContext();
+			createContextConnectionProvider(name, context);
+		} else {
+			sqlConnectionProvider = ParameterConnectionProviderImp.usingUriAndUserAndPassword(url,
+					user, password);
+		}
 	}
 
 	void createContextConnectionProvider(String name, InitialContext context) {

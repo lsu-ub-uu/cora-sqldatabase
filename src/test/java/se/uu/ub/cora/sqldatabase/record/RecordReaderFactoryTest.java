@@ -20,8 +20,12 @@
 package se.uu.ub.cora.sqldatabase.record;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 import javax.naming.InitialContext;
 
@@ -29,34 +33,42 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.logger.LoggerProvider;
-import se.uu.ub.cora.sqldatabase.SqlConnectionProviderSpy;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
+import se.uu.ub.cora.sqldatabase.connection.DriverSpy;
+import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.data.DataReaderImp;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 import se.uu.ub.cora.sqldatabase.record.internal.RecordReaderImp;
 
 public class RecordReaderFactoryTest {
-	private SqlConnectionProviderSpy connectionProvider;
 	private RecordReaderFactoryImp readerFactory;
 	private LoggerFactorySpy loggerFactorySpy;
 	private String lookupName;
+	private DriverSpy driver;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
-		connectionProvider = new SqlConnectionProviderSpy();
 		lookupName = "someLookupName";
 
 		readerFactory = RecordReaderFactoryImp.usingLookupNameFromContext(lookupName);
 	}
 
-	@Test(expectedExceptions = SqlDatabaseException.class)
+	@Test
 	public void testInitFromContextError() throws Exception {
 		RecordReaderFactory readerFactory = new RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext();
-		// readerFactory.
-		readerFactory.factor();
+		Exception error = null;
+		try {
+			readerFactory.factor();
+		} catch (Exception e) {
+			error = e;
+		}
+		assertNotNull(error);
+		assertTrue(error instanceof SqlDatabaseException);
+		assertEquals(error.getMessage(), "Error from overriding test class");
+		assertTrue(error.getCause() instanceof SqlDatabaseException);
 	}
 
 	@Test
@@ -70,13 +82,33 @@ public class RecordReaderFactoryTest {
 	}
 
 	@Test
+	public void testInitFromUriUserPassword() throws Exception {
+		driver = new DriverSpy();
+		DriverManager.registerDriver(driver);
+		String url = "";
+		String user = "";
+		String password = "";
+		readerFactory = RecordReaderFactoryImp.usingUriAndUserAndPassword(url, user, password);
+
+		readerFactory.factor();
+
+		ParameterConnectionProviderImp parameterConnectionProvider = (ParameterConnectionProviderImp) readerFactory
+				.getSqlConnectionProvider();
+		Connection connection = parameterConnectionProvider.getConnection();
+		assertEquals(connection, driver.connectionSpy);
+		assertEquals(driver.url, url);
+		assertEquals(driver.info.getProperty("user"), user);
+		assertEquals(driver.info.getProperty("password"), password);
+	}
+
+	@Test
 	public void testFactor() throws Exception {
 		RecordReader recordReader = readerFactory.factor();
 		assertTrue(recordReader instanceof RecordReaderImp);
 	}
 
 	@Test
-	public void testDataReaderSetWithDependencisInRecordReader() throws Exception {
+	public void testDataReaderSetWithDependencesInRecordReader() throws Exception {
 		RecordReaderFactoryImp readerFactory = RecordReaderFactoryImp
 				.usingLookupNameFromContext("someName");
 		readerFactory.factor();
@@ -93,6 +125,6 @@ class RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext extends Record
 
 	@Override
 	void createContextConnectionProvider(String name, InitialContext context) {
-		throw SqlDatabaseException.withMessage("");
+		throw SqlDatabaseException.withMessage("Error from overriding test class");
 	}
 }
