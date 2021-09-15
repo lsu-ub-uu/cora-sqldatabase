@@ -99,6 +99,7 @@ public class RecordReaderFactoryTest {
 		assertEquals(driver.url, url);
 		assertEquals(driver.info.getProperty("user"), user);
 		assertEquals(driver.info.getProperty("password"), password);
+		DriverManager.deregisterDriver(driver);
 	}
 
 	@Test

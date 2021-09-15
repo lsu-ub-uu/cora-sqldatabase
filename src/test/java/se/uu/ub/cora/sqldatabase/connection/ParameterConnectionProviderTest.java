@@ -23,17 +23,23 @@ import static org.testng.Assert.assertEquals;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class ParameterConnectionProviderTest {
 
 	private DriverSpy driver;
 
-	@BeforeTest
-	public void beforeTest() throws Exception {
+	@BeforeMethod
+	public void beforeMethod() throws Exception {
 		driver = new DriverSpy();
 		DriverManager.registerDriver(driver);
+	}
+
+	@AfterMethod
+	public void afterMethod() throws Exception {
+		DriverManager.deregisterDriver(driver);
 	}
 
 	@Test

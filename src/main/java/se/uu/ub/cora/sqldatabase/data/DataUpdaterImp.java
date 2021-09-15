@@ -62,8 +62,8 @@ public class DataUpdaterImp implements DataUpdater {
 			PreparedStatement preparedStatement) throws SQLException {
 		int position = 1;
 		for (Object value : values) {
-			if (value instanceof Timestamp timestamp) {
-				preparedStatement.setTimestamp(position, timestamp);
+			if (value instanceof Timestamp) {
+				preparedStatement.setTimestamp(position, (Timestamp) value);
 			} else {
 				preparedStatement.setObject(position, value);
 			}
