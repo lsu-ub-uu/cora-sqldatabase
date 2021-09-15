@@ -25,7 +25,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +32,7 @@ import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
+import se.uu.ub.cora.sqldatabase.data.internal.RowImp;
 
 public final class DataReaderImp implements DataReader {
 	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
@@ -81,7 +81,7 @@ public final class DataReaderImp implements DataReader {
 	}
 
 	@Override
-	public List<Map<String, Object>> executePreparedStatementQueryUsingSqlAndValues(String sql,
+	public List<Row> executePreparedStatementQueryUsingSqlAndValues(String sql,
 			List<Object> values) {
 		try {
 			return readUsingSqlAndValues(sql, values);
@@ -92,8 +92,7 @@ public final class DataReaderImp implements DataReader {
 		}
 	}
 
-	private List<Map<String, Object>> readUsingSqlAndValues(String sql, List<Object> values)
-			throws SQLException {
+	private List<Row> readUsingSqlAndValues(String sql, List<Object> values) throws SQLException {
 
 		try (Connection connection = sqlConnectionProvider.getConnection();
 				PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
@@ -112,8 +111,7 @@ public final class DataReaderImp implements DataReader {
 		}
 	}
 
-	private List<Map<String, Object>> getResultUsingQuery(PreparedStatement prepareStatement)
-			throws SQLException {
+	private List<Row> getResultUsingQuery(PreparedStatement prepareStatement) throws SQLException {
 		try (ResultSet resultSet = prepareStatement.executeQuery();) {
 			List<String> columnNames = createListOfColumnNamesFromResultSet(resultSet);
 			return createListOfMapsFromResultSetUsingColumnNames(resultSet, columnNames);
@@ -136,21 +134,21 @@ public final class DataReaderImp implements DataReader {
 		return columnNames;
 	}
 
-	private List<Map<String, Object>> createListOfMapsFromResultSetUsingColumnNames(
-			ResultSet resultSet, List<String> columnNames) throws SQLException {
-		List<Map<String, Object>> all = new ArrayList<>();
+	private List<Row> createListOfMapsFromResultSetUsingColumnNames(ResultSet resultSet,
+			List<String> columnNames) throws SQLException {
+		List<Row> all = new ArrayList<>();
 		while (resultSet.next()) {
-			HashMap<String, Object> row = createMapForCurrentRowInResultSet(resultSet, columnNames);
+			Row row = createMapForCurrentRowInResultSet(resultSet, columnNames);
 			all.add(row);
 		}
 		return all;
 	}
 
-	private HashMap<String, Object> createMapForCurrentRowInResultSet(ResultSet resultSet,
-			List<String> columnNames) throws SQLException {
-		HashMap<String, Object> row = new HashMap<>(columnNames.size());
+	private Row createMapForCurrentRowInResultSet(ResultSet resultSet, List<String> columnNames)
+			throws SQLException {
+		Row row = new RowImp();
 		for (String columnName : columnNames) {
-			row.put(columnName, resultSet.getObject(columnName));
+			row.addColumnWithValue(columnName, resultSet.getObject(columnName));
 		}
 		return row;
 	}

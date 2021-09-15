@@ -271,8 +271,8 @@ public class DataReaderImpTest {
 
 	@Test
 	public void testReadFromTableUsingConditionNoResultsReturnsEmptyList() throws Exception {
-		List<Map<String, Object>> results = dataReader
-				.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		List<Row> results = dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL,
+				values);
 		assertEquals(results, Collections.emptyList());
 	}
 

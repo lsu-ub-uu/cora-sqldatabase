@@ -10,6 +10,6 @@ module se.uu.ub.cora.sqldatabase {
 	exports se.uu.ub.cora.sqldatabase;
 	exports se.uu.ub.cora.sqldatabase.connection;
 	exports se.uu.ub.cora.sqldatabase.data;
-	exports se.uu.ub.cora.sqldatabase.record;
+	exports se.uu.ub.cora.sqldatabase.table;
 
 }

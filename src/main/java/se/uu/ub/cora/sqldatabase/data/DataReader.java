@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.record.RecordReader;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 /**
  * DataReader reads data from a sql database using prepared statements.
  * <p>
- * If you only need to read data from one table have a look at {@link RecordReader} instead.
+ * If you only need to read data from one table have a look at {@link TableFacade} instead.
  */
 public interface DataReader {
 	/**
@@ -40,11 +40,10 @@ public interface DataReader {
 	 *            A String with a prepared statement
 	 * @param values
 	 *            A List<Object> matching the values for the prepared statement
-	 * @return A List<Map<String, Object>> with one entry in the list for each row with a map
-	 *         containing the columnNames from the result as key and the corresponding values
+	 * @return A List<Row> with one entry in the list for each row with a map containing the
+	 *         columnNames from the result as key and the corresponding values
 	 */
-	List<Map<String, Object>> executePreparedStatementQueryUsingSqlAndValues(String sql,
-			List<Object> values);
+	List<Row> executePreparedStatementQueryUsingSqlAndValues(String sql, List<Object> values);
 
 	/**
 	 * readOneRowOrFailUsingSqlAndValues reads one row from the database using the supplied sql
