@@ -19,7 +19,7 @@
 
 package se.uu.ub.cora.sqldatabase.table;
 
-public interface RecordReaderFactory {
+public interface TableFacadeFactory {
 
 	TableFacade factor();
 

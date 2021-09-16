@@ -41,8 +41,8 @@ import se.uu.ub.cora.sqldatabase.data.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 
-public class RecordReaderFactoryTest {
-	private RecordReaderFactoryImp readerFactory;
+public class TableFacadeFactoryTest {
+	private TableFacadeFactoryImp readerFactory;
 	private LoggerFactorySpy loggerFactorySpy;
 	private String lookupName;
 	private DriverSpy driver;
@@ -53,12 +53,12 @@ public class RecordReaderFactoryTest {
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		lookupName = "someLookupName";
 
-		readerFactory = RecordReaderFactoryImp.usingLookupNameFromContext(lookupName);
+		readerFactory = TableFacadeFactoryImp.usingLookupNameFromContext(lookupName);
 	}
 
 	@Test
 	public void testInitFromContextError() throws Exception {
-		RecordReaderFactory readerFactory = new RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext();
+		TableFacadeFactory readerFactory = new RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext();
 		Exception error = null;
 		try {
 			readerFactory.factor();
@@ -88,7 +88,7 @@ public class RecordReaderFactoryTest {
 		String url = "";
 		String user = "";
 		String password = "";
-		readerFactory = RecordReaderFactoryImp.usingUriAndUserAndPassword(url, user, password);
+		readerFactory = TableFacadeFactoryImp.usingUriAndUserAndPassword(url, user, password);
 
 		readerFactory.factor();
 
@@ -110,7 +110,7 @@ public class RecordReaderFactoryTest {
 
 	@Test
 	public void testDataReaderSetWithDependencesInRecordReader() throws Exception {
-		RecordReaderFactoryImp readerFactory = RecordReaderFactoryImp
+		TableFacadeFactoryImp readerFactory = TableFacadeFactoryImp
 				.usingLookupNameFromContext("someName");
 
 		TableFacadeImp tableFacade = (TableFacadeImp) readerFactory.factor();
@@ -120,7 +120,7 @@ public class RecordReaderFactoryTest {
 	}
 }
 
-class RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext extends RecordReaderFactoryImp {
+class RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext extends TableFacadeFactoryImp {
 	RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext() {
 		super("Not important lookup name");
 	}

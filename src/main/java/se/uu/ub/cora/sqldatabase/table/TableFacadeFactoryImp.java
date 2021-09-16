@@ -30,28 +30,28 @@ import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.data.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 
-public class RecordReaderFactoryImp implements RecordReaderFactory {
+public class TableFacadeFactoryImp implements TableFacadeFactory {
 	private SqlConnectionProvider sqlConnectionProvider;
 	private String name;
 	private String url;
 	private String user;
 	private String password;
 
-	public static RecordReaderFactoryImp usingLookupNameFromContext(String name) {
-		return new RecordReaderFactoryImp(name);
+	public static TableFacadeFactoryImp usingLookupNameFromContext(String name) {
+		return new TableFacadeFactoryImp(name);
 	}
 
-	RecordReaderFactoryImp(String name) {
+	TableFacadeFactoryImp(String name) {
 		// package private for test reasons
 		this.name = name;
 	}
 
-	public static RecordReaderFactoryImp usingUriAndUserAndPassword(String url, String user,
+	public static TableFacadeFactoryImp usingUriAndUserAndPassword(String url, String user,
 			String password) {
-		return new RecordReaderFactoryImp(url, user, password);
+		return new TableFacadeFactoryImp(url, user, password);
 	}
 
-	private RecordReaderFactoryImp(String url, String user, String password) {
+	private TableFacadeFactoryImp(String url, String user, String password) {
 		this.url = url;
 		this.user = user;
 		this.password = password;
