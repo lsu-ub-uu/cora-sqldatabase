@@ -25,14 +25,16 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 /**
- * DataReader reads data from a sql database using prepared statements.
+ * DatabaseFacade reads and changes data in a sql database using prepared statements.
  * <p>
- * If you only need to read data from one table have a look at {@link TableFacade} instead.
+ * If you only need to read and update data from one table have a look at {@link TableFacade}
+ * instead.
  */
 public interface DatabaseFacade {
 	/**
 	 * readUsingSqlAndValues reads rows from the database using the supplied sql (prepared
-	 * statement) and the supplied values.<br>
+	 * statement) and the supplied values.
+	 * <p>
 	 * If no is found matching the sql and values MUST an empty list be returned.
 	 * 
 	 * @param sql
@@ -46,7 +48,8 @@ public interface DatabaseFacade {
 
 	/**
 	 * readOneRowOrFailUsingSqlAndValues reads one row from the database using the supplied sql
-	 * (prepared statement) and the supplied values.<br>
+	 * (prepared statement) and the supplied values.
+	 * <p>
 	 * If no row or more than one row is found matching the sql and values MUST a
 	 * {@link SqlDatabaseException} be thrown, indicating that the requested single row can not be
 	 * realibly read.
@@ -62,7 +65,7 @@ public interface DatabaseFacade {
 
 	// TODO: update
 	/**
-	 * ExecuteSqlWithValues Executes a sql statement as a preparedQuery returning the number of rows
+	 * ExecuteSqlWithValues executes a sql statement as a preparedQuery returning the number of rows
 	 * affected.
 	 * 
 	 * @param sql

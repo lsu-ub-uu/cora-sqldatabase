@@ -43,35 +43,36 @@ import se.uu.ub.cora.sqldatabase.data.Row;
 public class TableFacadeTest {
 	private TableFacadeImp tableFacade;
 	private SqlConnectionProviderSpy sqlConnectionProviderSpy;
+	private Map<String, Object> values;
 	private Map<String, Object> conditions;
-	private DatabaseFacadeSpy dataReader;
+	private DatabaseFacadeSpy databaseFacadeSpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
+		values = new HashMap<>();
 		conditions = new HashMap<>();
-		conditions.put("alpha2code", "SE");
-		dataReader = new DatabaseFacadeSpy();
+		databaseFacadeSpy = new DatabaseFacadeSpy();
 		sqlConnectionProviderSpy = new SqlConnectionProviderSpy();
-		tableFacade = TableFacadeImp.usingDataReader(dataReader);
+		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
 	}
 
 	@Test
 	public void testReadAllResultsReturnsResultFromDataReader() throws Exception {
 		String tableName = "someTableName";
 		List<Row> results = tableFacade.readRowsFromTable(tableName);
-		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
-		assertEquals(dataReader.sql, "select * from someTableName");
-		assertTrue(dataReader.values.isEmpty());
+		assertTrue(databaseFacadeSpy.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
+		assertEquals(databaseFacadeSpy.sql, "select * from someTableName");
+		assertTrue(databaseFacadeSpy.values.isEmpty());
 
-		assertEquals(results, dataReader.result);
+		assertEquals(results, databaseFacadeSpy.result);
 	}
 
 	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error reading data from someTableName")
 	public void testReadAllFromTableSqlErrorThrowsError() throws Exception {
-		dataReader.throwError = true;
+		databaseFacadeSpy.throwError = true;
 		sqlConnectionProviderSpy.returnErrorConnection = true;
-		tableFacade = TableFacadeImp.usingDataReader(dataReader);
+		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
 		tableFacade.readRowsFromTable("someTableName");
 	}
 
@@ -81,11 +82,11 @@ public class TableFacadeTest {
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(10, 109);
 
 		List<Row> results = tableFacade.readRowsFromTable(tableName, queryInfo);
-		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
-		assertEquals(dataReader.sql, "select * from someTableName limit 100 offset 9");
-		assertTrue(dataReader.values.isEmpty());
+		assertTrue(databaseFacadeSpy.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
+		assertEquals(databaseFacadeSpy.sql, "select * from someTableName limit 100 offset 9");
+		assertTrue(databaseFacadeSpy.values.isEmpty());
 
-		assertEquals(results, dataReader.result);
+		assertEquals(results, databaseFacadeSpy.result);
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class TableFacadeTest {
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(10, null);
 
 		tableFacade.readRowsFromTable(tableName, queryInfo);
-		assertEquals(dataReader.sql, "select * from someTableName offset 9");
+		assertEquals(databaseFacadeSpy.sql, "select * from someTableName offset 9");
 
 	}
 
@@ -104,7 +105,7 @@ public class TableFacadeTest {
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(null, 100);
 
 		tableFacade.readRowsFromTable(tableName, queryInfo);
-		assertEquals(dataReader.sql, "select * from someTableName limit 100");
+		assertEquals(databaseFacadeSpy.sql, "select * from someTableName limit 100");
 	}
 
 	@Test
@@ -115,7 +116,7 @@ public class TableFacadeTest {
 		queryInfo.setSortOrder(SortOrder.ASC);
 
 		tableFacade.readRowsFromTable(tableName, queryInfo);
-		assertEquals(dataReader.sql,
+		assertEquals(databaseFacadeSpy.sql,
 				"select * from someTableName order by from spy delimiter from spy");
 
 	}
@@ -123,7 +124,7 @@ public class TableFacadeTest {
 	@Test
 	public void testReadSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
 		sqlConnectionProviderSpy.returnErrorConnection = true;
-		tableFacade = TableFacadeImp.usingDataReader(dataReader);
+		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
 		try {
 			tableFacade.readRowsFromTable("someTableName");
 		} catch (Exception e) {
@@ -134,13 +135,13 @@ public class TableFacadeTest {
 	@Test
 	public void testGeneratedSqlQueryString() throws Exception {
 		tableFacade.readRowsFromTable("someTableName");
-		assertEquals(dataReader.sql, "select * from someTableName");
+		assertEquals(databaseFacadeSpy.sql, "select * from someTableName");
 	}
 
 	@Test
 	public void testReadOneSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
 		sqlConnectionProviderSpy.returnErrorConnection = true;
-		tableFacade = TableFacadeImp.usingDataReader(dataReader);
+		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
 		try {
 			tableFacade.readOneRowFromTableUsingConditions("someTableName", conditions);
 		} catch (Exception e) {
@@ -150,38 +151,40 @@ public class TableFacadeTest {
 
 	@Test
 	public void testGeneratedSqlQueryForOneString() throws Exception {
+		conditions.put("alpha2code", "SE");
 
 		Row result = tableFacade.readOneRowFromTableUsingConditions("someTableName", conditions);
-		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		assertTrue(databaseFacadeSpy.readOneRowFromDbUsingTableAndConditionsWasCalled);
 
-		assertEquals(dataReader.sql, "select * from someTableName where alpha2code = ?");
-		List<Object> values = dataReader.values;
+		assertEquals(databaseFacadeSpy.sql, "select * from someTableName where alpha2code = ?");
+		List<Object> values = databaseFacadeSpy.values;
 		assertEquals(values.size(), 1);
 		assertEquals(values.get(0), "SE");
 
-		assertSame(result, dataReader.oneRowResult);
+		assertSame(result, databaseFacadeSpy.oneRowResult);
 
 	}
 
 	@Test
 	public void testGeneratedSqlQueryForOneStringTwoConditions() throws Exception {
+		conditions.put("alpha2code", "SE");
 		conditions.put("alpha3code", "SWE");
 		Row result = tableFacade.readOneRowFromTableUsingConditions("someTableName", conditions);
 
-		assertEquals(dataReader.sql,
+		assertEquals(databaseFacadeSpy.sql,
 				"select * from someTableName where alpha2code = ? and alpha3code = ?");
-		List<Object> values = dataReader.values;
+		List<Object> values = databaseFacadeSpy.values;
 		assertEquals(values.size(), 2);
 		assertEquals(values.get(0), "SE");
 		assertEquals(values.get(1), "SWE");
-		assertSame(result, dataReader.oneRowResult);
+		assertSame(result, databaseFacadeSpy.oneRowResult);
 	}
 
 	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error reading data from someTableName")
 	public void testReadOneRowFromDbUsingTableAndConditionsThrowError() throws Exception {
 
-		dataReader.throwError = true;
+		databaseFacadeSpy.throwError = true;
 
 		tableFacade.readOneRowFromTableUsingConditions("someTableName", conditions);
 
@@ -193,54 +196,58 @@ public class TableFacadeTest {
 
 		tableFacade.readOneRowFromTableUsingConditions("someTableName", emptyCondtions);
 
-		assertEquals(dataReader.sql, "select * from someTableName");
-		assertEquals(dataReader.values, Collections.emptyList());
+		assertEquals(databaseFacadeSpy.sql, "select * from someTableName");
+		assertEquals(databaseFacadeSpy.values, Collections.emptyList());
 	}
 
 	@Test
 	public void testReadFromTableUsingConditionReturnsResultFromDataReader() throws Exception {
+		conditions.put("alpha2code", "SE");
+
 		List<Row> result = tableFacade.readRowsFromTableUsingConditions("someTableName",
 				conditions);
 
-		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
-		assertEquals(dataReader.sql, "select * from someTableName where alpha2code = ?");
+		assertTrue(databaseFacadeSpy.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
+		assertEquals(databaseFacadeSpy.sql, "select * from someTableName where alpha2code = ?");
 
-		List<Object> values = dataReader.values;
+		List<Object> values = databaseFacadeSpy.values;
 		assertEquals(values.size(), 1);
 		assertEquals(values.get(0), "SE");
 
-		assertSame(result, dataReader.result);
+		assertSame(result, databaseFacadeSpy.result);
 	}
 
 	@Test
 	public void testReadFromTableUsingTwoConditionReturnsResultFromDataReader() throws Exception {
+		conditions.put("alpha2code", "SE");
 		conditions.put("alpha3code", "SWE");
+
 		List<Row> result = tableFacade.readRowsFromTableUsingConditions("someTableName",
 				conditions);
 
-		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
-		assertEquals(dataReader.sql,
+		assertTrue(databaseFacadeSpy.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
+		assertEquals(databaseFacadeSpy.sql,
 				"select * from someTableName where alpha2code = ? and alpha3code = ?");
 
-		List<Object> values = dataReader.values;
+		List<Object> values = databaseFacadeSpy.values;
 		assertEquals(values.size(), 2);
 		assertEquals(values.get(0), "SE");
 		assertEquals(values.get(1), "SWE");
 
-		assertSame(result, dataReader.result);
+		assertSame(result, databaseFacadeSpy.result);
 	}
 
 	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error reading data from someTableName")
 	public void testReadFromTableUsingConditionSqlErrorThrowsError() throws Exception {
-		dataReader.throwError = true;
-		tableFacade = TableFacadeImp.usingDataReader(dataReader);
+		databaseFacadeSpy.throwError = true;
+		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
 		tableFacade.readRowsFromTableUsingConditions("someTableName", conditions);
 	}
 
 	@Test(expectedExceptions = SqlDatabaseException.class)
 	public void testReadNextFromSequenceError() throws Exception {
-		dataReader.throwError = true;
+		databaseFacadeSpy.throwError = true;
 
 		tableFacade.nextValueFromSequence("someSequence");
 	}
@@ -248,9 +255,9 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNextFromSequence() {
 		long result = tableFacade.nextValueFromSequence("someSequence");
-		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
-		assertTrue(dataReader.values.isEmpty());
-		assertEquals(dataReader.sql, "select nextval('someSequence') as nextval");
+		assertTrue(databaseFacadeSpy.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		assertTrue(databaseFacadeSpy.values.isEmpty());
+		assertEquals(databaseFacadeSpy.sql, "select nextval('someSequence') as nextval");
 		long resultInSpy = 438234090L;
 		assertEquals(result, resultInSpy);
 	}
@@ -266,12 +273,12 @@ public class TableFacadeTest {
 		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
 				conditions, queryInfo);
 
-		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
-		assertEquals(dataReader.sql, "select count(*) from organisation where domain = ?");
-		List<Object> values = dataReader.values;
+		assertTrue(databaseFacadeSpy.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		assertEquals(databaseFacadeSpy.sql, "select count(*) from organisation where domain = ?");
+		List<Object> values = databaseFacadeSpy.values;
 		assertEquals(values.size(), 1);
 		assertEquals(values.get(0), "uu");
-		assertEquals(numberOfRows, dataReader.oneRowResult.getValueByColumn("count"));
+		assertEquals(numberOfRows, databaseFacadeSpy.oneRowResult.getValueByColumn("count"));
 
 		assertFalse(queryInfo.getToNoWasCalled);
 		assertFalse(queryInfo.getFromNoWasCalled);
@@ -286,10 +293,10 @@ public class TableFacadeTest {
 		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
 				conditions, queryInfo);
 
-		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
-		assertEquals(dataReader.sql, "select count(*) from organisation");
-		assertTrue(dataReader.values.isEmpty());
-		assertEquals(numberOfRows, dataReader.oneRowResult.getValueByColumn("count"));
+		assertTrue(databaseFacadeSpy.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		assertEquals(databaseFacadeSpy.sql, "select count(*) from organisation");
+		assertTrue(databaseFacadeSpy.values.isEmpty());
+		assertEquals(numberOfRows, databaseFacadeSpy.oneRowResult.getValueByColumn("count"));
 	}
 
 	@Test
@@ -303,9 +310,9 @@ public class TableFacadeTest {
 		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
 				conditions, queryInfo);
 
-		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
-		assertEquals(dataReader.sql, "select count(*) from organisation where domain = ?");
-		List<Object> values = dataReader.values;
+		assertTrue(databaseFacadeSpy.readOneRowFromDbUsingTableAndConditionsWasCalled);
+		assertEquals(databaseFacadeSpy.sql, "select count(*) from organisation where domain = ?");
+		List<Object> values = databaseFacadeSpy.values;
 		assertEquals(values.size(), 1);
 		assertEquals(values.get(0), "uu");
 		assertEquals(numberOfRows, 10);
@@ -401,16 +408,118 @@ public class TableFacadeTest {
 
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromIsNullUseOneAsFrom() {
-		String type = "organisation";
+		String tableName = "organisation";
 		Map<String, Object> conditions = new HashMap<>();
 		conditions.put("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(null, 10);
-		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
+		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(tableName,
 				conditions, queryInfo);
 
 		assertEquals(numberOfRows, 10);
 
+	}
+
+	@Test
+	public void testDeleteOneRecordOneCondition() {
+		conditions.put("organisation_id", 234);
+
+		tableFacade.deleteRowFromTableUsingConditions("organisation", conditions);
+
+		List<Object> values = getValuesFromExecuteSqlWithValues();
+
+		String deleteSql = "delete from organisation where organisation_id = ?";
+		databaseFacadeSpy.MCR.assertParameter("executeSqlWithValues", 0, "sql", deleteSql);
+		assertEquals(values.get(0), 234);
+	}
+
+	private List<Object> getValuesFromExecuteSqlWithValues() {
+		return (List<Object>) databaseFacadeSpy.MCR
+				.getValueForMethodNameAndCallNumberAndParameterName("executeSqlWithValues", 0,
+						"values");
+	}
+
+	@Test
+	public void testDeleteOneRecordTwoConditions() {
+		conditions.put("organisation_id", 234);
+		conditions.put("organisation_name", "someNewOrganisationName");
+
+		tableFacade.deleteRowFromTableUsingConditions("organisation", conditions);
+
+		String deleteSql = "delete from organisation where organisation_id = ? and organisation_name = ?";
+		databaseFacadeSpy.MCR.assertParameter("executeSqlWithValues", 0, "sql", deleteSql);
+
+		List<Object> values = getValuesFromExecuteSqlWithValues();
+
+		assertEquals(values.get(0), 234);
+		assertEquals(values.get(1), "someNewOrganisationName");
+	}
+
+	@Test
+	public void testInsertOneRecord() {
+
+		values.put("organisation_id", 234);
+		values.put("organisation_name", "someNewOrganisationName");
+
+		tableFacade.insertRowInTableWithValues("organisation", values);
+		String insertSql = "insert into organisation(organisation_id, organisation_name) values(?, ?)";
+		databaseFacadeSpy.MCR.assertParameter("executeSqlWithValues", 0, "sql", insertSql);
+
+		List<Object> valuesSentToExecutor = getValuesFromExecuteSqlWithValues();
+
+		assertEquals(valuesSentToExecutor.get(0), 234);
+		assertEquals(valuesSentToExecutor.get(1), "someNewOrganisationName");
+	}
+
+	@Test
+	public void testUpdateOneRecordOneColumnOneCondition() {
+		values.put("organisation_name", "someNewOrganisationName");
+		conditions.put("organisation_id", 123);
+
+		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", values, conditions);
+
+		String updateSql = "update organisation set organisation_name = ? where organisation_id = ?";
+		List<Object> valuesSentToExecutor = getValuesFromExecuteSqlWithValues();
+
+		databaseFacadeSpy.MCR.assertParameter("executeSqlWithValues", 0, "sql", updateSql);
+		assertEquals(valuesSentToExecutor.get(0), "someNewOrganisationName");
+		assertEquals(valuesSentToExecutor.get(1), 123);
+	}
+
+	@Test
+	public void testUpdateOneRecordTwoColumnsOneCondition() {
+		values.put("organisation_name", "someNewOrganisationName");
+		values.put("organisation_code", "someNewOrgCode");
+		conditions.put("organisation_id", 123);
+
+		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", values, conditions);
+
+		String updateSql = "update organisation set organisation_code = ?, organisation_name = ? where organisation_id = ?";
+		List<Object> valuesSentToExecutor = getValuesFromExecuteSqlWithValues();
+
+		databaseFacadeSpy.MCR.assertParameter("executeSqlWithValues", 0, "sql", updateSql);
+		assertEquals(valuesSentToExecutor.get(0), "someNewOrgCode");
+		assertEquals(valuesSentToExecutor.get(1), "someNewOrganisationName");
+		assertEquals(valuesSentToExecutor.get(2), 123);
+	}
+
+	@Test
+	public void testUpdateOneRecordTwoColumnsTwoConditions() {
+		values.put("organisation_name", "someNewOrganisationName");
+		values.put("organisation_code", "someNewOrgCode");
+		conditions.put("organisation_id", 123);
+		conditions.put("country_code", "swe");
+
+		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", values, conditions);
+
+		String updateSql = "update organisation set organisation_code = ?, organisation_name = ? where organisation_id = ? and country_code = ?";
+		List<Object> valuesSentToExecutor = getValuesFromExecuteSqlWithValues();
+
+		databaseFacadeSpy.MCR.assertParameter("executeSqlWithValues", 0, "sql", updateSql);
+		assertEquals(valuesSentToExecutor.get(0), "someNewOrgCode");
+		assertEquals(valuesSentToExecutor.get(1), "someNewOrganisationName");
+		assertEquals(valuesSentToExecutor.get(2), 123);
+		assertEquals(valuesSentToExecutor.get(3), "swe");
 	}
 
 }

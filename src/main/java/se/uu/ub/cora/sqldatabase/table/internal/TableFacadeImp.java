@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringJoiner;
 
 import se.uu.ub.cora.sqldatabase.DbQueryInfo;
@@ -34,11 +35,11 @@ import se.uu.ub.cora.sqldatabase.table.TableFacade;
 public final class TableFacadeImp implements TableFacade {
 	private static final int MIN_FROM_NUMBER = 1;
 	private static final String ERROR_READING_DATA_FROM = "Error reading data from ";
-	private DatabaseFacade dataReader;
+	private DatabaseFacade dbFacade;
 	private static final String NEXTVAL_COLUMN_NAME = "nextval";
 
-	private TableFacadeImp(DatabaseFacade dataReader) {
-		this.dataReader = dataReader;
+	private TableFacadeImp(DatabaseFacade databaseFacade) {
+		this.dbFacade = databaseFacade;
 	}
 
 	public static TableFacadeImp usingDataReader(DatabaseFacade dataReader) {
@@ -61,8 +62,7 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	private List<Row> tryToReadAllFromTable(String sql) {
-		return dataReader.readUsingSqlAndValues(sql,
-				Collections.emptyList());
+		return dbFacade.readUsingSqlAndValues(sql, Collections.emptyList());
 
 	}
 
@@ -88,7 +88,7 @@ public final class TableFacadeImp implements TableFacade {
 		values.addAll(conditions.values());
 
 		String sql = createSqlForTableNameAndConditions(tableName, conditions);
-		return dataReader.readOneRowOrFailUsingSqlAndValues(sql, values);
+		return dbFacade.readOneRowOrFailUsingSqlAndValues(sql, values);
 	}
 
 	private String createSqlForTableNameAndConditions(String tableName,
@@ -120,18 +120,18 @@ public final class TableFacadeImp implements TableFacade {
 		String sql = createSqlForTableNameAndConditions(tableName, conditions);
 		List<Object> values = new ArrayList<>();
 		values.addAll(conditions.values());
-		return dataReader.readUsingSqlAndValues(sql, values);
+		return dbFacade.readUsingSqlAndValues(sql, values);
 	}
 
 	public DatabaseFacade getDataReader() {
 		// needed for test
-		return dataReader;
+		return dbFacade;
 	}
 
 	@Override
 	public long nextValueFromSequence(String sequenceName) {
 		String statement = "select nextval('" + sequenceName + "') as " + NEXTVAL_COLUMN_NAME;
-		Row row = dataReader.readOneRowOrFailUsingSqlAndValues(statement, Collections.emptyList());
+		Row row = dbFacade.readOneRowOrFailUsingSqlAndValues(statement, Collections.emptyList());
 		return (long) row.getValueByColumn(NEXTVAL_COLUMN_NAME);
 	}
 
@@ -165,7 +165,7 @@ public final class TableFacadeImp implements TableFacade {
 	private long readNumberOfRows(String tableName, Map<String, Object> conditions) {
 		String sql = assembleSqlForNumberOfRows(tableName, conditions);
 		List<Object> values = getConditionsAsValues(conditions);
-		Row countResult = dataReader.readOneRowOrFailUsingSqlAndValues(sql, values);
+		Row countResult = dbFacade.readOneRowOrFailUsingSqlAndValues(sql, values);
 		return (long) countResult.getValueByColumn("count");
 
 	}
@@ -216,8 +216,45 @@ public final class TableFacadeImp implements TableFacade {
 
 	@Override
 	public void insertRowInTableWithValues(String tableName, Map<String, Object> values) {
-		// TODO Auto-generated method stub
+		StringBuilder sql = createSql(tableName, values);
+		List<Object> columnValues = getAllColumnValues(values);
+		dbFacade.executeSqlWithValues(sql.toString(), columnValues);
 
+	}
+
+	private StringBuilder createSql(String tableName, Map<String, Object> columnsWithValues) {
+		StringBuilder sql = new StringBuilder("insert into " + tableName + "(");
+		List<String> columnNames = getAllColumnNames(columnsWithValues);
+		appendColumnNamesToInsertPart(sql, columnNames);
+		appendValuesPart(sql, columnNames);
+		return sql;
+	}
+
+	private String appendColumnNamesToInsertPart(StringBuilder sql, List<String> columnNames) {
+		StringJoiner joiner = new StringJoiner(", ");
+		addAllToJoiner2(columnNames, joiner);
+		sql.append(joiner);
+		return sql.toString();
+	}
+
+	private void addAllToJoiner2(List<String> columnNames, StringJoiner joiner) {
+		for (String columnName : columnNames) {
+			joiner.add(columnName);
+		}
+	}
+
+	private void appendValuesPart(StringBuilder sql, List<String> columnNames) {
+		sql.append(") values(");
+		sql.append(addCorrectNumberOfPlaceHoldersForValues(columnNames));
+		sql.append(')');
+	}
+
+	private String addCorrectNumberOfPlaceHoldersForValues(List<String> columnNames) {
+		StringJoiner joiner = new StringJoiner(", ");
+		for (int i = 0; i < columnNames.size(); i++) {
+			joiner.add("?");
+		}
+		return joiner.toString();
 	}
 
 	@Override
@@ -230,15 +267,105 @@ public final class TableFacadeImp implements TableFacade {
 	@Override
 	public void updateRowInTableUsingValuesAndConditions(String tableName,
 			Map<String, Object> values, Map<String, Object> conditions) {
-		// TODO Auto-generated method stub
+		StringBuilder sql = createSql(tableName, values, conditions);
+		List<Object> valuesForUpdate = addColumnsAndConditionsToValuesForUpdate(values, conditions);
 
+		dbFacade.executeSqlWithValues(sql.toString(), valuesForUpdate);
+	}
+
+	private StringBuilder createSql(String tableName, Map<String, Object> columnsWithValues,
+			Map<String, Object> conditions) {
+		StringBuilder sql = new StringBuilder(
+				createSettingPartOfSqlStatement(tableName, columnsWithValues));
+		sql.append(createWherePartOfSqlStatement(conditions));
+		return sql;
+	}
+
+	private String createSettingPartOfSqlStatement(String tableName,
+			Map<String, Object> columnsWithValues) {
+		StringBuilder sql = new StringBuilder("update " + tableName + " set ");
+		List<String> columnNames = getAllColumnNames(columnsWithValues);
+		return appendColumnsToSelectPart(sql, columnNames);
+	}
+
+	private String appendColumnsToSelectPart(StringBuilder sql, List<String> columnNames) {
+		StringJoiner joiner = new StringJoiner(", ");
+		addAllToJoiner(columnNames, joiner);
+		sql.append(joiner);
+		return sql.toString();
+	}
+
+	private String createWherePartOfSqlStatement(Map<String, Object> conditions) {
+		StringBuilder sql = new StringBuilder(" where ");
+		List<String> conditionNames = getAllConditionNames(conditions);
+		return appendConditionsToWherePart(sql, conditionNames);
+	}
+
+	private List<String> getAllConditionNames(Map<String, Object> conditions) {
+		List<String> conditionNames = new ArrayList<>(conditions.size());
+		for (Entry<String, Object> condition : conditions.entrySet()) {
+			conditionNames.add(condition.getKey());
+		}
+		return conditionNames;
+	}
+
+	//
+	// public DataUpdater getDataUpdater() {
+	// return dataUpdater;
+	// }
+	//
+	private String appendConditionsToWherePart(StringBuilder sql, List<String> conditions) {
+		StringJoiner joiner = new StringJoiner(" and ");
+		addAllToJoiner(conditions, joiner);
+		sql.append(joiner);
+		return sql.toString();
+	}
+
+	private List<Object> addColumnsAndConditionsToValuesForUpdate(Map<String, Object> columns,
+			Map<String, Object> conditions) {
+		List<Object> valuesForUpdate = new ArrayList<>();
+		valuesForUpdate.addAll(columns.values());
+		valuesForUpdate.addAll(conditions.values());
+		return valuesForUpdate;
 	}
 
 	@Override
 	public void deleteRowFromTableUsingConditions(String tableName,
 			Map<String, Object> conditions) {
-		// TODO Auto-generated method stub
+		StringBuilder sql = new StringBuilder("delete from " + tableName + " where ");
+		List<String> columnNames = getAllColumnNames(conditions);
+		appendColumnNamesToDeletePart(sql, columnNames);
+		List<Object> columnValues = getAllColumnValues(conditions);
 
+		dbFacade.executeSqlWithValues(sql.toString(), columnValues);
 	}
 
+	private List<String> getAllColumnNames(Map<String, Object> columnsWithValues) {
+		List<String> columnNames = new ArrayList<>(columnsWithValues.size());
+		for (Entry<String, Object> column : columnsWithValues.entrySet()) {
+			columnNames.add(column.getKey());
+		}
+		return columnNames;
+	}
+
+	private String appendColumnNamesToDeletePart(StringBuilder sql, List<String> columnNames) {
+		StringJoiner joiner = new StringJoiner(" and ");
+		addAllToJoiner(columnNames, joiner);
+		sql.append(joiner);
+		return sql.toString();
+	}
+
+	private void addAllToJoiner(List<String> columnNames, StringJoiner joiner) {
+		for (String columnName : columnNames) {
+			joiner.add(columnName + " = ?");
+		}
+	}
+
+	private List<Object> getAllColumnValues(Map<String, Object> columnsWithValues) {
+		List<Object> columnValues = new ArrayList<>(columnsWithValues.size());
+		for (Entry<String, Object> column : columnsWithValues.entrySet()) {
+			columnValues.add(column.getValue());
+		}
+		return columnValues;
+	}
 }

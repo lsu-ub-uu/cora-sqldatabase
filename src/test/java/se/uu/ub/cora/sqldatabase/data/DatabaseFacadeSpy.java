@@ -23,6 +23,7 @@ import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.data.internal.RowImp;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 
 public class DatabaseFacadeSpy implements DatabaseFacade {
 
@@ -33,6 +34,8 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 	public boolean throwError = false;
 	public boolean readOneRowFromDbUsingTableAndConditionsWasCalled = false;
 	public Row oneRowResult;
+
+	public MethodCallRecorder MCR = new MethodCallRecorder();
 
 	@Override
 	public List<Row> readUsingSqlAndValues(String sql, List<Object> values) {
@@ -84,8 +87,12 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 
 	@Override
 	public int executeSqlWithValues(String sql, List<Object> values) {
-		// TODO Auto-generated method stub
-		return 0;
+		MCR.addCall("sql", sql, "values", values);
+
+		int returnValue = 0;
+
+		MCR.addReturned(returnValue);
+		return returnValue;
 	}
 
 }

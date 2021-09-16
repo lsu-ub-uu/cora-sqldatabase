@@ -50,7 +50,7 @@ public class DatabaseFacadeTest {
 	private SqlConnectionProviderSpy sqlConnectionProviderSpy;
 	private List<Object> values;
 	private LoggerFactorySpy loggerFactorySpy;
-	private String testedClassName = "DataReaderImp";
+	private String testedClassName = "DatabaseFacadeImp";
 	private String updateSql = "update testTable set x=? where y = ?";
 
 	@BeforeMethod
