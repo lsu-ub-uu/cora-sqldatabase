@@ -26,8 +26,8 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
-import se.uu.ub.cora.sqldatabase.data.DataReader;
-import se.uu.ub.cora.sqldatabase.data.DataReaderImp;
+import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.data.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 
 public class RecordReaderFactoryImp implements RecordReaderFactory {
@@ -60,7 +60,7 @@ public class RecordReaderFactoryImp implements RecordReaderFactory {
 	@Override
 	public TableFacade factor() {
 		createConnectionProviderIfNotCreatedSinceBefore();
-		DataReader dataReader = DataReaderImp.usingSqlConnectionProvider(sqlConnectionProvider);
+		DatabaseFacade dataReader = DatabaseFacadeImp.usingSqlConnectionProvider(sqlConnectionProvider);
 		return TableFacadeImp.usingDataReader(dataReader);
 	}
 

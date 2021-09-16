@@ -23,8 +23,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,14 +43,15 @@ import se.uu.ub.cora.sqldatabase.connection.PreparedStatementSpy;
 import se.uu.ub.cora.sqldatabase.connection.ResultSetSpy;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 
-public class DataReaderImpTest {
+public class DatabaseFacadeTest {
 	private static final String SOME_SQL = "select x from y";
 	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
-	private DataReaderImp dataReader;
+	private DatabaseFacadeImp dataReader;
 	private SqlConnectionProviderSpy sqlConnectionProviderSpy;
 	private List<Object> values;
 	private LoggerFactorySpy loggerFactorySpy;
 	private String testedClassName = "DataReaderImp";
+	private String updateSql = "update testTable set x=? where y = ?";
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -56,7 +59,7 @@ public class DataReaderImpTest {
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 
 		sqlConnectionProviderSpy = new SqlConnectionProviderSpy();
-		dataReader = DataReaderImp.usingSqlConnectionProvider(sqlConnectionProviderSpy);
+		dataReader = DatabaseFacadeImp.usingSqlConnectionProvider(sqlConnectionProviderSpy);
 		values = new ArrayList<>();
 	}
 
@@ -269,8 +272,7 @@ public class DataReaderImpTest {
 
 	@Test
 	public void testReadFromTableUsingConditionNoResultsReturnsEmptyList() throws Exception {
-		List<Row> results = dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL,
-				values);
+		List<Row> results = dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		assertEquals(results, Collections.emptyList());
 	}
 
@@ -278,7 +280,7 @@ public class DataReaderImpTest {
 			+ ERROR_READING_DATA_USING_SQL + SOME_SQL)
 	public void testReadFromTableUsingConditionSqlErrorThrowsError() throws Exception {
 		sqlConnectionProviderSpy.returnErrorConnection = true;
-		dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		dataReader.readUsingSqlAndValues(SOME_SQL, values);
 	}
 
 	@Test
@@ -286,7 +288,7 @@ public class DataReaderImpTest {
 			throws Exception {
 		sqlConnectionProviderSpy.returnErrorConnection = true;
 		try {
-			dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+			dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		} catch (Exception e) {
 			assertEquals(e.getCause().getMessage(), "error thrown from prepareStatement in spy");
 		}
@@ -308,7 +310,7 @@ public class DataReaderImpTest {
 			List<Object> values) {
 		Exception caughtException = null;
 		try {
-			dataReader.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+			dataReader.readUsingSqlAndValues(sql, values);
 		} catch (Exception e) {
 			caughtException = e;
 		}
@@ -317,36 +319,36 @@ public class DataReaderImpTest {
 
 	@Test
 	public void testSqlSetAsPreparedStatement() throws Exception {
-		dataReader.executePreparedStatementQueryUsingSqlAndValues(
-				"select * from someTableName where alpha2code = ?", values);
+		dataReader.readUsingSqlAndValues("select * from someTableName where alpha2code = ?",
+				values);
 		String generatedSql = sqlConnectionProviderSpy.connection.sql;
 		assertEquals(generatedSql, "select * from someTableName where alpha2code = ?");
 	}
 
 	@Test
 	public void testExecuteQueryIsCalledForExecutePreparedStatement() throws Exception {
-		dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
 		assertTrue(preparedStatementSpy.executeQueryWasCalled);
 	}
 
 	@Test
 	public void testCloseOfConnectionIsCalledForExecutePreparedStatement() throws Exception {
-		dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		ConnectionSpy connectionSpy = sqlConnectionProviderSpy.connection;
 		assertTrue(connectionSpy.closeWasCalled);
 	}
 
 	@Test
 	public void testCloseOfPrepareStatementIsCalledForExecutePreparedStatement() throws Exception {
-		dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
 		assertTrue(preparedStatementSpy.closeWasCalled);
 	}
 
 	@Test
 	public void testCloseOfResultSetIsCalledForExecutePreparedStatement() throws Exception {
-		dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		ResultSetSpy resultSetSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy.resultSet;
 		assertTrue(resultSetSpy.closeWasCalled);
 	}
@@ -357,7 +359,7 @@ public class DataReaderImpTest {
 		setValuesInResultSetSpy(resultSetSpy);
 
 		resultSetSpy.hasNext = true;
-		dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		assertEquals(resultSetSpy.getMetadataWasCalled, true);
 	}
 
@@ -374,8 +376,7 @@ public class DataReaderImpTest {
 		rowValues.add(columnValues);
 		resultSetSpy.rowValues = rowValues;
 
-		List<Row> readAllFromTable = dataReader
-				.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		List<Row> readAllFromTable = dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		Row row0 = readAllFromTable.get(0);
 
 		Set<String> columnSet = row0.columnSet();
@@ -401,8 +402,7 @@ public class DataReaderImpTest {
 
 		resultSetSpy.rowValues = rowValues;
 
-		List<Row> readAllFromTable = dataReader
-				.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		List<Row> readAllFromTable = dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		Row row0 = readAllFromTable.get(0);
 
 		Set<String> columnSet = row0.columnSet();
@@ -420,10 +420,90 @@ public class DataReaderImpTest {
 		setValuesInResultSetSpy(resultSetSpy);
 		values.add("SE");
 		values.add("SWE");
-		dataReader.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
+		dataReader.readUsingSqlAndValues(SOME_SQL, values);
 		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
 		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
 		assertEquals(preparedStatementSpy.usedSetObjects.get("2"), "SWE");
 	}
 
+	@Test
+	public void testNoAffectedRows() {
+		int updatedRows = dataReader.executeSqlWithValues(updateSql, values);
+
+		assertEquals(updatedRows, 0);
+	}
+
+	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
+			+ "Error executing statement: update testTable set x=\\? where y = \\?")
+	public void testExecuteSqlThrowsError() throws Exception {
+		sqlConnectionProviderSpy.returnErrorConnection = true;
+		dataReader.executeSqlWithValues(updateSql, values);
+	}
+
+	@Test
+	public void testExecuteSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
+		sqlConnectionProviderSpy.returnErrorConnection = true;
+		try {
+			dataReader.executeSqlWithValues(updateSql, values);
+		} catch (Exception e) {
+			assertEquals(e.getCause().getMessage(), "error thrown from prepareStatement in spy");
+		}
+	}
+
+	@Test
+	public void testExecuteUsingSqlAndValuesClosesPrepareStatmentsAndConnection() throws Exception {
+		dataReader.executeSqlWithValues(updateSql, values);
+
+		String generatedSql = sqlConnectionProviderSpy.connection.sql;
+		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
+		ConnectionSpy connectionSpy = sqlConnectionProviderSpy.connection;
+
+		assertEquals(generatedSql, updateSql);
+		assertTrue(preparedStatementSpy.executeUpdateWasCalled);
+		assertTrue(preparedStatementSpy.closeWasCalled);
+		assertTrue(connectionSpy.closeWasCalled);
+	}
+
+	@Test
+	public void testExecuteSqlWithValuesAreSetInSql() throws Exception {
+		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
+		values.add("SE");
+		values.add("SWE");
+
+		dataReader.executeSqlWithValues(updateSql, values);
+
+		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
+		assertEquals(preparedStatementSpy.usedSetObjects.get("2"), "SWE");
+	}
+
+	@Test
+	public void testExecuteSqlWithValuesNoOfAffectedRowsAreReturned() throws Exception {
+		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
+		preparedStatementSpy.noOfAffectedRows = 5;
+		values.add("SE");
+		values.add("SWE");
+
+		int updatedRows = dataReader.executeSqlWithValues(updateSql, values);
+
+		assertEquals(updatedRows, 5);
+	}
+
+	@Test
+	public void testSetTimestampPreparedStatement() throws Exception {
+		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
+		values.add("SE");
+		values.add(createTimestamp());
+
+		dataReader.executeSqlWithValues(updateSql, values);
+
+		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
+		assertTrue(preparedStatementSpy.usedSetTimestamps.get("2") instanceof Timestamp);
+	}
+
+	private Timestamp createTimestamp() {
+		Date today = new Date();
+		long time = today.getTime();
+		Timestamp timestamp = new Timestamp(time);
+		return timestamp;
+	}
 }

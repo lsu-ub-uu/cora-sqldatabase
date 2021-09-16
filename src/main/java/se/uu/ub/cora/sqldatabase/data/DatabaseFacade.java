@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2018, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -29,10 +29,10 @@ import se.uu.ub.cora.sqldatabase.table.TableFacade;
  * <p>
  * If you only need to read data from one table have a look at {@link TableFacade} instead.
  */
-public interface DataReader {
+public interface DatabaseFacade {
 	/**
-	 * executePreparedStatementQueryUsingSqlAndValues reads rows from the database using the
-	 * supplied sql (prepared statement) and the supplied values.<br>
+	 * readUsingSqlAndValues reads rows from the database using the supplied sql (prepared
+	 * statement) and the supplied values.<br>
 	 * If no is found matching the sql and values MUST an empty list be returned.
 	 * 
 	 * @param sql
@@ -42,7 +42,7 @@ public interface DataReader {
 	 * @return A List<Row> with one entry in the list for each row with a map containing the
 	 *         columnNames from the result as key and the corresponding values
 	 */
-	List<Row> executePreparedStatementQueryUsingSqlAndValues(String sql, List<Object> values);
+	List<Row> readUsingSqlAndValues(String sql, List<Object> values);
 
 	/**
 	 * readOneRowOrFailUsingSqlAndValues reads one row from the database using the supplied sql
@@ -59,5 +59,18 @@ public interface DataReader {
 	 *         corresponding values
 	 */
 	Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values);
+
+	// TODO: update
+	/**
+	 * ExecuteSqlWithValues Executes a sql statement as a preparedQuery returning the number of rows
+	 * affected.
+	 * 
+	 * @param sql
+	 *            A String with the prepared statement to execute
+	 * @param values
+	 *            A List with Objects to use in the prepared statement
+	 * @return An int with the number of rows affected by the statement
+	 */
+	int executeSqlWithValues(String sql, List<Object> values);
 
 }

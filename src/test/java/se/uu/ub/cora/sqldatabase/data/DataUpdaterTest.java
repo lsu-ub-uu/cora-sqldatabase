@@ -38,19 +38,19 @@ public class DataUpdaterTest {
 
 	private SqlConnectionProviderSpy sqlConnectionProviderSpy;
 	private List<Object> values;
-	private DataUpdater dataUpdater;
+	private DataUpdater dataReader;
 	private String sql = "update testTable set x=? where y = ?";
 
 	@BeforeMethod
 	public void beforeMethod() {
 		sqlConnectionProviderSpy = new SqlConnectionProviderSpy();
-		dataUpdater = DataUpdaterImp.usingSqlConnectionProvider(sqlConnectionProviderSpy);
+		dataReader = DataUpdaterImp.usingSqlConnectionProvider(sqlConnectionProviderSpy);
 		values = new ArrayList<>();
 	}
 
 	@Test
 	public void testNoAffectedRows() {
-		int updatedRows = dataUpdater.executeUsingSqlAndValues(sql, values);
+		int updatedRows = dataReader.executeUsingSqlAndValues(sql, values);
 		assertEquals(updatedRows, 0);
 	}
 
@@ -58,14 +58,14 @@ public class DataUpdaterTest {
 			+ "Error executing statement: update testTable set x=\\? where y = \\?")
 	public void testExecuteSqlThrowsError() throws Exception {
 		sqlConnectionProviderSpy.returnErrorConnection = true;
-		dataUpdater.executeUsingSqlAndValues(sql, values);
+		dataReader.executeUsingSqlAndValues(sql, values);
 	}
 
 	@Test
 	public void testExecuteSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
 		sqlConnectionProviderSpy.returnErrorConnection = true;
 		try {
-			dataUpdater.executeUsingSqlAndValues(sql, values);
+			dataReader.executeUsingSqlAndValues(sql, values);
 		} catch (Exception e) {
 			assertEquals(e.getCause().getMessage(), "error thrown from prepareStatement in spy");
 		}
@@ -73,28 +73,28 @@ public class DataUpdaterTest {
 
 	@Test
 	public void testSqlSetAsPreparedStatement() throws Exception {
-		dataUpdater.executeUsingSqlAndValues(sql, values);
+		dataReader.executeUsingSqlAndValues(sql, values);
 		String generatedSql = sqlConnectionProviderSpy.connection.sql;
 		assertEquals(generatedSql, sql);
 	}
 
 	@Test
 	public void testExecuteIsCalledForExecutePreparedStatement() throws Exception {
-		dataUpdater.executeUsingSqlAndValues(sql, values);
+		dataReader.executeUsingSqlAndValues(sql, values);
 		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
 		assertTrue(preparedStatementSpy.executeUpdateWasCalled);
 	}
 
 	@Test
 	public void testCloseOfConnectionIsCalledForExecutePreparedStatement() throws Exception {
-		dataUpdater.executeUsingSqlAndValues(sql, values);
+		dataReader.executeUsingSqlAndValues(sql, values);
 		ConnectionSpy connectionSpy = sqlConnectionProviderSpy.connection;
 		assertTrue(connectionSpy.closeWasCalled);
 	}
 
 	@Test
 	public void testCloseOfPrepareStatementIsCalledForExecutePreparedStatement() throws Exception {
-		dataUpdater.executeUsingSqlAndValues(sql, values);
+		dataReader.executeUsingSqlAndValues(sql, values);
 		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
 		assertTrue(preparedStatementSpy.closeWasCalled);
 	}
@@ -104,7 +104,7 @@ public class DataUpdaterTest {
 		PreparedStatementSpy preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
 		values.add("SE");
 		values.add("SWE");
-		dataUpdater.executeUsingSqlAndValues(sql, values);
+		dataReader.executeUsingSqlAndValues(sql, values);
 		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
 		assertEquals(preparedStatementSpy.usedSetObjects.get("2"), "SWE");
 	}
@@ -115,7 +115,7 @@ public class DataUpdaterTest {
 		preparedStatementSpy.noOfAffectedRows = 5;
 		values.add("SE");
 		values.add("SWE");
-		int updatedRows = dataUpdater.executeUsingSqlAndValues(sql, values);
+		int updatedRows = dataReader.executeUsingSqlAndValues(sql, values);
 		assertEquals(updatedRows, 5);
 	}
 
@@ -128,7 +128,7 @@ public class DataUpdaterTest {
 		long time = today.getTime();
 		Timestamp timestamp = new Timestamp(time);
 		values.add(timestamp);
-		dataUpdater.executeUsingSqlAndValues(sql, values);
+		dataReader.executeUsingSqlAndValues(sql, values);
 		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
 		assertTrue(preparedStatementSpy.usedSetTimestamps.get("2") instanceof Timestamp);
 	}

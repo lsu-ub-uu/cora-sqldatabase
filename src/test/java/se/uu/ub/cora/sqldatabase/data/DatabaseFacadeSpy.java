@@ -24,7 +24,7 @@ import java.util.List;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.data.internal.RowImp;
 
-public class DataReaderSpy implements DataReader {
+public class DatabaseFacadeSpy implements DatabaseFacade {
 
 	public boolean executePreparedStatementQueryUsingSqlAndValuesWasCalled = false;
 	public String sql = "";
@@ -35,8 +35,7 @@ public class DataReaderSpy implements DataReader {
 	public Row oneRowResult;
 
 	@Override
-	public List<Row> executePreparedStatementQueryUsingSqlAndValues(String sql,
-			List<Object> values) {
+	public List<Row> readUsingSqlAndValues(String sql, List<Object> values) {
 		this.sql = sql;
 		this.values = values;
 		executePreparedStatementQueryUsingSqlAndValuesWasCalled = true;
@@ -81,6 +80,12 @@ public class DataReaderSpy implements DataReader {
 			oneRowResult = createResult();
 		}
 		return oneRowResult;
+	}
+
+	@Override
+	public int executeSqlWithValues(String sql, List<Object> values) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

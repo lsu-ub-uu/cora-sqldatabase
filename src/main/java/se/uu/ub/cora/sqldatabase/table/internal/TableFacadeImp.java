@@ -27,21 +27,21 @@ import java.util.StringJoiner;
 
 import se.uu.ub.cora.sqldatabase.DbQueryInfo;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.data.DataReader;
+import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.data.Row;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public final class TableFacadeImp implements TableFacade {
 	private static final int MIN_FROM_NUMBER = 1;
 	private static final String ERROR_READING_DATA_FROM = "Error reading data from ";
-	private DataReader dataReader;
+	private DatabaseFacade dataReader;
 	private static final String NEXTVAL_COLUMN_NAME = "nextval";
 
-	private TableFacadeImp(DataReader dataReader) {
+	private TableFacadeImp(DatabaseFacade dataReader) {
 		this.dataReader = dataReader;
 	}
 
-	public static TableFacadeImp usingDataReader(DataReader dataReader) {
+	public static TableFacadeImp usingDataReader(DatabaseFacade dataReader) {
 		return new TableFacadeImp(dataReader);
 	}
 
@@ -61,7 +61,7 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	private List<Row> tryToReadAllFromTable(String sql) {
-		return dataReader.executePreparedStatementQueryUsingSqlAndValues(sql,
+		return dataReader.readUsingSqlAndValues(sql,
 				Collections.emptyList());
 
 	}
@@ -120,10 +120,10 @@ public final class TableFacadeImp implements TableFacade {
 		String sql = createSqlForTableNameAndConditions(tableName, conditions);
 		List<Object> values = new ArrayList<>();
 		values.addAll(conditions.values());
-		return dataReader.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		return dataReader.readUsingSqlAndValues(sql, values);
 	}
 
-	public DataReader getDataReader() {
+	public DatabaseFacade getDataReader() {
 		// needed for test
 		return dataReader;
 	}
@@ -221,7 +221,7 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	@Override
-	public List<Map<String, Object>> readRowsFromTableUsingConditionsAndQueryInfo(String tableName,
+	public List<Row> readRowsFromTableUsingConditionsAndQueryInfo(String tableName,
 			Map<String, Object> conditions, DbQueryInfo queryInfo) {
 		// TODO Auto-generated method stub
 		return null;

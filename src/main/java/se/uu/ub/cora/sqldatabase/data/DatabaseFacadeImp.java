@@ -24,6 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,23 +34,23 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.data.internal.RowImp;
 
-public final class DataReaderImp implements DataReader {
+public final class DatabaseFacadeImp implements DatabaseFacade {
 	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
 	private SqlConnectionProvider sqlConnectionProvider;
-	private Logger log = LoggerProvider.getLoggerForClass(DataReaderImp.class);
+	private Logger log = LoggerProvider.getLoggerForClass(DatabaseFacadeImp.class);
 
-	private DataReaderImp(SqlConnectionProvider sqlConnectionProvider) {
+	private DatabaseFacadeImp(SqlConnectionProvider sqlConnectionProvider) {
 		this.sqlConnectionProvider = sqlConnectionProvider;
 	}
 
-	public static DataReaderImp usingSqlConnectionProvider(
+	public static DatabaseFacadeImp usingSqlConnectionProvider(
 			SqlConnectionProvider sqlConnectionProvider) {
-		return new DataReaderImp(sqlConnectionProvider);
+		return new DatabaseFacadeImp(sqlConnectionProvider);
 	}
 
 	@Override
 	public Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values) {
-		List<Row> readRows = executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		List<Row> readRows = readUsingSqlAndValues(sql, values);
 		throwErrorIfNoRowIsReturned(sql, readRows);
 		throwErrorIfMoreThanOneRowIsReturned(sql, readRows);
 		return getSingleResultFromList(readRows);
@@ -78,10 +79,9 @@ public final class DataReaderImp implements DataReader {
 	}
 
 	@Override
-	public List<Row> executePreparedStatementQueryUsingSqlAndValues(String sql,
-			List<Object> values) {
+	public List<Row> readUsingSqlAndValues(String sql, List<Object> values) {
 		try {
-			return readUsingSqlAndValues(sql, values);
+			return tryToReadUsingSqlAndValues(sql, values);
 		} catch (SQLException e) {
 			String message = ERROR_READING_DATA_USING_SQL + sql;
 			log.logErrorUsingMessageAndException(message, e);
@@ -89,8 +89,8 @@ public final class DataReaderImp implements DataReader {
 		}
 	}
 
-	private List<Row> readUsingSqlAndValues(String sql, List<Object> values) throws SQLException {
-
+	private List<Row> tryToReadUsingSqlAndValues(String sql, List<Object> values)
+			throws SQLException {
 		try (Connection connection = sqlConnectionProvider.getConnection();
 				PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
 
@@ -100,10 +100,14 @@ public final class DataReaderImp implements DataReader {
 	}
 
 	private void addParameterValuesToPreparedStatement(List<Object> values,
-			PreparedStatement prepareStatement) throws SQLException {
+			PreparedStatement preparedStatement) throws SQLException {
 		int position = 1;
 		for (Object value : values) {
-			prepareStatement.setObject(position, value);
+			if (value instanceof Timestamp) {
+				preparedStatement.setTimestamp(position, (Timestamp) value);
+			} else {
+				preparedStatement.setObject(position, value);
+			}
 			position++;
 		}
 	}
@@ -150,8 +154,27 @@ public final class DataReaderImp implements DataReader {
 		return row;
 	}
 
+	@Override
+	public int executeSqlWithValues(String sql, List<Object> values) {
+		try {
+			return updateUsingSqlAndValues(sql, values);
+		} catch (SQLException e) {
+			throw SqlDatabaseException.withMessageAndException("Error executing statement: " + sql,
+					e);
+		}
+	}
+
+	private int updateUsingSqlAndValues(String sql, List<Object> values) throws SQLException {
+		try (Connection connection = sqlConnectionProvider.getConnection();
+				PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
+			addParameterValuesToPreparedStatement(values, prepareStatement);
+			return prepareStatement.executeUpdate();
+		}
+	}
+
 	public SqlConnectionProvider getSqlConnectionProvider() {
 		// needed for test
 		return sqlConnectionProvider;
 	}
+
 }

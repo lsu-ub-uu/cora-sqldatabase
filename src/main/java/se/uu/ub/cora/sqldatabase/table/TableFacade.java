@@ -25,13 +25,13 @@ import java.util.Map;
 
 import se.uu.ub.cora.sqldatabase.DbQueryInfo;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.data.DataReader;
+import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.data.Row;
 
 /**
  * RecordReader reads data from sql database without the need to write sql statements.
  * <p>
- * If you need to use more generic sql statements use {@link DataReader} instead.
+ * If you need to use more generic sql statements use {@link DatabaseFacade} instead.
  */
 public interface TableFacade {
 
@@ -90,7 +90,7 @@ public interface TableFacade {
 	 * @param queryInfo
 	 * @return
 	 */
-	List<Map<String, Object>> readRowsFromTableUsingConditionsAndQueryInfo(String tableName,
+	List<Row> readRowsFromTableUsingConditionsAndQueryInfo(String tableName,
 			Map<String, Object> conditions, DbQueryInfo queryInfo);
 
 	/**

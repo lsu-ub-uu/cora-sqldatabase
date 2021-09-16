@@ -37,7 +37,7 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.DriverSpy;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
-import se.uu.ub.cora.sqldatabase.data.DataReaderImp;
+import se.uu.ub.cora.sqldatabase.data.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 
@@ -115,7 +115,7 @@ public class RecordReaderFactoryTest {
 
 		TableFacadeImp tableFacade = (TableFacadeImp) readerFactory.factor();
 
-		DataReaderImp dataReader = (DataReaderImp) tableFacade.getDataReader();
+		DatabaseFacadeImp dataReader = (DatabaseFacadeImp) tableFacade.getDataReader();
 		assertSame(dataReader.getSqlConnectionProvider(), readerFactory.getSqlConnectionProvider());
 	}
 }

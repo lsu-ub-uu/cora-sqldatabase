@@ -37,20 +37,20 @@ import se.uu.ub.cora.sqldatabase.DbQueryInfoSpy;
 import se.uu.ub.cora.sqldatabase.SortOrder;
 import se.uu.ub.cora.sqldatabase.SqlConnectionProviderSpy;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.data.DataReaderSpy;
+import se.uu.ub.cora.sqldatabase.data.DatabaseFacadeSpy;
 import se.uu.ub.cora.sqldatabase.data.Row;
 
 public class TableFacadeTest {
 	private TableFacadeImp tableFacade;
 	private SqlConnectionProviderSpy sqlConnectionProviderSpy;
 	private Map<String, Object> conditions;
-	private DataReaderSpy dataReader;
+	private DatabaseFacadeSpy dataReader;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		conditions = new HashMap<>();
 		conditions.put("alpha2code", "SE");
-		dataReader = new DataReaderSpy();
+		dataReader = new DatabaseFacadeSpy();
 		sqlConnectionProviderSpy = new SqlConnectionProviderSpy();
 		tableFacade = TableFacadeImp.usingDataReader(dataReader);
 	}
