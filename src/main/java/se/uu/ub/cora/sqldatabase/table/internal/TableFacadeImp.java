@@ -35,6 +35,7 @@ public final class TableFacadeImp implements TableFacade {
 	private static final int MIN_FROM_NUMBER = 1;
 	private static final String ERROR_READING_DATA_FROM = "Error reading data from ";
 	private DataReader dataReader;
+	private static final String NEXTVAL_COLUMN_NAME = "nextval";
 
 	private TableFacadeImp(DataReader dataReader) {
 		this.dataReader = dataReader;
@@ -70,7 +71,7 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	@Override
-	public Map<String, Object> readOneRowFromTableUsingConditions(String tableName,
+	public Row readOneRowFromTableUsingConditions(String tableName,
 			Map<String, Object> conditions) {
 		try {
 			return tryToReadOneRowFromDbUsingTableAndConditions(tableName, conditions);
@@ -80,7 +81,7 @@ public final class TableFacadeImp implements TableFacade {
 		}
 	}
 
-	private Map<String, Object> tryToReadOneRowFromDbUsingTableAndConditions(String tableName,
+	private Row tryToReadOneRowFromDbUsingTableAndConditions(String tableName,
 			Map<String, Object> conditions) {
 
 		List<Object> values = new ArrayList<>();
@@ -104,7 +105,7 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	@Override
-	public List<Map<String, Object>> readRowsFromTableUsingConditions(String tableName,
+	public List<Row> readRowsFromTableUsingConditions(String tableName,
 			Map<String, Object> conditions) {
 		try {
 			return tryToReadFromTableUsingConditions(tableName, conditions);
@@ -114,7 +115,7 @@ public final class TableFacadeImp implements TableFacade {
 		}
 	}
 
-	private List<Map<String, Object>> tryToReadFromTableUsingConditions(String tableName,
+	private List<Row> tryToReadFromTableUsingConditions(String tableName,
 			Map<String, Object> conditions) {
 		String sql = createSqlForTableNameAndConditions(tableName, conditions);
 		List<Object> values = new ArrayList<>();
@@ -128,13 +129,14 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	@Override
-	public Map<String, Object> nextValueFromSequence(String sequenceName) {
-		return dataReader.readOneRowOrFailUsingSqlAndValues(
-				"select nextval('" + sequenceName + "')", Collections.emptyList());
+	public long nextValueFromSequence(String sequenceName) {
+		String statement = "select nextval('" + sequenceName + "') as " + NEXTVAL_COLUMN_NAME;
+		Row row = dataReader.readOneRowOrFailUsingSqlAndValues(statement, Collections.emptyList());
+		return (long) row.getValueByColumn(NEXTVAL_COLUMN_NAME);
 	}
 
 	@Override
-	public List<Map<String, Object>> readRowsFromTable(String tableName, DbQueryInfo queryInfo) {
+	public List<Row> readRowsFromTable(String tableName, DbQueryInfo queryInfo) {
 		String sql = createSelectAllFor(tableName);
 		sql += getSortPart(queryInfo);
 		sql += getDelimiter(queryInfo);
@@ -163,8 +165,8 @@ public final class TableFacadeImp implements TableFacade {
 	private long readNumberOfRows(String tableName, Map<String, Object> conditions) {
 		String sql = assembleSqlForNumberOfRows(tableName, conditions);
 		List<Object> values = getConditionsAsValues(conditions);
-		Map<String, Object> countResult = dataReader.readOneRowOrFailUsingSqlAndValues(sql, values);
-		return (long) countResult.get("count");
+		Row countResult = dataReader.readOneRowOrFailUsingSqlAndValues(sql, values);
+		return (long) countResult.getValueByColumn("count");
 
 	}
 
@@ -178,8 +180,8 @@ public final class TableFacadeImp implements TableFacade {
 				: calculateDifference(minFromNumber, maxToNumber);
 	}
 
-	private String assembleSqlForNumberOfRows(String type, Map<String, Object> conditions) {
-		return "select count(*) from " + type + possiblyAddConditionsToSql(conditions);
+	private String assembleSqlForNumberOfRows(String tableName, Map<String, Object> conditions) {
+		return "select count(*) from " + tableName + possiblyAddConditionsToSql(conditions);
 	}
 
 	private List<Object> getConditionsAsValues(Map<String, Object> conditions) {

@@ -20,7 +20,6 @@
 package se.uu.ub.cora.sqldatabase.data;
 
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
@@ -59,6 +58,6 @@ public interface DataReader {
 	 * @return A Map<String, Object> with the columnNames from the result as key and the
 	 *         corresponding values
 	 */
-	Map<String, Object> readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values);
+	Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values);
 
 }

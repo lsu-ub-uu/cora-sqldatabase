@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -205,11 +206,10 @@ public class DataReaderImpTest {
 		resultSetSpy.hasNext = true;
 		setValuesInResultSetSpy(resultSetSpy);
 
-		Map<String, Object> readRow = dataReader.readOneRowOrFailUsingSqlAndValues(SOME_SQL,
-				values);
+		Row readRow = dataReader.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
 
-		assertEquals(readRow.keySet().size(), 4);
-		assertTrue(readRow.containsKey("someColumnName"));
+		assertEquals(readRow.columnSet().size(), 4);
+		assertTrue(readRow.hasColumn("someColumnName"));
 	}
 
 	@Test
@@ -222,13 +222,12 @@ public class DataReaderImpTest {
 		List<Map<String, Object>> rowValues = createListOfRowValues(columnNames);
 		resultSetSpy.rowValues = rowValues;
 
-		Map<String, Object> readRow = dataReader.readOneRowOrFailUsingSqlAndValues(SOME_SQL,
-				values);
-		assertEquals(readRow.keySet().size(), 4);
-		assertTrue(readRow.containsKey(columnNames.get(0)));
-		assertTrue(readRow.containsKey(columnNames.get(1)));
-		assertTrue(readRow.containsKey(columnNames.get(2)));
-		assertTrue(readRow.containsKey(columnNames.get(3)));
+		Row readRow = dataReader.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
+		assertEquals(readRow.columnSet().size(), 4);
+		assertTrue(readRow.hasColumn(columnNames.get(0)));
+		assertTrue(readRow.hasColumn(columnNames.get(1)));
+		assertTrue(readRow.hasColumn(columnNames.get(2)));
+		assertTrue(readRow.hasColumn(columnNames.get(3)));
 	}
 
 	@Test
@@ -241,13 +240,12 @@ public class DataReaderImpTest {
 		List<Map<String, Object>> rowValues = createListOfRowValues(columnNames);
 		resultSetSpy.rowValues = rowValues;
 
-		Map<String, Object> readRow = dataReader.readOneRowOrFailUsingSqlAndValues(SOME_SQL,
-				values);
-		assertEquals(readRow.keySet().size(), 4);
-		assertEquals(readRow.get(columnNames.get(0)), "value1");
-		assertEquals(readRow.get(columnNames.get(1)), "secondValue");
-		assertEquals(readRow.get(columnNames.get(2)), 3);
-		assertEquals(readRow.get(columnNames.get(3)), "someOther value four");
+		Row readRow = dataReader.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
+		assertEquals(readRow.columnSet().size(), 4);
+		assertEquals(readRow.getValueByColumn(columnNames.get(0)), "value1");
+		assertEquals(readRow.getValueByColumn(columnNames.get(1)), "secondValue");
+		assertEquals(readRow.getValueByColumn(columnNames.get(2)), 3);
+		assertEquals(readRow.getValueByColumn(columnNames.get(3)), "someOther value four");
 	}
 
 	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
@@ -376,16 +374,16 @@ public class DataReaderImpTest {
 		rowValues.add(columnValues);
 		resultSetSpy.rowValues = rowValues;
 
-		List<Map<String, Object>> readAllFromTable = dataReader
+		List<Row> readAllFromTable = dataReader
 				.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
-		Map<String, Object> row0 = readAllFromTable.get(0);
+		Row row0 = readAllFromTable.get(0);
 
-		assertEquals(row0.keySet().size(), 4);
-		assertTrue(row0.containsKey("someColumnName"));
-		assertTrue(row0.containsKey(columnNames.get(0)));
-		assertTrue(row0.containsKey(columnNames.get(1)));
-		assertTrue(row0.containsKey(columnNames.get(2)));
-		assertTrue(row0.containsKey(columnNames.get(3)));
+		Set<String> columnSet = row0.columnSet();
+		assertEquals(columnSet.size(), 4);
+		assertTrue(columnSet.contains(columnNames.get(0)));
+		assertTrue(columnSet.contains(columnNames.get(1)));
+		assertTrue(columnSet.contains(columnNames.get(2)));
+		assertTrue(columnSet.contains(columnNames.get(3)));
 	}
 
 	@Test
@@ -403,16 +401,17 @@ public class DataReaderImpTest {
 
 		resultSetSpy.rowValues = rowValues;
 
-		List<Map<String, Object>> readAllFromTable = dataReader
+		List<Row> readAllFromTable = dataReader
 				.executePreparedStatementQueryUsingSqlAndValues(SOME_SQL, values);
-		Map<String, Object> row0 = readAllFromTable.get(0);
+		Row row0 = readAllFromTable.get(0);
 
+		Set<String> columnSet = row0.columnSet();
 		assertEquals(readAllFromTable.size(), 1);
-		assertEquals(row0.keySet().size(), 4);
-		assertEquals(row0.get(columnNames.get(0)), "value1");
-		assertEquals(row0.get(columnNames.get(1)), "secondValue");
-		assertEquals(row0.get(columnNames.get(2)), 3);
-		assertEquals(row0.get(columnNames.get(3)), "someOther value four");
+		assertEquals(columnSet.size(), 4);
+		assertEquals(row0.getValueByColumn(columnNames.get(0)), "value1");
+		assertEquals(row0.getValueByColumn(columnNames.get(1)), "secondValue");
+		assertEquals(row0.getValueByColumn(columnNames.get(2)), 3);
+		assertEquals(row0.getValueByColumn(columnNames.get(3)), "someOther value four");
 	}
 
 	@Test

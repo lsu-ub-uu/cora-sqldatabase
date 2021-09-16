@@ -4,7 +4,6 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -13,6 +12,7 @@ import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.data.DataReaderImp;
+import se.uu.ub.cora.sqldatabase.data.Row;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 
 public class RealDbTest {
@@ -33,8 +33,8 @@ public class RealDbTest {
 		DataReaderImp dataReaderImp = DataReaderImp.usingSqlConnectionProvider(sProvider);
 		String sql = "select * from country;";
 		List<Object> values = new ArrayList<>();
-		List<Map<String, Object>> result = dataReaderImp
-				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		List<Row> result = dataReaderImp.executePreparedStatementQueryUsingSqlAndValues(sql,
+				values);
 		assertNotNull(result);
 	}
 
@@ -47,8 +47,8 @@ public class RealDbTest {
 		// String sql = "select * from organisation ;";
 		List<Object> values = new ArrayList<>();
 		values.add(51);
-		List<Map<String, Object>> result = dataReaderImp
-				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		List<Row> result = dataReaderImp.executePreparedStatementQueryUsingSqlAndValues(sql,
+				values);
 		assertNotNull(result);
 	}
 
@@ -61,8 +61,8 @@ public class RealDbTest {
 		// String sql = "select * from organisation ;";
 		List<Object> values = new ArrayList<>();
 		values.add("Stockholms organisation");
-		List<Map<String, Object>> result = dataReaderImp
-				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		List<Row> result = dataReaderImp.executePreparedStatementQueryUsingSqlAndValues(sql,
+				values);
 		assertNotNull(result);
 	}
 
@@ -77,8 +77,8 @@ public class RealDbTest {
 		List<Object> values = new ArrayList<>();
 		values.add("organisation");
 		values.add(false);
-		List<Map<String, Object>> result = dataReaderImp
-				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		List<Row> result = dataReaderImp.executePreparedStatementQueryUsingSqlAndValues(sql,
+				values);
 		assertNotNull(result);
 	}
 
@@ -90,8 +90,8 @@ public class RealDbTest {
 		String sql = "update country set defaultname = ? where alpha2code = 'SE';";
 		List<Object> values = new ArrayList<>();
 		values.add("fake name se");
-		List<Map<String, Object>> result = dataReaderImp
-				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		List<Row> result = dataReaderImp.executePreparedStatementQueryUsingSqlAndValues(sql,
+				values);
 		assertNotNull(result);
 	}
 
@@ -104,8 +104,8 @@ public class RealDbTest {
 		// String sql = "select * from organisation ;";
 		List<Object> values = new ArrayList<>();
 		// values.add(51);
-		List<Map<String, Object>> result = dataReaderImp
-				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
+		List<Row> result = dataReaderImp.executePreparedStatementQueryUsingSqlAndValues(sql,
+				values);
 		assertNotNull(result);
 	}
 
@@ -121,10 +121,10 @@ public class RealDbTest {
 		// String sql = "select * from organisation ;";
 		List<Object> values = new ArrayList<>();
 		// values.add(51);
-		List<Map<String, Object>> result = dataReaderImp
-				.executePreparedStatementQueryUsingSqlAndValues(sql, values);
-		for (Map<String, Object> map : result) {
-			System.out.println(map);
+		List<Row> result = dataReaderImp.executePreparedStatementQueryUsingSqlAndValues(sql,
+				values);
+		for (Row row : result) {
+			System.out.println(row);
 		}
 		assertNotNull(result);
 	}

@@ -19,7 +19,10 @@
 package se.uu.ub.cora.sqldatabase.data.internal;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+
+import java.util.Set;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -48,14 +51,17 @@ public class RowTest {
 
 	@Test
 	public void testAddSeveralColumnsWithValues() throws Exception {
-
-		row.addColumnWithValue("aColumn1", "anObject1");
-		row.addColumnWithValue("aColumn2", "anObject2");
-		row.addColumnWithValue("aColumn3", "anObject3");
+		addThreeColumnsWithValues();
 
 		assertEquals(row.getValueByColumn("aColumn1"), "anObject1");
 		assertEquals(row.getValueByColumn("aColumn2"), "anObject2");
 		assertEquals(row.getValueByColumn("aColumn3"), "anObject3");
+	}
+
+	private void addThreeColumnsWithValues() {
+		row.addColumnWithValue("aColumn1", "anObject1");
+		row.addColumnWithValue("aColumn2", "anObject2");
+		row.addColumnWithValue("aColumn3", "anObject3");
 	}
 
 	@Test
@@ -72,6 +78,22 @@ public class RowTest {
 	public void testGetValueByColumnWitNoExistingColumnName() throws Exception {
 
 		row.getValueByColumn("NoExistingColumn");
+	}
+
+	@Test
+	public void testColumnsSet() throws Exception {
+		addThreeColumnsWithValues();
+
+		Set<String> columnSet = row.columnSet();
+		assertEquals(columnSet.size(), 3);
+	}
+
+	@Test
+	public void testHasColumn() throws Exception {
+		addThreeColumnsWithValues();
+
+		assertFalse(row.hasColumn("nonExistingColumnName"));
+		assertTrue(row.hasColumn("aColumn1"));
 	}
 
 }

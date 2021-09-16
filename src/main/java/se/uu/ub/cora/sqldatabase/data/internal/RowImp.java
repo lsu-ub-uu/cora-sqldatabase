@@ -21,6 +21,7 @@ package se.uu.ub.cora.sqldatabase.data.internal;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.data.DatabaseNull;
@@ -44,6 +45,16 @@ public class RowImp implements Row {
 			return columnValues.get(columnName);
 		}
 		throw SqlDatabaseException.withMessage("Column: " + columnName + ", does not exist");
+	}
+
+	@Override
+	public Set<String> columnSet() {
+		return columnValues.keySet();
+	}
+
+	@Override
+	public boolean hasColumn(String columnName) {
+		return columnValues.containsKey(columnName);
 	}
 
 }

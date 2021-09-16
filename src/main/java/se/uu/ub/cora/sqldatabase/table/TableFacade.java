@@ -19,6 +19,7 @@
 
 package se.uu.ub.cora.sqldatabase.table;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ public interface TableFacade {
 	 * @param queryInfo
 	 * @return
 	 */
-	List<Map<String, Object>> readRowsFromTable(String tableName, DbQueryInfo queryInfo);
+	List<Row> readRowsFromTable(String tableName, DbQueryInfo queryInfo);
 
 	/**
 	 * readOneRowFromDbUsingTableAndConditions reads one row from the database using a tablename and
@@ -72,8 +73,7 @@ public interface TableFacade {
 	 * @return A Map<String, Object> with the columnNames from the result as key and the
 	 *         corresponding values
 	 */
-	Map<String, Object> readOneRowFromTableUsingConditions(String tableName,
-			Map<String, Object> conditions);
+	Row readOneRowFromTableUsingConditions(String tableName, Map<String, Object> conditions);
 
 	/**
 	 * 
@@ -81,8 +81,7 @@ public interface TableFacade {
 	 * @param conditions
 	 * @return
 	 */
-	List<Map<String, Object>> readRowsFromTableUsingConditions(String tableName,
-			Map<String, Object> conditions);
+	List<Row> readRowsFromTableUsingConditions(String tableName, Map<String, Object> conditions);
 
 	/**
 	 * 
@@ -130,10 +129,12 @@ public interface TableFacade {
 	void deleteRowFromTableUsingConditions(String tableName, Map<String, Object> conditions);
 
 	/**
+	 * <p>
+	 * If the sequence does not exist MUST an {@link SQLException} thrown.
 	 * 
 	 * @param sequenceName
 	 * @return
 	 */
-	Map<String, Object> nextValueFromSequence(String sequenceName);
+	long nextValueFromSequence(String sequenceName);
 
 }

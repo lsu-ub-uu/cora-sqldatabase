@@ -112,9 +112,10 @@ public class RecordReaderFactoryTest {
 	public void testDataReaderSetWithDependencesInRecordReader() throws Exception {
 		RecordReaderFactoryImp readerFactory = RecordReaderFactoryImp
 				.usingLookupNameFromContext("someName");
-		readerFactory.factor();
-		TableFacadeImp recordReader = (TableFacadeImp) readerFactory.factor();
-		DataReaderImp dataReader = (DataReaderImp) recordReader.getDataReader();
+
+		TableFacadeImp tableFacade = (TableFacadeImp) readerFactory.factor();
+
+		DataReaderImp dataReader = (DataReaderImp) tableFacade.getDataReader();
 		assertSame(dataReader.getSqlConnectionProvider(), readerFactory.getSqlConnectionProvider());
 	}
 }

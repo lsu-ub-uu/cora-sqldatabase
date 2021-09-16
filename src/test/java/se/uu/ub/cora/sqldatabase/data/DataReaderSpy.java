@@ -19,24 +19,23 @@
 package se.uu.ub.cora.sqldatabase.data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.data.internal.RowImp;
 
 public class DataReaderSpy implements DataReader {
 
 	public boolean executePreparedStatementQueryUsingSqlAndValuesWasCalled = false;
 	public String sql = "";
 	public List<Object> values;
-	public List<Map<String, Object>> result = new ArrayList<>();
+	public List<Row> result = new ArrayList<>();
 	public boolean throwError = false;
 	public boolean readOneRowFromDbUsingTableAndConditionsWasCalled = false;
-	public Map<String, Object> oneRowResult;
+	public Row oneRowResult;
 
 	@Override
-	public List<Map<String, Object>> executePreparedStatementQueryUsingSqlAndValues(String sql,
+	public List<Row> executePreparedStatementQueryUsingSqlAndValues(String sql,
 			List<Object> values) {
 		this.sql = sql;
 		this.values = values;
@@ -49,21 +48,21 @@ public class DataReaderSpy implements DataReader {
 		// if (sql.startsWith("select count")) {
 		// innerResult.put("count", 453);
 		// } else {
-		Map<String, Object> innerResult = createResult();
+		Row innerResult = createResult();
 		// }
 		result.add(innerResult);
 		return result;
 	}
 
-	private Map<String, Object> createResult() {
-		Map<String, Object> innerResult = new HashMap<>();
-		innerResult.put("id", "someId");
-		innerResult.put("name", "someName");
+	private Row createResult() {
+		Row innerResult = new RowImp();
+		innerResult.addColumnWithValue("id", "someId");
+		innerResult.addColumnWithValue("name", "someName");
 		return innerResult;
 	}
 
 	@Override
-	public Map<String, Object> readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values) {
+	public Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values) {
 		this.sql = sql;
 		this.values = values;
 		readOneRowFromDbUsingTableAndConditionsWasCalled = true;
@@ -72,9 +71,12 @@ public class DataReaderSpy implements DataReader {
 					.withMessage("Error from readOneRowOrFailUsingSqlAndValues in DataReaderSpy");
 		}
 
-		oneRowResult = new HashMap<>();
+		oneRowResult = new RowImp();
 		if (sql.startsWith("select count")) {
-			oneRowResult.put("count", 453L);
+			oneRowResult.addColumnWithValue("count", 453L);
+		} else if (sql.startsWith("select nextval")) {
+			String nextValName = sql.substring(sql.lastIndexOf(" ") + 1, sql.length());
+			oneRowResult.addColumnWithValue(nextValName, 438234090L);
 		} else {
 			oneRowResult = createResult();
 		}

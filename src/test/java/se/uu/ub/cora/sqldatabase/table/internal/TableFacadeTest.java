@@ -38,7 +38,7 @@ import se.uu.ub.cora.sqldatabase.SortOrder;
 import se.uu.ub.cora.sqldatabase.SqlConnectionProviderSpy;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.data.DataReaderSpy;
-import se.uu.ub.cora.sqldatabase.data.internal.RowImp;
+import se.uu.ub.cora.sqldatabase.data.Row;
 
 public class TableFacadeTest {
 	private TableFacadeImp tableFacade;
@@ -58,7 +58,7 @@ public class TableFacadeTest {
 	@Test
 	public void testReadAllResultsReturnsResultFromDataReader() throws Exception {
 		String tableName = "someTableName";
-		List<RowImp> results = tableFacade.readRowsFromTable(tableName);
+		List<Row> results = tableFacade.readRowsFromTable(tableName);
 		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
 		assertEquals(dataReader.sql, "select * from someTableName");
 		assertTrue(dataReader.values.isEmpty());
@@ -80,7 +80,7 @@ public class TableFacadeTest {
 		String tableName = "someTableName";
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(10, 109);
 
-		List<Map<String, Object>> results = tableFacade.readRowsFromTable(tableName, queryInfo);
+		List<Row> results = tableFacade.readRowsFromTable(tableName, queryInfo);
 		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
 		assertEquals(dataReader.sql, "select * from someTableName limit 100 offset 9");
 		assertTrue(dataReader.values.isEmpty());
@@ -151,8 +151,7 @@ public class TableFacadeTest {
 	@Test
 	public void testGeneratedSqlQueryForOneString() throws Exception {
 
-		Map<String, Object> result = tableFacade.readOneRowFromTableUsingConditions("someTableName",
-				conditions);
+		Row result = tableFacade.readOneRowFromTableUsingConditions("someTableName", conditions);
 		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
 
 		assertEquals(dataReader.sql, "select * from someTableName where alpha2code = ?");
@@ -167,8 +166,7 @@ public class TableFacadeTest {
 	@Test
 	public void testGeneratedSqlQueryForOneStringTwoConditions() throws Exception {
 		conditions.put("alpha3code", "SWE");
-		Map<String, Object> result = tableFacade.readOneRowFromTableUsingConditions("someTableName",
-				conditions);
+		Row result = tableFacade.readOneRowFromTableUsingConditions("someTableName", conditions);
 
 		assertEquals(dataReader.sql,
 				"select * from someTableName where alpha2code = ? and alpha3code = ?");
@@ -201,8 +199,8 @@ public class TableFacadeTest {
 
 	@Test
 	public void testReadFromTableUsingConditionReturnsResultFromDataReader() throws Exception {
-		List<Map<String, Object>> result = tableFacade
-				.readRowsFromTableUsingConditions("someTableName", conditions);
+		List<Row> result = tableFacade.readRowsFromTableUsingConditions("someTableName",
+				conditions);
 
 		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
 		assertEquals(dataReader.sql, "select * from someTableName where alpha2code = ?");
@@ -217,8 +215,8 @@ public class TableFacadeTest {
 	@Test
 	public void testReadFromTableUsingTwoConditionReturnsResultFromDataReader() throws Exception {
 		conditions.put("alpha3code", "SWE");
-		List<Map<String, Object>> result = tableFacade
-				.readRowsFromTableUsingConditions("someTableName", conditions);
+		List<Row> result = tableFacade.readRowsFromTableUsingConditions("someTableName",
+				conditions);
 
 		assertTrue(dataReader.executePreparedStatementQueryUsingSqlAndValuesWasCalled);
 		assertEquals(dataReader.sql,
@@ -240,15 +238,21 @@ public class TableFacadeTest {
 		tableFacade.readRowsFromTableUsingConditions("someTableName", conditions);
 	}
 
+	@Test(expectedExceptions = SqlDatabaseException.class)
+	public void testReadNextFromSequenceError() throws Exception {
+		dataReader.throwError = true;
+
+		tableFacade.nextValueFromSequence("someSequence");
+	}
+
 	@Test
 	public void testReadNextFromSequence() {
-		String sequenceName = "someSequence";
-		Map<String, Object> result = tableFacade.nextValueFromSequence(sequenceName);
+		long result = tableFacade.nextValueFromSequence("someSequence");
 		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
 		assertTrue(dataReader.values.isEmpty());
-		assertEquals(dataReader.sql, "select nextval('someSequence')");
-
-		assertSame(result, dataReader.oneRowResult);
+		assertEquals(dataReader.sql, "select nextval('someSequence') as nextval");
+		long resultInSpy = 438234090L;
+		assertEquals(result, resultInSpy);
 	}
 
 	@Test
@@ -267,7 +271,7 @@ public class TableFacadeTest {
 		List<Object> values = dataReader.values;
 		assertEquals(values.size(), 1);
 		assertEquals(values.get(0), "uu");
-		assertEquals(numberOfRows, dataReader.oneRowResult.get("count"));
+		assertEquals(numberOfRows, dataReader.oneRowResult.getValueByColumn("count"));
 
 		assertFalse(queryInfo.getToNoWasCalled);
 		assertFalse(queryInfo.getFromNoWasCalled);
@@ -285,7 +289,7 @@ public class TableFacadeTest {
 		assertTrue(dataReader.readOneRowFromDbUsingTableAndConditionsWasCalled);
 		assertEquals(dataReader.sql, "select count(*) from organisation");
 		assertTrue(dataReader.values.isEmpty());
-		assertEquals(numberOfRows, dataReader.oneRowResult.get("count"));
+		assertEquals(numberOfRows, dataReader.oneRowResult.getValueByColumn("count"));
 	}
 
 	@Test

@@ -26,7 +26,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
@@ -49,34 +48,32 @@ public final class DataReaderImp implements DataReader {
 	}
 
 	@Override
-	public Map<String, Object> readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values) {
-		List<Map<String, Object>> readRows = executePreparedStatementQueryUsingSqlAndValues(sql,
-				values);
+	public Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values) {
+		List<Row> readRows = executePreparedStatementQueryUsingSqlAndValues(sql, values);
 		throwErrorIfNoRowIsReturned(sql, readRows);
 		throwErrorIfMoreThanOneRowIsReturned(sql, readRows);
 		return getSingleResultFromList(readRows);
 	}
 
-	private void throwErrorIfNoRowIsReturned(String sql, List<Map<String, Object>> readRows) {
+	private void throwErrorIfNoRowIsReturned(String sql, List<Row> readRows) {
 		if (readRows.isEmpty()) {
 			throw SqlDatabaseException
 					.withMessage(ERROR_READING_DATA_USING_SQL + sql + ": no row returned");
 		}
 	}
 
-	private void throwErrorIfMoreThanOneRowIsReturned(String sql,
-			List<Map<String, Object>> readRows) {
+	private void throwErrorIfMoreThanOneRowIsReturned(String sql, List<Row> readRows) {
 		if (resultHasMoreThanOneRow(readRows)) {
 			throw SqlDatabaseException.withMessage(
 					ERROR_READING_DATA_USING_SQL + sql + ": more than one row returned");
 		}
 	}
 
-	private boolean resultHasMoreThanOneRow(List<Map<String, Object>> readRows) {
+	private boolean resultHasMoreThanOneRow(List<Row> readRows) {
 		return readRows.size() > 1;
 	}
 
-	private Map<String, Object> getSingleResultFromList(List<Map<String, Object>> readRows) {
+	private Row getSingleResultFromList(List<Row> readRows) {
 		return readRows.get(0);
 	}
 

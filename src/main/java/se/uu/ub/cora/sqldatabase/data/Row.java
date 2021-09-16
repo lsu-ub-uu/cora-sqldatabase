@@ -19,10 +19,16 @@
 
 package se.uu.ub.cora.sqldatabase.data;
 
+import java.util.Set;
+
 public interface Row {
 
 	void addColumnWithValue(String columnName, Object object);
 
 	Object getValueByColumn(String columnName);
+
+	Set<String> columnSet();
+
+	boolean hasColumn(String columnName);
 
 }
