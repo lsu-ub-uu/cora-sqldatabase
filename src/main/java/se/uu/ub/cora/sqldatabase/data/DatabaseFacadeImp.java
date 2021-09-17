@@ -30,9 +30,10 @@ import java.util.List;
 
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
-import se.uu.ub.cora.sqldatabase.data.internal.RowImp;
+import se.uu.ub.cora.sqldatabase.internal.RowImp;
 
 public final class DatabaseFacadeImp implements DatabaseFacade {
 	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
@@ -147,7 +148,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 
 	private Row createMapForCurrentRowInResultSet(ResultSet resultSet, List<String> columnNames)
 			throws SQLException {
-		Row row = new RowImp();
+		RowImp row = new RowImp();
 		for (String columnName : columnNames) {
 			row.addColumnWithValue(columnName, resultSet.getObject(columnName));
 		}

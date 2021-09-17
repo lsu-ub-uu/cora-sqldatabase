@@ -36,6 +36,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlConnectionProviderSpy;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
@@ -505,5 +506,10 @@ public class DatabaseFacadeTest {
 		long time = today.getTime();
 		Timestamp timestamp = new Timestamp(time);
 		return timestamp;
+	}
+
+	@Test
+	public void testReadUsingSqlAndValuesWithDatabaseNull() throws Exception {
+
 	}
 }

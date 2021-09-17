@@ -19,20 +19,25 @@
 package se.uu.ub.cora.sqldatabase.data.internal;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.sqldatabase.Condition;
-import se.uu.ub.cora.sqldatabase.internal.ConditionImp;
+import se.uu.ub.cora.sqldatabase.Conditions;
+import se.uu.ub.cora.sqldatabase.DatabaseNull;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.internal.ConditionsImp;
 
 public class ConditionsTest {
 
-	private Condition condition;
+	private Conditions condition;
 
 	@BeforeMethod
 	void beforeMethod() {
-		condition = new ConditionImp();
+		condition = new ConditionsImp();
 	}
 
 	@Test
@@ -44,6 +49,50 @@ public class ConditionsTest {
 
 		Object value = condition.getValue(conditionName);
 		assertEquals(value, condtionValue);
+	}
+
+	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
+			+ "Condition\\: NoExistingCondition, does not exist")
+	public void testGetValueForNoExistingCondition() throws Exception {
+
+		condition.getValue("NoExistingCondition");
+	}
+
+	@Test
+	public void testAddConditionWithDatabaseNullValue() throws Exception {
+		condition.add("someCondition", new DatabaseNull());
+
+		Object value = condition.getValue("someCondition");
+
+		assertTrue(value instanceof DatabaseNull);
+	}
+
+	@Test
+	public void testGetNames() throws Exception {
+		condition.add("someCondition1", "someValue1");
+		condition.add("someCondition2", "someValue2");
+		condition.add("someCondition3", "someValue3");
+
+		List<String> myList = condition.getNames();
+
+		assertEquals(myList.size(), 3);
+		assertEquals(myList.get(0), "someCondition1");
+		assertEquals(myList.get(1), "someCondition2");
+		assertEquals(myList.get(2), "someCondition3");
+	}
+
+	@Test
+	public void testGetValues() throws Exception {
+		condition.add("someCondition1", "someValue1");
+		condition.add("someCondition2", "someValue2");
+		condition.add("someCondition3", "someValue3");
+
+		List<Object> myList = condition.getValues();
+
+		assertEquals(myList.size(), 3);
+		assertEquals(myList.get(0), "someValue1");
+		assertEquals(myList.get(1), "someValue2");
+		assertEquals(myList.get(2), "someValue3");
 	}
 
 }

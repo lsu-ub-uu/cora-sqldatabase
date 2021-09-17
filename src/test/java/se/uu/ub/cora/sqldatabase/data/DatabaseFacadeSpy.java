@@ -21,8 +21,9 @@ package se.uu.ub.cora.sqldatabase.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.data.internal.RowImp;
+import se.uu.ub.cora.sqldatabase.internal.RowImp;
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 
 public class DatabaseFacadeSpy implements DatabaseFacade {
@@ -33,7 +34,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 	public List<Row> result = new ArrayList<>();
 	public boolean throwError = false;
 	public boolean readOneRowFromDbUsingTableAndConditionsWasCalled = false;
-	public Row oneRowResult;
+	public RowImp oneRowResult;
 
 	public MethodCallRecorder MCR = new MethodCallRecorder();
 
@@ -56,8 +57,8 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 		return result;
 	}
 
-	private Row createResult() {
-		Row innerResult = new RowImp();
+	private RowImp createResult() {
+		RowImp innerResult = new RowImp();
 		innerResult.addColumnWithValue("id", "someId");
 		innerResult.addColumnWithValue("name", "someName");
 		return innerResult;

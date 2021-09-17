@@ -16,24 +16,44 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package se.uu.ub.cora.sqldatabase.internal;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-import se.uu.ub.cora.sqldatabase.Condition;
+import se.uu.ub.cora.sqldatabase.DatabaseNull;
+import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
-public class ConditionImp implements Condition {
-	private Map<String, Object> conditions = new HashMap<>();
+public class RowImp implements Row {
+	private Map<String, Object> columnValues = new HashMap<>();
 
-	@Override
-	public void add(String conditionName, Object conditionValue) {
-		conditions.put(conditionName, conditionValue);
+	public void addColumnWithValue(String columnName, Object object) {
+		if (object == null) {
+			columnValues.put(columnName, new DatabaseNull());
+		} else {
+			columnValues.put(columnName, object);
+		}
 	}
 
 	@Override
-	public Object getValue(String conditionName) {
-		return conditions.get(conditionName);
+	public Object getValueByColumn(String columnName) {
+		if (columnValues.containsKey(columnName)) {
+			return columnValues.get(columnName);
+		}
+		throw SqlDatabaseException.withMessage("Column: " + columnName + ", does not exist");
+	}
+
+	@Override
+	public Set<String> columnSet() {
+		return columnValues.keySet();
+	}
+
+	@Override
+	public boolean hasColumn(String columnName) {
+		return columnValues.containsKey(columnName);
 	}
 
 }

@@ -17,18 +17,34 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.sqldatabase.data;
+package se.uu.ub.cora.sqldatabase;
 
 import java.util.Set;
 
+/**
+ * The Row interface represents a database row, giving access to reading values from a database
+ * query result.
+ */
 public interface Row {
 
-	void addColumnWithValue(String columnName, Object object);
-
+	/**
+	 * 
+	 * @param columnName
+	 * @return
+	 */
 	Object getValueByColumn(String columnName);
 
+	/**
+	 * 
+	 * @return
+	 */
 	Set<String> columnSet();
 
+	/**
+	 * 
+	 * @param columnName
+	 * @return
+	 */
 	boolean hasColumn(String columnName);
 
 }

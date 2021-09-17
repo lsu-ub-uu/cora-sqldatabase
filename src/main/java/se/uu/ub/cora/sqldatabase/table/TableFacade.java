@@ -23,21 +23,24 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import se.uu.ub.cora.sqldatabase.Conditions;
 import se.uu.ub.cora.sqldatabase.DbQueryInfo;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
-import se.uu.ub.cora.sqldatabase.data.Row;
 
 /**
- * RecordReader reads data from sql database without the need to write sql statements.
+ * TableFacade interacts with data from sql database without the need to write sql statements.
  * <p>
  * If you need to use more generic sql statements use {@link DatabaseFacade} instead.
  */
 public interface TableFacade {
 
 	/**
+	 * insertRowInTableWithValues creates a new row in the named table using the provided values
 	 * 
 	 * @param tableName
+	 *            A String with the name of the table to insert values into
 	 * @param values
 	 */
 	void insertRowInTableWithValues(String tableName, Map<String, Object> values);
@@ -73,7 +76,7 @@ public interface TableFacade {
 	 * @return A Map<String, Object> with the columnNames from the result as key and the
 	 *         corresponding values
 	 */
-	Row readOneRowFromTableUsingConditions(String tableName, Map<String, Object> conditions);
+	Row readOneRowFromTableUsingConditions(String tableName, Conditions conditions);
 
 	/**
 	 * 
@@ -81,7 +84,7 @@ public interface TableFacade {
 	 * @param conditions
 	 * @return
 	 */
-	List<Row> readRowsFromTableUsingConditions(String tableName, Map<String, Object> conditions);
+	List<Row> readRowsFromTableUsingConditions(String tableName, Conditions conditions);
 
 	/**
 	 * 
@@ -90,8 +93,8 @@ public interface TableFacade {
 	 * @param queryInfo
 	 * @return
 	 */
-	List<Row> readRowsFromTableUsingConditionsAndQueryInfo(String tableName,
-			Map<String, Object> conditions, DbQueryInfo queryInfo);
+	List<Row> readRowsFromTableUsingConditionsAndQueryInfo(String tableName, Conditions conditions,
+			DbQueryInfo queryInfo);
 
 	/**
 	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions. The number
@@ -109,8 +112,8 @@ public interface TableFacade {
 	 * @param DbQueryInfo,
 	 *            the dbQueryInfo used to limit the query
 	 */
-	long numberOfRowsInTableForConditionsAndQueryInfo(String tableName,
-			Map<String, Object> conditions, DbQueryInfo queryInfo);
+	long numberOfRowsInTableForConditionsAndQueryInfo(String tableName, Conditions conditions,
+			DbQueryInfo queryInfo);
 
 	/**
 	 * 
@@ -119,14 +122,14 @@ public interface TableFacade {
 	 * @param conditions
 	 */
 	void updateRowInTableUsingValuesAndConditions(String tableName, Map<String, Object> values,
-			Map<String, Object> conditions);
+			Conditions conditions);
 
 	/**
 	 * 
 	 * @param tableName
 	 * @param conditions
 	 */
-	void deleteRowFromTableUsingConditions(String tableName, Map<String, Object> conditions);
+	void deleteRowFromTableUsingConditions(String tableName, Conditions conditions);
 
 	/**
 	 * <p>

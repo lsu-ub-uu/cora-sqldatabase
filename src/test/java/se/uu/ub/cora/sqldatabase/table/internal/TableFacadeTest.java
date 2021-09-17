@@ -32,25 +32,28 @@ import java.util.Map;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.sqldatabase.Conditions;
 import se.uu.ub.cora.sqldatabase.DbQueryInfoImp;
 import se.uu.ub.cora.sqldatabase.DbQueryInfoSpy;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SortOrder;
 import se.uu.ub.cora.sqldatabase.SqlConnectionProviderSpy;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.data.DatabaseFacadeSpy;
-import se.uu.ub.cora.sqldatabase.data.Row;
+import se.uu.ub.cora.sqldatabase.internal.ConditionsImp;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class TableFacadeTest {
-	private TableFacadeImp tableFacade;
+	private TableFacade tableFacade;
 	private SqlConnectionProviderSpy sqlConnectionProviderSpy;
 	private Map<String, Object> values;
-	private Map<String, Object> conditions;
+	private Conditions conditions;
 	private DatabaseFacadeSpy databaseFacadeSpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		values = new HashMap<>();
-		conditions = new HashMap<>();
+		conditions = new ConditionsImp();
 		databaseFacadeSpy = new DatabaseFacadeSpy();
 		sqlConnectionProviderSpy = new SqlConnectionProviderSpy();
 		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
@@ -151,7 +154,7 @@ public class TableFacadeTest {
 
 	@Test
 	public void testGeneratedSqlQueryForOneString() throws Exception {
-		conditions.put("alpha2code", "SE");
+		conditions.add("alpha2code", "SE");
 
 		Row result = tableFacade.readOneRowFromTableUsingConditions("someTableName", conditions);
 		assertTrue(databaseFacadeSpy.readOneRowFromDbUsingTableAndConditionsWasCalled);
@@ -167,8 +170,8 @@ public class TableFacadeTest {
 
 	@Test
 	public void testGeneratedSqlQueryForOneStringTwoConditions() throws Exception {
-		conditions.put("alpha2code", "SE");
-		conditions.put("alpha3code", "SWE");
+		conditions.add("alpha2code", "SE");
+		conditions.add("alpha3code", "SWE");
 		Row result = tableFacade.readOneRowFromTableUsingConditions("someTableName", conditions);
 
 		assertEquals(databaseFacadeSpy.sql,
@@ -192,8 +195,8 @@ public class TableFacadeTest {
 
 	@Test
 	public void ReadOneRowFromDbUsingTableAndConditionsWithEmptyConditions() throws Exception {
-		Map<String, Object> emptyCondtions = Collections.emptyMap();
 
+		Conditions emptyCondtions = new ConditionsImp();
 		tableFacade.readOneRowFromTableUsingConditions("someTableName", emptyCondtions);
 
 		assertEquals(databaseFacadeSpy.sql, "select * from someTableName");
@@ -202,7 +205,7 @@ public class TableFacadeTest {
 
 	@Test
 	public void testReadFromTableUsingConditionReturnsResultFromDataReader() throws Exception {
-		conditions.put("alpha2code", "SE");
+		conditions.add("alpha2code", "SE");
 
 		List<Row> result = tableFacade.readRowsFromTableUsingConditions("someTableName",
 				conditions);
@@ -219,8 +222,8 @@ public class TableFacadeTest {
 
 	@Test
 	public void testReadFromTableUsingTwoConditionReturnsResultFromDataReader() throws Exception {
-		conditions.put("alpha2code", "SE");
-		conditions.put("alpha3code", "SWE");
+		conditions.add("alpha2code", "SE");
+		conditions.add("alpha3code", "SWE");
 
 		List<Row> result = tableFacade.readRowsFromTableUsingConditions("someTableName",
 				conditions);
@@ -265,8 +268,8 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRows() {
 		String type = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("domain", "uu");
+		// Map<String, Object> conditions = new HashMap<>();
+		conditions.add("domain", "uu");
 
 		DbQueryInfoSpy queryInfo = new DbQueryInfoSpy();
 		queryInfo.delimiterIsPresentValue = false;
@@ -287,7 +290,6 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRowsNoConditions() {
 		String type = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
 		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
@@ -302,8 +304,8 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRowsWithFromAndTo() {
 		String type = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("domain", "uu");
+		// Map<String, Object> conditions = new HashMap<>();
+		conditions.add("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(2, 11);
 
@@ -322,8 +324,7 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenToLargerThanNumOfRows() {
 		String type = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("domain", "uu");
+		conditions.add("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(440, 476);
 
@@ -337,8 +338,8 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromLargerThanNumOfRows() {
 		String type = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("domain", "uu");
+		// Map<String, Object> conditions = new HashMap<>();
+		conditions.add("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(460, 476);
 
@@ -352,8 +353,8 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromLargerThanTo() {
 		String type = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("domain", "uu");
+		// Map<String, Object> conditions = new HashMap<>();
+		conditions.add("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(300, 150);
 
@@ -367,8 +368,8 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromAndToIsSameAndMax() {
 		String type = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("domain", "uu");
+		// Map<String, Object> conditions = new HashMap<>();
+		conditions.add("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(453, 453);
 		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
@@ -381,8 +382,8 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenToIsNull() {
 		String type = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("domain", "uu");
+		// Map<String, Object> conditions = new HashMap<>();
+		conditions.add("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(400, null);
 		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
@@ -395,8 +396,8 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromIsZeroUseOneAsFrom() {
 		String type = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("domain", "uu");
+		// Map<String, Object> conditions = new HashMap<>();
+		conditions.add("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(0, 10);
 		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
@@ -409,8 +410,8 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromIsNullUseOneAsFrom() {
 		String tableName = "organisation";
-		Map<String, Object> conditions = new HashMap<>();
-		conditions.put("domain", "uu");
+		// Map<String, Object> conditions = new HashMap<>();
+		conditions.add("domain", "uu");
 
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp(null, 10);
 		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(tableName,
@@ -422,7 +423,7 @@ public class TableFacadeTest {
 
 	@Test
 	public void testDeleteOneRecordOneCondition() {
-		conditions.put("organisation_id", 234);
+		conditions.add("organisation_id", 234);
 
 		tableFacade.deleteRowFromTableUsingConditions("organisation", conditions);
 
@@ -441,8 +442,8 @@ public class TableFacadeTest {
 
 	@Test
 	public void testDeleteOneRecordTwoConditions() {
-		conditions.put("organisation_id", 234);
-		conditions.put("organisation_name", "someNewOrganisationName");
+		conditions.add("organisation_id", 234);
+		conditions.add("organisation_name", "someNewOrganisationName");
 
 		tableFacade.deleteRowFromTableUsingConditions("organisation", conditions);
 
@@ -474,7 +475,7 @@ public class TableFacadeTest {
 	@Test
 	public void testUpdateOneRecordOneColumnOneCondition() {
 		values.put("organisation_name", "someNewOrganisationName");
-		conditions.put("organisation_id", 123);
+		conditions.add("organisation_id", 123);
 
 		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", values, conditions);
 
@@ -490,7 +491,7 @@ public class TableFacadeTest {
 	public void testUpdateOneRecordTwoColumnsOneCondition() {
 		values.put("organisation_name", "someNewOrganisationName");
 		values.put("organisation_code", "someNewOrgCode");
-		conditions.put("organisation_id", 123);
+		conditions.add("organisation_id", 123);
 
 		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", values, conditions);
 
@@ -507,8 +508,8 @@ public class TableFacadeTest {
 	public void testUpdateOneRecordTwoColumnsTwoConditions() {
 		values.put("organisation_name", "someNewOrganisationName");
 		values.put("organisation_code", "someNewOrgCode");
-		conditions.put("organisation_id", 123);
-		conditions.put("country_code", "swe");
+		conditions.add("organisation_id", 123);
+		conditions.add("country_code", "swe");
 
 		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", values, conditions);
 

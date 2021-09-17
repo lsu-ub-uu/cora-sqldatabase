@@ -27,13 +27,13 @@ import java.util.Set;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.sqldatabase.DatabaseNull;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.data.DatabaseNull;
-import se.uu.ub.cora.sqldatabase.data.Row;
+import se.uu.ub.cora.sqldatabase.internal.RowImp;
 
 public class RowTest {
 
-	private Row row;
+	private RowImp row;
 
 	@BeforeMethod
 	void beforeMethod() {
