@@ -238,7 +238,7 @@ public final class TableFacadeImp implements TableFacade {
 	public void updateRowInTableUsingValuesAndConditions(String tableName, Parameters parameters,
 			Conditions conditions) {
 		String sql = createUpdateSql(tableName, parameters, conditions);
-		List<Object> valuesForUpdate = getListOfValuesFromValuesAndConditions(parameters,
+		List<Object> valuesForUpdate = getListOfValuesFromParametersAndConditions(parameters,
 				conditions);
 		dbFacade.executeSqlWithValues(sql, valuesForUpdate);
 	}
@@ -250,7 +250,7 @@ public final class TableFacadeImp implements TableFacade {
 		return sql.toString();
 	}
 
-	private List<Object> getListOfValuesFromValuesAndConditions(Parameters parameters,
+	private List<Object> getListOfValuesFromParametersAndConditions(Parameters parameters,
 			Conditions conditions) {
 		List<Object> valuesForUpdate = new ArrayList<>();
 		valuesForUpdate.addAll(parameters.getValues());
