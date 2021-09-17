@@ -52,6 +52,10 @@ public final class TableFacadeImp implements TableFacade {
 		return readAllFromTableUsingSql(tableName, sql);
 	}
 
+	private String createSelectAllFor(String tableName) {
+		return "select * from " + tableName;
+	}
+
 	private List<Row> readAllFromTableUsingSql(String tableName, String sql) {
 		try {
 			return tryToReadAllFromTable(sql);
@@ -66,10 +70,6 @@ public final class TableFacadeImp implements TableFacade {
 
 	}
 
-	private String createSelectAllFor(String tableName) {
-		return "select * from " + tableName;
-	}
-
 	@Override
 	public Row readOneRowFromTableUsingConditions(String tableName, Conditions conditions) {
 		try {
@@ -82,21 +82,13 @@ public final class TableFacadeImp implements TableFacade {
 
 	private Row tryToReadOneRowFromDbUsingTableAndConditions(String tableName,
 			Conditions conditions) {
-		String sql = createSqlForTableNameAndConditionsNames(tableName, conditions.getNames());
+		String sql = createSqlForTableNameAndConditionsNames(tableName, conditions);
 		return dbFacade.readOneRowOrFailUsingSqlAndValues(sql, conditions.getValues());
 	}
 
 	private String createSqlForTableNameAndConditionsNames(String tableName,
-			List<String> conditionName) {
-		return createSelectAllFor(tableName) + possiblyAddConditionsToSql(conditionName);
-	}
-
-	private String createConditionPartOfSql(List<String> conditionName) {
-		StringJoiner joiner = new StringJoiner(" and ");
-		for (String key : conditionName) {
-			joiner.add(key + " = ?");
-		}
-		return joiner.toString();
+			Conditions conditions) {
+		return createSelectAllFor(tableName) + possiblyAddConditionsToSql(conditions);
 	}
 
 	@Override
@@ -110,7 +102,7 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	private List<Row> tryToReadFromTableUsingConditions(String tableName, Conditions conditions) {
-		String sql = createSqlForTableNameAndConditionsNames(tableName, conditions.getNames());
+		String sql = createSqlForTableNameAndConditionsNames(tableName, conditions);
 		return dbFacade.readUsingSqlAndValues(sql, conditions.getValues());
 	}
 
@@ -157,7 +149,6 @@ public final class TableFacadeImp implements TableFacade {
 		String sql = assembleSqlForNumberOfRows(tableName, conditions);
 		Row countResult = dbFacade.readOneRowOrFailUsingSqlAndValues(sql, conditions.getValues());
 		return (long) countResult.getValueByColumn("count");
-
 	}
 
 	private long calculateNumberOfRowsUsingDelimiter(DbQueryInfo queryInfo, long numberOfRows) {
@@ -171,16 +162,29 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	private String assembleSqlForNumberOfRows(String tableName, Conditions conditions) {
-		return "select count(*) from " + tableName
-				+ possiblyAddConditionsToSql(conditions.getNames());
+		return "select count(*) from " + tableName + possiblyAddConditionsToSql(conditions);
 	}
 
-	private String possiblyAddConditionsToSql(List<String> conditionsName) {
-		if (!conditionsName.isEmpty()) {
-			String conditionPart = createConditionPartOfSql(conditionsName);
-			return " where " + conditionPart;
+	private String possiblyAddConditionsToSql(Conditions conditions) {
+		if (conditions.getNames().isEmpty()) {
+			return "";
 		}
-		return "";
+		return createWherePartOfSqlStatement(conditions);
+	}
+
+	private String createWherePartOfSqlStatement(Conditions conditions) {
+		StringBuilder sql = new StringBuilder(" where ");
+		sql.append(joinAllFromListAddingToAndSeparatingBy(conditions.getNames(), " = ?", " and "));
+		return sql.toString();
+	}
+
+	private String joinAllFromListAddingToAndSeparatingBy(List<String> list, String toAdd,
+			String delimiter) {
+		StringJoiner joiner = new StringJoiner(delimiter);
+		for (String element : list) {
+			joiner.add(element + toAdd);
+		}
+		return joiner.toString();
 	}
 
 	private boolean fromNoIsNullOrLessThanMinNumber(DbQueryInfo queryInfo) {
@@ -208,28 +212,11 @@ public final class TableFacadeImp implements TableFacade {
 
 	private StringBuilder createSql(String tableName, Parameters parameters) {
 		StringBuilder sql = new StringBuilder("insert into " + tableName + "(");
-		appendColumnNamesToInsertPart(sql, parameters.getNames());
-		appendValuesPart(sql, parameters.getNames());
-		return sql;
-	}
-
-	private String appendColumnNamesToInsertPart(StringBuilder sql, List<String> parameterNames) {
-		StringJoiner joiner = new StringJoiner(", ");
-		addAllToJoiner2(parameterNames, joiner);
-		sql.append(joiner);
-		return sql.toString();
-	}
-
-	private void addAllToJoiner2(List<String> parametersNames, StringJoiner joiner) {
-		for (String columnName : parametersNames) {
-			joiner.add(columnName);
-		}
-	}
-
-	private void appendValuesPart(StringBuilder sql, List<String> parameterNames) {
+		sql.append(joinAllFromListAddingToAndSeparatingBy(parameters.getNames(), "", ", "));
 		sql.append(") values(");
-		sql.append(addCorrectNumberOfPlaceHoldersForValues(parameterNames));
+		sql.append(addCorrectNumberOfPlaceHoldersForValues(parameters.getNames()));
 		sql.append(')');
+		return sql;
 	}
 
 	private String addCorrectNumberOfPlaceHoldersForValues(List<String> parameterNames) {
@@ -250,41 +237,16 @@ public final class TableFacadeImp implements TableFacade {
 	@Override
 	public void updateRowInTableUsingValuesAndConditions(String tableName, Parameters parameters,
 			Conditions conditions) {
-		StringBuilder sql = createSql(tableName, parameters, conditions);
+		String sql = createUpdateSql(tableName, parameters, conditions);
 		List<Object> valuesForUpdate = getListOfValuesFromValuesAndConditions(parameters,
 				conditions);
-		dbFacade.executeSqlWithValues(sql.toString(), valuesForUpdate);
+		dbFacade.executeSqlWithValues(sql, valuesForUpdate);
 	}
 
-	private StringBuilder createSql(String tableName, Parameters parameters,
-			Conditions conditions) {
-		StringBuilder sql = new StringBuilder(
-				createSettingPartOfSqlStatement(tableName, parameters));
-		sql.append(createWherePartOfSqlStatement(conditions));
-		return sql;
-	}
-
-	private String createSettingPartOfSqlStatement(String tableName, Parameters parameters) {
+	private String createUpdateSql(String tableName, Parameters parameters, Conditions conditions) {
 		StringBuilder sql = new StringBuilder("update " + tableName + " set ");
-		return appendColumnsToSelectPart(sql, parameters.getNames());
-	}
-
-	private String appendColumnsToSelectPart(StringBuilder sql, List<String> columnNames) {
-		StringJoiner joiner = new StringJoiner(", ");
-		addAllToJoiner(columnNames, joiner);
-		sql.append(joiner);
-		return sql.toString();
-	}
-
-	private String createWherePartOfSqlStatement(Conditions conditions) {
-		StringBuilder sql = new StringBuilder(" where ");
-		return appendConditionsToWherePart(sql, conditions.getNames());
-	}
-
-	private String appendConditionsToWherePart(StringBuilder sql, List<String> conditions) {
-		StringJoiner joiner = new StringJoiner(" and ");
-		addAllToJoiner(conditions, joiner);
-		sql.append(joiner);
+		sql.append(joinAllFromListAddingToAndSeparatingBy(parameters.getNames(), " = ?", ", "));
+		sql.append(possiblyAddConditionsToSql(conditions));
 		return sql.toString();
 	}
 
@@ -298,22 +260,9 @@ public final class TableFacadeImp implements TableFacade {
 
 	@Override
 	public void deleteRowFromTableUsingConditions(String tableName, Conditions conditions) {
-		StringBuilder sql = new StringBuilder("delete from " + tableName + " where ");
-		appendColumnNamesToDeletePart(sql, conditions.getNames());
+		StringBuilder sql = new StringBuilder("delete from " + tableName);
+		sql.append(possiblyAddConditionsToSql(conditions));
 		dbFacade.executeSqlWithValues(sql.toString(), conditions.getValues());
-	}
-
-	private String appendColumnNamesToDeletePart(StringBuilder sql, List<String> columnNames) {
-		StringJoiner joiner = new StringJoiner(" and ");
-		addAllToJoiner(columnNames, joiner);
-		sql.append(joiner);
-		return sql.toString();
-	}
-
-	private void addAllToJoiner(List<String> columnNames, StringJoiner joiner) {
-		for (String columnName : columnNames) {
-			joiner.add(columnName + " = ?");
-		}
 	}
 
 }
