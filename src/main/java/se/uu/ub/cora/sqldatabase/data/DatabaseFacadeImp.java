@@ -30,6 +30,7 @@ import java.util.List;
 
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.sqldatabase.DatabaseNull;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
@@ -106,6 +107,8 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		for (Object value : values) {
 			if (value instanceof Timestamp) {
 				preparedStatement.setTimestamp(position, (Timestamp) value);
+			} else if (value instanceof DatabaseNull) {
+				preparedStatement.setNull(position, java.sql.Types.NULL);
 			} else {
 				preparedStatement.setObject(position, value);
 			}

@@ -25,6 +25,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+
 public class PreparedStatementSpy implements PreparedStatement {
 
 	public boolean executeQueryWasCalled = false;
@@ -35,6 +37,8 @@ public class PreparedStatementSpy implements PreparedStatement {
 	public Map<String, Object> usedSetObjects = new HashMap<>();
 	public Map<String, Object> usedSetTimestamps = new HashMap<>();
 	public int noOfAffectedRows = 0;
+
+	public MethodCallRecorder MCR = new MethodCallRecorder();
 
 	@Override
 	public ResultSet executeQuery(String sql) throws SQLException {
@@ -313,8 +317,7 @@ public class PreparedStatementSpy implements PreparedStatement {
 
 	@Override
 	public void setNull(int parameterIndex, int sqlType) throws SQLException {
-		// TODO Auto-generated method stub
-
+		MCR.addCall("parameterIndex", parameterIndex, "sqlType", sqlType);
 	}
 
 	@Override
@@ -427,8 +430,9 @@ public class PreparedStatementSpy implements PreparedStatement {
 
 	@Override
 	public void setObject(int parameterIndex, Object x) throws SQLException {
-		// TODO Auto-generated method stub
 		usedSetObjects.put(String.valueOf(parameterIndex), x);
+
+		MCR.addCall("parameterIndex", parameterIndex, "x", x);
 	}
 
 	@Override
