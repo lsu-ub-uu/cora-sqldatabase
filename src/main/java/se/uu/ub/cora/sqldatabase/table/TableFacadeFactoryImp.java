@@ -27,7 +27,7 @@ import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
-import se.uu.ub.cora.sqldatabase.data.DatabaseFacadeImp;
+import se.uu.ub.cora.sqldatabase.data.internal.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 
 public class TableFacadeFactoryImp implements TableFacadeFactory {

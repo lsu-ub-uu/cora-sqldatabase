@@ -26,73 +26,75 @@ import java.util.List;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.sqldatabase.Conditions;
 import se.uu.ub.cora.sqldatabase.DatabaseNull;
+import se.uu.ub.cora.sqldatabase.Parameters;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.internal.ConditionsImp;
+import se.uu.ub.cora.sqldatabase.internal.ParametersImp;
 
-public class ConditionsTest {
+public class ParametersTest {
 
-	private Conditions conditions;
+	Parameters parameters;
+	private static final String SOME_PARAMETER = "someParameter";
 
 	@BeforeMethod
-	void beforeMethod() {
-		conditions = new ConditionsImp();
+	public void beforeMethod() {
+		parameters = new ParametersImp();
 	}
 
 	@Test
-	public void testAddCondition() throws Exception {
-		String conditionName = "aCondition";
+	public void testAddParameter() throws Exception {
 
-		Object condtionValue = "condtionValue";
-		conditions.add(conditionName, condtionValue);
+		Object parameterValue = "parameterValue";
+		parameters.add(SOME_PARAMETER, parameterValue);
 
-		Object value = conditions.getValue(conditionName);
-		assertEquals(value, condtionValue);
+		Object value = parameters.getValue(SOME_PARAMETER);
+		assertEquals(value, parameterValue);
 	}
 
 	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
-			+ "Condition\\: NoExistingCondition, does not exist")
+			+ "Parameter\\: NoExistingParameter, does not exist")
 	public void testGetValueForNoExistingCondition() throws Exception {
 
-		conditions.getValue("NoExistingCondition");
+		parameters.getValue("NoExistingParameter");
 	}
 
 	@Test
 	public void testAddConditionWithDatabaseNullValue() throws Exception {
-		conditions.add("someCondition", new DatabaseNull());
+		parameters.add(SOME_PARAMETER, new DatabaseNull());
 
-		Object value = conditions.getValue("someCondition");
+		Object value = parameters.getValue(SOME_PARAMETER);
 
 		assertTrue(value instanceof DatabaseNull);
 	}
 
 	@Test
 	public void testGetNames() throws Exception {
-		conditions.add("someCondition1", "someValue1");
-		conditions.add("someCondition2", "someValue2");
-		conditions.add("someCondition3", "someValue3");
+		addParametersAndValues();
 
-		List<String> myList = conditions.getNames();
+		List<String> myList = parameters.getNames();
 
 		assertEquals(myList.size(), 3);
-		assertEquals(myList.get(0), "someCondition1");
-		assertEquals(myList.get(1), "someCondition2");
-		assertEquals(myList.get(2), "someCondition3");
+		assertEquals(myList.get(0), "someParameter1");
+		assertEquals(myList.get(1), "someParameter2");
+		assertEquals(myList.get(2), "someParameter3");
 	}
 
 	@Test
 	public void testGetValues() throws Exception {
-		conditions.add("someCondition1", "someValue1");
-		conditions.add("someCondition2", "someValue2");
-		conditions.add("someCondition3", "someValue3");
+		addParametersAndValues();
 
-		List<Object> myList = conditions.getValues();
+		List<Object> myList = parameters.getValues();
 
 		assertEquals(myList.size(), 3);
 		assertEquals(myList.get(0), "someValue1");
 		assertEquals(myList.get(1), "someValue2");
 		assertEquals(myList.get(2), "someValue3");
+	}
+
+	private void addParametersAndValues() {
+		parameters.add("someParameter1", "someValue1");
+		parameters.add("someParameter2", "someValue2");
+		parameters.add("someParameter3", "someValue3");
 	}
 
 }

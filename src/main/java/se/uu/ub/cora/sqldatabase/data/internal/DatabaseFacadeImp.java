@@ -17,7 +17,7 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.sqldatabase.data;
+package se.uu.ub.cora.sqldatabase.data.internal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,6 +34,7 @@ import se.uu.ub.cora.sqldatabase.DatabaseNull;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
+import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.internal.RowImp;
 
 public final class DatabaseFacadeImp implements DatabaseFacade {

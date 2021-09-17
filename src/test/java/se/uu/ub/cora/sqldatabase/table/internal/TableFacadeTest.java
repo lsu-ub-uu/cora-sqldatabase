@@ -25,9 +25,7 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -35,24 +33,26 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.sqldatabase.Conditions;
 import se.uu.ub.cora.sqldatabase.DbQueryInfoImp;
 import se.uu.ub.cora.sqldatabase.DbQueryInfoSpy;
+import se.uu.ub.cora.sqldatabase.Parameters;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SortOrder;
 import se.uu.ub.cora.sqldatabase.SqlConnectionProviderSpy;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.data.DatabaseFacadeSpy;
 import se.uu.ub.cora.sqldatabase.internal.ConditionsImp;
+import se.uu.ub.cora.sqldatabase.internal.ParametersImp;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class TableFacadeTest {
 	private TableFacade tableFacade;
 	private SqlConnectionProviderSpy sqlConnectionProviderSpy;
-	private Map<String, Object> values;
+	private Parameters parameters;
 	private Conditions conditions;
 	private DatabaseFacadeSpy databaseFacadeSpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
-		values = new HashMap<>();
+		parameters = new ParametersImp();
 		conditions = new ConditionsImp();
 		databaseFacadeSpy = new DatabaseFacadeSpy();
 		sqlConnectionProviderSpy = new SqlConnectionProviderSpy();
@@ -459,10 +459,10 @@ public class TableFacadeTest {
 	@Test
 	public void testInsertOneRecord() {
 
-		values.put("organisation_id", 234);
-		values.put("organisation_name", "someNewOrganisationName");
+		parameters.add("organisation_id", 234);
+		parameters.add("organisation_name", "someNewOrganisationName");
 
-		tableFacade.insertRowInTableWithValues("organisation", values);
+		tableFacade.insertRowInTableWithValues("organisation", parameters);
 		String insertSql = "insert into organisation(organisation_id, organisation_name) values(?, ?)";
 		databaseFacadeSpy.MCR.assertParameter("executeSqlWithValues", 0, "sql", insertSql);
 
@@ -474,10 +474,11 @@ public class TableFacadeTest {
 
 	@Test
 	public void testUpdateOneRecordOneColumnOneCondition() {
-		values.put("organisation_name", "someNewOrganisationName");
+		parameters.add("organisation_name", "someNewOrganisationName");
 		conditions.add("organisation_id", 123);
 
-		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", values, conditions);
+		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", parameters,
+				conditions);
 
 		String updateSql = "update organisation set organisation_name = ? where organisation_id = ?";
 		List<Object> valuesSentToExecutor = getValuesFromExecuteSqlWithValues();
@@ -489,36 +490,38 @@ public class TableFacadeTest {
 
 	@Test
 	public void testUpdateOneRecordTwoColumnsOneCondition() {
-		values.put("organisation_name", "someNewOrganisationName");
-		values.put("organisation_code", "someNewOrgCode");
+		parameters.add("organisation_name", "someNewOrganisationName");
+		parameters.add("organisation_code", "someNewOrgCode");
 		conditions.add("organisation_id", 123);
 
-		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", values, conditions);
+		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", parameters,
+				conditions);
 
-		String updateSql = "update organisation set organisation_code = ?, organisation_name = ? where organisation_id = ?";
+		String updateSql = "update organisation set organisation_name = ?, organisation_code = ? where organisation_id = ?";
 		List<Object> valuesSentToExecutor = getValuesFromExecuteSqlWithValues();
 
 		databaseFacadeSpy.MCR.assertParameter("executeSqlWithValues", 0, "sql", updateSql);
-		assertEquals(valuesSentToExecutor.get(0), "someNewOrgCode");
-		assertEquals(valuesSentToExecutor.get(1), "someNewOrganisationName");
+		assertEquals(valuesSentToExecutor.get(0), "someNewOrganisationName");
+		assertEquals(valuesSentToExecutor.get(1), "someNewOrgCode");
 		assertEquals(valuesSentToExecutor.get(2), 123);
 	}
 
 	@Test
 	public void testUpdateOneRecordTwoColumnsTwoConditions() {
-		values.put("organisation_name", "someNewOrganisationName");
-		values.put("organisation_code", "someNewOrgCode");
+		parameters.add("organisation_name", "someNewOrganisationName");
+		parameters.add("organisation_code", "someNewOrgCode");
 		conditions.add("organisation_id", 123);
 		conditions.add("country_code", "swe");
 
-		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", values, conditions);
+		tableFacade.updateRowInTableUsingValuesAndConditions("organisation", parameters,
+				conditions);
 
-		String updateSql = "update organisation set organisation_code = ?, organisation_name = ? where organisation_id = ? and country_code = ?";
+		String updateSql = "update organisation set organisation_name = ?, organisation_code = ? where organisation_id = ? and country_code = ?";
 		List<Object> valuesSentToExecutor = getValuesFromExecuteSqlWithValues();
 
 		databaseFacadeSpy.MCR.assertParameter("executeSqlWithValues", 0, "sql", updateSql);
-		assertEquals(valuesSentToExecutor.get(0), "someNewOrgCode");
-		assertEquals(valuesSentToExecutor.get(1), "someNewOrganisationName");
+		assertEquals(valuesSentToExecutor.get(0), "someNewOrganisationName");
+		assertEquals(valuesSentToExecutor.get(1), "someNewOrgCode");
 		assertEquals(valuesSentToExecutor.get(2), 123);
 		assertEquals(valuesSentToExecutor.get(3), "swe");
 	}

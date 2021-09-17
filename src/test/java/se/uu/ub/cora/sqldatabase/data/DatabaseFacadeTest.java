@@ -43,6 +43,7 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
 import se.uu.ub.cora.sqldatabase.connection.PreparedStatementSpy;
 import se.uu.ub.cora.sqldatabase.connection.ResultSetSpy;
+import se.uu.ub.cora.sqldatabase.data.internal.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 
 public class DatabaseFacadeTest {

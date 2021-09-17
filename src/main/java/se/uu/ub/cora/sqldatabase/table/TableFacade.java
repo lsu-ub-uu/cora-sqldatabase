@@ -21,10 +21,10 @@ package se.uu.ub.cora.sqldatabase.table;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 import se.uu.ub.cora.sqldatabase.Conditions;
 import se.uu.ub.cora.sqldatabase.DbQueryInfo;
+import se.uu.ub.cora.sqldatabase.Parameters;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
@@ -41,9 +41,9 @@ public interface TableFacade {
 	 * 
 	 * @param tableName
 	 *            A String with the name of the table to insert values into
-	 * @param values
+	 * @param parameters
 	 */
-	void insertRowInTableWithValues(String tableName, Map<String, Object> values);
+	void insertRowInTableWithValues(String tableName, Parameters parameters);
 
 	/**
 	 * 
@@ -121,7 +121,7 @@ public interface TableFacade {
 	 * @param values
 	 * @param conditions
 	 */
-	void updateRowInTableUsingValuesAndConditions(String tableName, Map<String, Object> values,
+	void updateRowInTableUsingValuesAndConditions(String tableName, Parameters parameters,
 			Conditions conditions);
 
 	/**

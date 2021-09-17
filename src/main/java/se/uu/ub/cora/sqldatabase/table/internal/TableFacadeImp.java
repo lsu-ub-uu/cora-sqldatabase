@@ -22,12 +22,11 @@ package se.uu.ub.cora.sqldatabase.table.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.StringJoiner;
 
 import se.uu.ub.cora.sqldatabase.Conditions;
 import se.uu.ub.cora.sqldatabase.DbQueryInfo;
+import se.uu.ub.cora.sqldatabase.Parameters;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
@@ -201,43 +200,41 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	@Override
-	public void insertRowInTableWithValues(String tableName, Map<String, Object> values) {
-		StringBuilder sql = createSql(tableName, values);
-		List<Object> columnValues = getAllColumnValues(values);
-		dbFacade.executeSqlWithValues(sql.toString(), columnValues);
+	public void insertRowInTableWithValues(String tableName, Parameters parameters) {
+		StringBuilder sql = createSql(tableName, parameters);
+		dbFacade.executeSqlWithValues(sql.toString(), parameters.getValues());
 
 	}
 
-	private StringBuilder createSql(String tableName, Map<String, Object> columnsWithValues) {
+	private StringBuilder createSql(String tableName, Parameters parameters) {
 		StringBuilder sql = new StringBuilder("insert into " + tableName + "(");
-		List<String> columnNames = getAllColumnNames(columnsWithValues);
-		appendColumnNamesToInsertPart(sql, columnNames);
-		appendValuesPart(sql, columnNames);
+		appendColumnNamesToInsertPart(sql, parameters.getNames());
+		appendValuesPart(sql, parameters.getNames());
 		return sql;
 	}
 
-	private String appendColumnNamesToInsertPart(StringBuilder sql, List<String> columnNames) {
+	private String appendColumnNamesToInsertPart(StringBuilder sql, List<String> parameterNames) {
 		StringJoiner joiner = new StringJoiner(", ");
-		addAllToJoiner2(columnNames, joiner);
+		addAllToJoiner2(parameterNames, joiner);
 		sql.append(joiner);
 		return sql.toString();
 	}
 
-	private void addAllToJoiner2(List<String> columnNames, StringJoiner joiner) {
-		for (String columnName : columnNames) {
+	private void addAllToJoiner2(List<String> parametersNames, StringJoiner joiner) {
+		for (String columnName : parametersNames) {
 			joiner.add(columnName);
 		}
 	}
 
-	private void appendValuesPart(StringBuilder sql, List<String> columnNames) {
+	private void appendValuesPart(StringBuilder sql, List<String> parameterNames) {
 		sql.append(") values(");
-		sql.append(addCorrectNumberOfPlaceHoldersForValues(columnNames));
+		sql.append(addCorrectNumberOfPlaceHoldersForValues(parameterNames));
 		sql.append(')');
 	}
 
-	private String addCorrectNumberOfPlaceHoldersForValues(List<String> columnNames) {
+	private String addCorrectNumberOfPlaceHoldersForValues(List<String> parameterNames) {
 		StringJoiner joiner = new StringJoiner(", ");
-		for (int i = 0; i < columnNames.size(); i++) {
+		for (int i = 0; i < parameterNames.size(); i++) {
 			joiner.add("?");
 		}
 		return joiner.toString();
@@ -251,26 +248,25 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	@Override
-	public void updateRowInTableUsingValuesAndConditions(String tableName,
-			Map<String, Object> values, Conditions conditions) {
-		StringBuilder sql = createSql(tableName, values, conditions);
-		List<Object> valuesForUpdate = getListOfValuesFromValuesAndConditions(values, conditions);
+	public void updateRowInTableUsingValuesAndConditions(String tableName, Parameters parameters,
+			Conditions conditions) {
+		StringBuilder sql = createSql(tableName, parameters, conditions);
+		List<Object> valuesForUpdate = getListOfValuesFromValuesAndConditions(parameters,
+				conditions);
 		dbFacade.executeSqlWithValues(sql.toString(), valuesForUpdate);
 	}
 
-	private StringBuilder createSql(String tableName, Map<String, Object> columnsWithValues,
+	private StringBuilder createSql(String tableName, Parameters parameters,
 			Conditions conditions) {
 		StringBuilder sql = new StringBuilder(
-				createSettingPartOfSqlStatement(tableName, columnsWithValues));
+				createSettingPartOfSqlStatement(tableName, parameters));
 		sql.append(createWherePartOfSqlStatement(conditions));
 		return sql;
 	}
 
-	private String createSettingPartOfSqlStatement(String tableName,
-			Map<String, Object> columnsWithValues) {
+	private String createSettingPartOfSqlStatement(String tableName, Parameters parameters) {
 		StringBuilder sql = new StringBuilder("update " + tableName + " set ");
-		List<String> columnNames = getAllColumnNames(columnsWithValues);
-		return appendColumnsToSelectPart(sql, columnNames);
+		return appendColumnsToSelectPart(sql, parameters.getNames());
 	}
 
 	private String appendColumnsToSelectPart(StringBuilder sql, List<String> columnNames) {
@@ -292,10 +288,10 @@ public final class TableFacadeImp implements TableFacade {
 		return sql.toString();
 	}
 
-	private List<Object> getListOfValuesFromValuesAndConditions(Map<String, Object> values,
+	private List<Object> getListOfValuesFromValuesAndConditions(Parameters parameters,
 			Conditions conditions) {
 		List<Object> valuesForUpdate = new ArrayList<>();
-		valuesForUpdate.addAll(values.values());
+		valuesForUpdate.addAll(parameters.getValues());
 		valuesForUpdate.addAll(conditions.getValues());
 		return valuesForUpdate;
 	}
@@ -305,14 +301,6 @@ public final class TableFacadeImp implements TableFacade {
 		StringBuilder sql = new StringBuilder("delete from " + tableName + " where ");
 		appendColumnNamesToDeletePart(sql, conditions.getNames());
 		dbFacade.executeSqlWithValues(sql.toString(), conditions.getValues());
-	}
-
-	private List<String> getAllColumnNames(Map<String, Object> columnsWithValues) {
-		List<String> columnNames = new ArrayList<>(columnsWithValues.size());
-		for (Entry<String, Object> column : columnsWithValues.entrySet()) {
-			columnNames.add(column.getKey());
-		}
-		return columnNames;
 	}
 
 	private String appendColumnNamesToDeletePart(StringBuilder sql, List<String> columnNames) {
@@ -328,11 +316,4 @@ public final class TableFacadeImp implements TableFacade {
 		}
 	}
 
-	private List<Object> getAllColumnValues(Map<String, Object> columnsWithValues) {
-		List<Object> columnValues = new ArrayList<>(columnsWithValues.size());
-		for (Entry<String, Object> column : columnsWithValues.entrySet()) {
-			columnValues.add(column.getValue());
-		}
-		return columnValues;
-	}
 }
