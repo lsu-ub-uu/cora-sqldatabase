@@ -30,17 +30,14 @@ import java.util.List;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.sqldatabase.Conditions;
-import se.uu.ub.cora.sqldatabase.DbQueryInfoImp;
-import se.uu.ub.cora.sqldatabase.DbQueryInfoSpy;
-import se.uu.ub.cora.sqldatabase.Parameters;
+import se.uu.ub.cora.sqldatabase.DatabaseFacadeSpy;
 import se.uu.ub.cora.sqldatabase.Row;
-import se.uu.ub.cora.sqldatabase.SortOrder;
 import se.uu.ub.cora.sqldatabase.SqlConnectionProviderSpy;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.data.DatabaseFacadeSpy;
-import se.uu.ub.cora.sqldatabase.internal.ConditionsImp;
-import se.uu.ub.cora.sqldatabase.internal.ParametersImp;
+import se.uu.ub.cora.sqldatabase.table.Conditions;
+import se.uu.ub.cora.sqldatabase.table.DbQueryInfoSpy;
+import se.uu.ub.cora.sqldatabase.table.Parameters;
+import se.uu.ub.cora.sqldatabase.table.SortOrder;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class TableFacadeTest {
@@ -56,7 +53,7 @@ public class TableFacadeTest {
 		conditions = new ConditionsImp();
 		databaseFacadeSpy = new DatabaseFacadeSpy();
 		sqlConnectionProviderSpy = new SqlConnectionProviderSpy();
-		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
+		tableFacade = TableFacadeImp.usingDatabaseFacade(databaseFacadeSpy);
 	}
 
 	@Test
@@ -75,7 +72,7 @@ public class TableFacadeTest {
 	public void testReadAllFromTableSqlErrorThrowsError() throws Exception {
 		databaseFacadeSpy.throwError = true;
 		sqlConnectionProviderSpy.returnErrorConnection = true;
-		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
+		tableFacade = TableFacadeImp.usingDatabaseFacade(databaseFacadeSpy);
 		tableFacade.readRowsFromTable("someTableName");
 	}
 
@@ -127,7 +124,7 @@ public class TableFacadeTest {
 	@Test
 	public void testReadSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
 		sqlConnectionProviderSpy.returnErrorConnection = true;
-		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
+		tableFacade = TableFacadeImp.usingDatabaseFacade(databaseFacadeSpy);
 		try {
 			tableFacade.readRowsFromTable("someTableName");
 		} catch (Exception e) {
@@ -144,7 +141,7 @@ public class TableFacadeTest {
 	@Test
 	public void testReadOneSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
 		sqlConnectionProviderSpy.returnErrorConnection = true;
-		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
+		tableFacade = TableFacadeImp.usingDatabaseFacade(databaseFacadeSpy);
 		try {
 			tableFacade.readOneRowFromTableUsingConditions("someTableName", conditions);
 		} catch (Exception e) {
@@ -244,7 +241,7 @@ public class TableFacadeTest {
 			+ "Error reading data from someTableName")
 	public void testReadFromTableUsingConditionSqlErrorThrowsError() throws Exception {
 		databaseFacadeSpy.throwError = true;
-		tableFacade = TableFacadeImp.usingDataReader(databaseFacadeSpy);
+		tableFacade = TableFacadeImp.usingDatabaseFacade(databaseFacadeSpy);
 		tableFacade.readRowsFromTableUsingConditions("someTableName", conditions);
 	}
 

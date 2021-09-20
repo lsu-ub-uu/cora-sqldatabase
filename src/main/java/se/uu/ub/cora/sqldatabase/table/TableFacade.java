@@ -22,12 +22,9 @@ package se.uu.ub.cora.sqldatabase.table;
 import java.sql.SQLException;
 import java.util.List;
 
-import se.uu.ub.cora.sqldatabase.Conditions;
-import se.uu.ub.cora.sqldatabase.DbQueryInfo;
-import se.uu.ub.cora.sqldatabase.Parameters;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
 
 /**
  * TableFacade interacts with data from sql database without the need to write sql statements.

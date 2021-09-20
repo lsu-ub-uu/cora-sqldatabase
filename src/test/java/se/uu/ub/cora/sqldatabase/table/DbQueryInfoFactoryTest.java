@@ -16,18 +16,32 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.sqldatabase;
+package se.uu.ub.cora.sqldatabase.table;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
 
-public class SortOrderTest {
+import se.uu.ub.cora.sqldatabase.table.DbQueryInfo;
+import se.uu.ub.cora.sqldatabase.table.DbQueryInfoFactory;
+import se.uu.ub.cora.sqldatabase.table.DbQueryInfoFactoryImp;
+
+public class DbQueryInfoFactoryTest {
 
 	@Test
-	public void testSortOrder() {
-		assertEquals(SortOrder.ASC.order, "asc");
-		assertEquals(SortOrder.DESC.order, "desc");
+	public void testFactorWhenFromAndToIsNull() {
+		DbQueryInfoFactory factory = new DbQueryInfoFactoryImp();
+		DbQueryInfo queryInfo = factory.factorUsingFromNoAndToNo(null, null);
+		assertNull(queryInfo.getFromNo());
+		assertNull(queryInfo.getToNo());
 	}
 
+	@Test
+	public void testFactorWithFromNoAndToNo() {
+		DbQueryInfoFactory factory = new DbQueryInfoFactoryImp();
+		DbQueryInfo queryInfo = factory.factorUsingFromNoAndToNo(4, 78);
+		assertEquals(queryInfo.getFromNo(), Integer.valueOf(4));
+		assertEquals(queryInfo.getToNo(), Integer.valueOf(78));
+	}
 }

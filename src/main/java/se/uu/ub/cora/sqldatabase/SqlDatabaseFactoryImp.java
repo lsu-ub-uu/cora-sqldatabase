@@ -17,41 +17,40 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.sqldatabase.table;
+package se.uu.ub.cora.sqldatabase;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
-import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
-import se.uu.ub.cora.sqldatabase.data.internal.DatabaseFacadeImp;
+import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 
-public class TableFacadeFactoryImp implements TableFacadeFactory {
+public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 	private SqlConnectionProvider sqlConnectionProvider;
 	private String name;
 	private String url;
 	private String user;
 	private String password;
 
-	public static TableFacadeFactoryImp usingLookupNameFromContext(String name) {
-		return new TableFacadeFactoryImp(name);
+	public static SqlDatabaseFactoryImp usingLookupNameFromContext(String name) {
+		return new SqlDatabaseFactoryImp(name);
 	}
 
-	TableFacadeFactoryImp(String name) {
+	SqlDatabaseFactoryImp(String name) {
 		// package private for test reasons
 		this.name = name;
 	}
 
-	public static TableFacadeFactoryImp usingUriAndUserAndPassword(String url, String user,
+	public static SqlDatabaseFactoryImp usingUriAndUserAndPassword(String url, String user,
 			String password) {
-		return new TableFacadeFactoryImp(url, user, password);
+		return new SqlDatabaseFactoryImp(url, user, password);
 	}
 
-	private TableFacadeFactoryImp(String url, String user, String password) {
+	private SqlDatabaseFactoryImp(String url, String user, String password) {
 		this.url = url;
 		this.user = user;
 		this.password = password;
@@ -62,7 +61,7 @@ public class TableFacadeFactoryImp implements TableFacadeFactory {
 		createConnectionProviderIfNotCreatedSinceBefore();
 		DatabaseFacade dbFacade = DatabaseFacadeImp
 				.usingSqlConnectionProvider(sqlConnectionProvider);
-		return TableFacadeImp.usingDataReader(dbFacade);
+		return TableFacadeImp.usingDatabaseFacade(dbFacade);
 	}
 
 	private void createConnectionProviderIfNotCreatedSinceBefore() {

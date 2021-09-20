@@ -16,13 +16,11 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.sqldatabase.data;
+package se.uu.ub.cora.sqldatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import se.uu.ub.cora.sqldatabase.Row;
-import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.internal.RowImp;
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 

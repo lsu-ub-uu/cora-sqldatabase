@@ -8,8 +8,5 @@ module se.uu.ub.cora.sqldatabase {
 	requires se.uu.ub.cora.logger;
 
 	exports se.uu.ub.cora.sqldatabase;
-	exports se.uu.ub.cora.sqldatabase.connection;
-	exports se.uu.ub.cora.sqldatabase.data;
 	exports se.uu.ub.cora.sqldatabase.table;
-
 }

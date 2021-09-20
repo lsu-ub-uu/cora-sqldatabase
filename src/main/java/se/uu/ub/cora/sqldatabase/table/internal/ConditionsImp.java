@@ -16,14 +16,14 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.sqldatabase.internal;
+package se.uu.ub.cora.sqldatabase.table.internal;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import se.uu.ub.cora.sqldatabase.Conditions;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.table.Conditions;
 
 public class ConditionsImp implements Conditions {
 	private LinkedHashMap<String, Object> conditions = new LinkedHashMap<>();

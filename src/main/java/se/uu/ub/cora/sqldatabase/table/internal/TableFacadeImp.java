@@ -24,12 +24,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
-import se.uu.ub.cora.sqldatabase.Conditions;
-import se.uu.ub.cora.sqldatabase.DbQueryInfo;
-import se.uu.ub.cora.sqldatabase.Parameters;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
-import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.table.Conditions;
+import se.uu.ub.cora.sqldatabase.table.DbQueryInfo;
+import se.uu.ub.cora.sqldatabase.table.Parameters;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public final class TableFacadeImp implements TableFacade {
@@ -42,8 +42,8 @@ public final class TableFacadeImp implements TableFacade {
 		this.dbFacade = databaseFacade;
 	}
 
-	public static TableFacadeImp usingDataReader(DatabaseFacade dataReader) {
-		return new TableFacadeImp(dataReader);
+	public static TableFacadeImp usingDatabaseFacade(DatabaseFacade dbFacade) {
+		return new TableFacadeImp(dbFacade);
 	}
 
 	@Override

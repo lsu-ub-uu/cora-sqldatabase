@@ -17,12 +17,10 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.sqldatabase.data;
+package se.uu.ub.cora.sqldatabase;
 
 import java.util.List;
 
-import se.uu.ub.cora.sqldatabase.Row;
-import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 /**

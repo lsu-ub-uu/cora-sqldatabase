@@ -16,13 +16,21 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.sqldatabase;
+package se.uu.ub.cora.sqldatabase.table;
 
-public class DbQueryInfoFactoryImp implements DbQueryInfoFactory {
+public interface DbQueryInfoFactory {
 
-	@Override
-	public DbQueryInfo factorUsingFromNoAndToNo(Integer fromNo, Integer toNo) {
-		return new DbQueryInfoImp(fromNo, toNo);
-	}
+	/**
+	 * factorUsingFromAndToNo factores a DbQueryInfo, using fromNo and toNo. The method SHOULD
+	 * handle the possibilty that either fromNo or toNo is null, and return an instance of
+	 * DbQueryInfo regardless.
+	 * 
+	 * @param Integer
+	 *            fromNo, the from number to set in the DbQueryInfo
+	 * 
+	 * @param Integer
+	 *            toNo, the to number to set in the DbQueryInfo
+	 */
+	DbQueryInfo factorUsingFromNoAndToNo(Integer fromNo, Integer toNo);
 
 }

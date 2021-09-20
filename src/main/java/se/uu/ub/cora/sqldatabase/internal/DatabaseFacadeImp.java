@@ -17,7 +17,7 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.sqldatabase.data.internal;
+package se.uu.ub.cora.sqldatabase.internal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,12 +30,11 @@ import java.util.List;
 
 import se.uu.ub.cora.logger.Logger;
 import se.uu.ub.cora.logger.LoggerProvider;
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.DatabaseNull;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
-import se.uu.ub.cora.sqldatabase.data.DatabaseFacade;
-import se.uu.ub.cora.sqldatabase.internal.RowImp;
 
 public final class DatabaseFacadeImp implements DatabaseFacade {
 	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";

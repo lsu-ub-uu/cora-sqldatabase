@@ -16,9 +16,11 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.sqldatabase;
+package se.uu.ub.cora.sqldatabase.table;
 
 import java.util.List;
+
+import se.uu.ub.cora.sqldatabase.DatabaseNull;
 
 /**
  * Parameters hold names and values for prepared statements. Each parameter has two sub parts, name

@@ -16,7 +16,10 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.sqldatabase;
+package se.uu.ub.cora.sqldatabase.table;
+
+import se.uu.ub.cora.sqldatabase.table.DbQueryInfo;
+import se.uu.ub.cora.sqldatabase.table.SortOrder;
 
 public class DbQueryInfoSpy implements DbQueryInfo {
 

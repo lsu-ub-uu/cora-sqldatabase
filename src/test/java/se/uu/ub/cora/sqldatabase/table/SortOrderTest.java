@@ -16,21 +16,20 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.sqldatabase;
+package se.uu.ub.cora.sqldatabase.table;
 
-public interface DbQueryInfoFactory {
+import static org.testng.Assert.assertEquals;
 
-	/**
-	 * factorUsingFromAndToNo factores a DbQueryInfo, using fromNo and toNo. The method SHOULD
-	 * handle the possibilty that either fromNo or toNo is null, and return an instance of
-	 * DbQueryInfo regardless.
-	 * 
-	 * @param Integer
-	 *            fromNo, the from number to set in the DbQueryInfo
-	 * 
-	 * @param Integer
-	 *            toNo, the to number to set in the DbQueryInfo
-	 */
-	DbQueryInfo factorUsingFromNoAndToNo(Integer fromNo, Integer toNo);
+import org.testng.annotations.Test;
+
+import se.uu.ub.cora.sqldatabase.table.SortOrder;
+
+public class SortOrderTest {
+
+	@Test
+	public void testSortOrder() {
+		assertEquals(SortOrder.ASC.order, "asc");
+		assertEquals(SortOrder.DESC.order, "desc");
+	}
 
 }

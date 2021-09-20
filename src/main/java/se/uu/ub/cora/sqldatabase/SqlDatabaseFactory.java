@@ -16,15 +16,13 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package se.uu.ub.cora.sqldatabase;
 
-public enum SortOrder {
-	ASC("asc"), DESC("desc");
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
-	public final String order;
+public interface SqlDatabaseFactory {
 
-	SortOrder(String order) {
-		this.order = order;
-	}
+	TableFacade factor();
 
 }

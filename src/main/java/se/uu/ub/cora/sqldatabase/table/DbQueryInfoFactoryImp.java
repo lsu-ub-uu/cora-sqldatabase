@@ -16,28 +16,15 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.uu.ub.cora.sqldatabase;
+package se.uu.ub.cora.sqldatabase.table;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import se.uu.ub.cora.sqldatabase.table.internal.DbQueryInfoImp;
 
-import org.testng.annotations.Test;
+public class DbQueryInfoFactoryImp implements DbQueryInfoFactory {
 
-public class DbQueryInfoFactoryTest {
-
-	@Test
-	public void testFactorWhenFromAndToIsNull() {
-		DbQueryInfoFactory factory = new DbQueryInfoFactoryImp();
-		DbQueryInfo queryInfo = factory.factorUsingFromNoAndToNo(null, null);
-		assertNull(queryInfo.getFromNo());
-		assertNull(queryInfo.getToNo());
+	@Override
+	public DbQueryInfo factorUsingFromNoAndToNo(Integer fromNo, Integer toNo) {
+		return new DbQueryInfoImp(fromNo, toNo);
 	}
 
-	@Test
-	public void testFactorWithFromNoAndToNo() {
-		DbQueryInfoFactory factory = new DbQueryInfoFactoryImp();
-		DbQueryInfo queryInfo = factory.factorUsingFromNoAndToNo(4, 78);
-		assertEquals(queryInfo.getFromNo(), Integer.valueOf(4));
-		assertEquals(queryInfo.getToNo(), Integer.valueOf(78));
-	}
 }
