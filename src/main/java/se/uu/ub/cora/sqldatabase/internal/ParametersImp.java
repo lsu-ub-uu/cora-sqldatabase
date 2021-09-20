@@ -51,4 +51,9 @@ public class ParametersImp implements Parameters {
 		return new ArrayList<>(parameters.values());
 	}
 
+	@Override
+	public boolean hasParameters() {
+		return parameters.size() > 0;
+	}
+
 }

@@ -27,10 +27,9 @@ import java.util.List;
 public interface Conditions {
 
 	/**
-	 * The add method adds a condition part with name and value to this conditions.
+	 * The add method adds a condition with name and value to this conditions.
 	 * <p>
-	 * If a condition is to use null, MUST the value of the added condition part be
-	 * {@link DatabaseNull}
+	 * If a condition is to use null, MUST the value of the added condition be {@link DatabaseNull}
 	 * 
 	 * @param name
 	 *            A String with the name to use in the sql query

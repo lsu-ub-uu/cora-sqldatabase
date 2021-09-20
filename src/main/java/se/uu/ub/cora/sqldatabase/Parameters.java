@@ -20,14 +20,55 @@ package se.uu.ub.cora.sqldatabase;
 
 import java.util.List;
 
+/**
+ * Parameters hold names and values for prepared statements. Each parameter has two sub parts, name
+ * and value. Parameters are used to set names and values when using prepared statements.
+ */
 public interface Parameters {
 
+	/**
+	 * The add method adds a parameter with name and value to this parameters.
+	 * <p>
+	 * If a parameter is to use null, MUST the value of the added parameter be {@link DatabaseNull}
+	 * 
+	 * @param name
+	 *            A String with the name to use in the sql query
+	 * 
+	 * @param value
+	 *            A String with the value to use in the sql query
+	 *
+	 */
 	void add(String name, Object value);
 
+	/**
+	 * getValue method is used to get the value of a parameter that matches the parameter name.
+	 * 
+	 * @param name
+	 *            A String with the name of the parameter.
+	 * @return An Object with the value of the parameter.
+	 */
 	Object getValue(String name);
 
+	/**
+	 * getNames returns a list of names from each parameter that exist in this class. The list of
+	 * names are returned in the same order as the parameter were added.
+	 * 
+	 * @return A List of Strings with the names for the parameters
+	 */
 	List<String> getNames();
 
+	/**
+	 * getValues returns a list of values from each parameter that exist in this class. The list of
+	 * values are returned in the same order as the parameter were added.
+	 * 
+	 * @return A List of Objects with the values for the parameters
+	 */
 	List<Object> getValues();
 
+	/**
+	 * hasParameterss returns true if at least one parameter have been added, else false is returned
+	 * 
+	 * @return A boolean, true if there are parameters else false
+	 */
+	boolean hasParameters();
 }

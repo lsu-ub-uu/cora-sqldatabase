@@ -19,6 +19,7 @@
 package se.uu.ub.cora.sqldatabase.data.internal;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
@@ -95,6 +96,18 @@ public class ParametersTest {
 		parameters.add("someParameter1", "someValue1");
 		parameters.add("someParameter2", "someValue2");
 		parameters.add("someParameter3", "someValue3");
+	}
+
+	@Test
+	public void testHasParameters() throws Exception {
+		assertFalse(parameters.hasParameters());
+	}
+
+	@Test
+	public void testHasParametersOneIsAdded() throws Exception {
+		parameters.add("someParameter1", "someValue1");
+		assertTrue(parameters.hasParameters());
+
 	}
 
 }
