@@ -106,7 +106,7 @@ public final class TableFacadeImp implements TableFacade {
 		return dbFacade.readUsingSqlAndValues(sql, conditions.getValues());
 	}
 
-	public DatabaseFacade getDataReader() {
+	public DatabaseFacade getDatabaseFacade() {
 		// needed for test
 		return dbFacade;
 	}

@@ -37,15 +37,19 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.DriverSpy;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
+import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.data.internal.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 
 public class TableFacadeFactoryTest {
-	private TableFacadeFactoryImp readerFactory;
+	private TableFacadeFactoryImp tableFacadeFactory;
 	private LoggerFactorySpy loggerFactorySpy;
 	private String lookupName;
 	private DriverSpy driver;
+	private String url = "someUrl";
+	private String user = "someUser";
+	private String password = "somePassword";
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -53,15 +57,15 @@ public class TableFacadeFactoryTest {
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		lookupName = "someLookupName";
 
-		readerFactory = TableFacadeFactoryImp.usingLookupNameFromContext(lookupName);
+		tableFacadeFactory = TableFacadeFactoryImp.usingLookupNameFromContext(lookupName);
 	}
 
 	@Test
 	public void testInitFromContextError() throws Exception {
-		TableFacadeFactory readerFactory = new RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext();
+		TableFacadeFactory tableFacadeFactory = new RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext();
 		Exception error = null;
 		try {
-			readerFactory.factor();
+			tableFacadeFactory.factor();
 		} catch (Exception e) {
 			error = e;
 		}
@@ -73,9 +77,9 @@ public class TableFacadeFactoryTest {
 
 	@Test
 	public void testInitFromContext() throws Exception {
-		readerFactory.factor();
+		tableFacadeFactory.factor();
 
-		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) readerFactory
+		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) tableFacadeFactory
 				.getSqlConnectionProvider();
 		assertTrue(sqlConnectionProvider.getContext() instanceof InitialContext);
 		assertEquals(sqlConnectionProvider.getName(), lookupName);
@@ -85,14 +89,11 @@ public class TableFacadeFactoryTest {
 	public void testInitFromUriUserPassword() throws Exception {
 		driver = new DriverSpy();
 		DriverManager.registerDriver(driver);
-		String url = "";
-		String user = "";
-		String password = "";
-		readerFactory = TableFacadeFactoryImp.usingUriAndUserAndPassword(url, user, password);
+		tableFacadeFactory = TableFacadeFactoryImp.usingUriAndUserAndPassword(url, user, password);
 
-		readerFactory.factor();
+		tableFacadeFactory.factor();
 
-		ParameterConnectionProviderImp parameterConnectionProvider = (ParameterConnectionProviderImp) readerFactory
+		ParameterConnectionProviderImp parameterConnectionProvider = (ParameterConnectionProviderImp) tableFacadeFactory
 				.getSqlConnectionProvider();
 		Connection connection = parameterConnectionProvider.getConnection();
 		assertEquals(connection, driver.connectionSpy);
@@ -104,19 +105,46 @@ public class TableFacadeFactoryTest {
 
 	@Test
 	public void testFactor() throws Exception {
-		TableFacade recordReader = readerFactory.factor();
-		assertTrue(recordReader instanceof TableFacadeImp);
+		TableFacade tableFacade = tableFacadeFactory.factor();
+		assertTrue(tableFacade instanceof TableFacadeImp);
+	}
+
+	@Test
+	public void testWhenInitFromContextFactorMoreThanOnceUsesSameConnectionProvider()
+			throws Exception {
+		tableFacadeFactory = TableFacadeFactoryImp.usingLookupNameFromContext(lookupName);
+		ensureSameConnectionProviderForTwoFactoryCallse();
+	}
+
+	private void ensureSameConnectionProviderForTwoFactoryCallse() {
+		assertSame(factorTableFacadeAndGetSqlConnectionProviderFromIt(),
+				factorTableFacadeAndGetSqlConnectionProviderFromIt());
+	}
+
+	private SqlConnectionProvider factorTableFacadeAndGetSqlConnectionProviderFromIt() {
+		TableFacadeImp tableFacade = (TableFacadeImp) tableFacadeFactory.factor();
+		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
+		SqlConnectionProvider sqlConnectionProvider = databaseFacade.getSqlConnectionProvider();
+		return sqlConnectionProvider;
+	}
+
+	@Test
+	public void testWhenInitFromParametersFactorMoreThanOnceUsesSameConnectionProvider()
+			throws Exception {
+		tableFacadeFactory = TableFacadeFactoryImp.usingUriAndUserAndPassword(url, user, password);
+		ensureSameConnectionProviderForTwoFactoryCallse();
 	}
 
 	@Test
 	public void testDataReaderSetWithDependencesInRecordReader() throws Exception {
-		TableFacadeFactoryImp readerFactory = TableFacadeFactoryImp
+		TableFacadeFactoryImp tableFacadeFactory = TableFacadeFactoryImp
 				.usingLookupNameFromContext("someName");
 
-		TableFacadeImp tableFacade = (TableFacadeImp) readerFactory.factor();
+		TableFacadeImp tableFacade = (TableFacadeImp) tableFacadeFactory.factor();
 
-		DatabaseFacadeImp dataReader = (DatabaseFacadeImp) tableFacade.getDataReader();
-		assertSame(dataReader.getSqlConnectionProvider(), readerFactory.getSqlConnectionProvider());
+		DatabaseFacadeImp dataReader = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
+		assertSame(dataReader.getSqlConnectionProvider(),
+				tableFacadeFactory.getSqlConnectionProvider());
 	}
 }
 
@@ -126,7 +154,7 @@ class RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext extends TableF
 	}
 
 	@Override
-	void createContextConnectionProvider(String name, InitialContext context) {
+	void createContextConnectionProvider() {
 		throw SqlDatabaseException.withMessage("Error from overriding test class");
 	}
 }

@@ -60,31 +60,50 @@ public class TableFacadeFactoryImp implements TableFacadeFactory {
 	@Override
 	public TableFacade factor() {
 		createConnectionProviderIfNotCreatedSinceBefore();
-		DatabaseFacade dataReader = DatabaseFacadeImp.usingSqlConnectionProvider(sqlConnectionProvider);
-		return TableFacadeImp.usingDataReader(dataReader);
+		DatabaseFacade dbFacade = DatabaseFacadeImp
+				.usingSqlConnectionProvider(sqlConnectionProvider);
+		return TableFacadeImp.usingDataReader(dbFacade);
 	}
 
 	private void createConnectionProviderIfNotCreatedSinceBefore() {
+		if (connectionProviderNeedsToBeCreated()) {
+			createConnectionProvider();
+		}
+	}
+
+	private boolean connectionProviderNeedsToBeCreated() {
+		return null == sqlConnectionProvider;
+	}
+
+	private void createConnectionProvider() {
 		try {
-			tryToCreateConnectionProviderIfNotCreatedSinceBefore();
+			tryToCreateConnectionProvider();
 		} catch (Exception e) {
 			throw SqlDatabaseException.withMessageAndException(e.getMessage(), e);
 		}
 	}
 
-	private void tryToCreateConnectionProviderIfNotCreatedSinceBefore() throws NamingException {
-		if (null != name) {
-			InitialContext context = new InitialContext();
-			createContextConnectionProvider(name, context);
+	private void tryToCreateConnectionProvider() throws NamingException {
+		if (connectionInfoIsProvidedInContext()) {
+			createContextConnectionProvider();
 		} else {
-			sqlConnectionProvider = ParameterConnectionProviderImp.usingUriAndUserAndPassword(url,
-					user, password);
+			createParameterConnectionProvider();
 		}
 	}
 
-	void createContextConnectionProvider(String name, InitialContext context) {
+	private boolean connectionInfoIsProvidedInContext() {
+		return null != name;
+	}
+
+	void createContextConnectionProvider() throws NamingException {
+		InitialContext context = new InitialContext();
 		sqlConnectionProvider = ContextConnectionProviderImp.usingInitialContextAndName(context,
 				name);
+	}
+
+	private void createParameterConnectionProvider() {
+		sqlConnectionProvider = ParameterConnectionProviderImp.usingUriAndUserAndPassword(url, user,
+				password);
 	}
 
 	SqlConnectionProvider getSqlConnectionProvider() {
