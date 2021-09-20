@@ -23,6 +23,8 @@ import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public interface SqlDatabaseFactory {
 
-	TableFacade factor();
+	TableFacade factorTableFacade();
+
+	DatabaseFacade factorDatabaseFacade();
 
 }

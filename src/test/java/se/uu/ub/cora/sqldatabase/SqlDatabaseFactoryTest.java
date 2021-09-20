@@ -21,6 +21,7 @@ package se.uu.ub.cora.sqldatabase;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
@@ -65,7 +66,7 @@ public class SqlDatabaseFactoryTest {
 		SqlDatabaseFactory tableFacadeFactory = new RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext();
 		Exception error = null;
 		try {
-			tableFacadeFactory.factor();
+			tableFacadeFactory.factorTableFacade();
 		} catch (Exception e) {
 			error = e;
 		}
@@ -77,7 +78,7 @@ public class SqlDatabaseFactoryTest {
 
 	@Test
 	public void testInitFromContext() throws Exception {
-		sqlDatabaseFactory.factor();
+		sqlDatabaseFactory.factorTableFacade();
 
 		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) sqlDatabaseFactory
 				.getSqlConnectionProvider();
@@ -91,7 +92,7 @@ public class SqlDatabaseFactoryTest {
 		DriverManager.registerDriver(driver);
 		sqlDatabaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(url, user, password);
 
-		sqlDatabaseFactory.factor();
+		sqlDatabaseFactory.factorTableFacade();
 
 		ParameterConnectionProviderImp parameterConnectionProvider = (ParameterConnectionProviderImp) sqlDatabaseFactory
 				.getSqlConnectionProvider();
@@ -104,25 +105,32 @@ public class SqlDatabaseFactoryTest {
 	}
 
 	@Test
-	public void testFactor() throws Exception {
-		TableFacade tableFacade = sqlDatabaseFactory.factor();
+	public void testFactorTableFacade() throws Exception {
+		TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade();
 		assertTrue(tableFacade instanceof TableFacadeImp);
+	}
+
+	@Test
+	public void testTwoCallsToFactoryReturnsDifferentInstances() throws Exception {
+		TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade();
+		TableFacade tableFacade2 = sqlDatabaseFactory.factorTableFacade();
+		assertNotSame(tableFacade, tableFacade2);
 	}
 
 	@Test
 	public void testWhenInitFromContextFactorMoreThanOnceUsesSameConnectionProvider()
 			throws Exception {
 		sqlDatabaseFactory = SqlDatabaseFactoryImp.usingLookupNameFromContext(lookupName);
-		ensureSameConnectionProviderForTwoFactoryCallse();
+		ensureSameConnectionProviderForTwoFactoryCalls();
 	}
 
-	private void ensureSameConnectionProviderForTwoFactoryCallse() {
+	private void ensureSameConnectionProviderForTwoFactoryCalls() {
 		assertSame(factorTableFacadeAndGetSqlConnectionProviderFromIt(),
 				factorTableFacadeAndGetSqlConnectionProviderFromIt());
 	}
 
 	private SqlConnectionProvider factorTableFacadeAndGetSqlConnectionProviderFromIt() {
-		TableFacadeImp tableFacade = (TableFacadeImp) sqlDatabaseFactory.factor();
+		TableFacadeImp tableFacade = (TableFacadeImp) sqlDatabaseFactory.factorTableFacade();
 		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
 		SqlConnectionProvider sqlConnectionProvider = databaseFacade.getSqlConnectionProvider();
 		return sqlConnectionProvider;
@@ -132,7 +140,7 @@ public class SqlDatabaseFactoryTest {
 	public void testWhenInitFromParametersFactorMoreThanOnceUsesSameConnectionProvider()
 			throws Exception {
 		sqlDatabaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(url, user, password);
-		ensureSameConnectionProviderForTwoFactoryCallse();
+		ensureSameConnectionProviderForTwoFactoryCalls();
 	}
 
 	@Test
@@ -140,16 +148,55 @@ public class SqlDatabaseFactoryTest {
 		SqlDatabaseFactoryImp tableFacadeFactory = SqlDatabaseFactoryImp
 				.usingLookupNameFromContext("someName");
 
-		TableFacadeImp tableFacade = (TableFacadeImp) tableFacadeFactory.factor();
+		TableFacadeImp tableFacade = (TableFacadeImp) tableFacadeFactory.factorTableFacade();
 
 		DatabaseFacadeImp dataReader = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
 		assertSame(dataReader.getSqlConnectionProvider(),
 				tableFacadeFactory.getSqlConnectionProvider());
 	}
+
+	@Test
+	public void testFactorDatabaseFacade() throws Exception {
+		DatabaseFacade dbFacade = sqlDatabaseFactory.factorDatabaseFacade();
+		assertTrue(dbFacade instanceof DatabaseFacadeImp);
+	}
+
+	@Test
+	public void testTwoCallsToFactoryDatabaseReturnsDifferentInstances() throws Exception {
+		DatabaseFacade databaseFacade = sqlDatabaseFactory.factorDatabaseFacade();
+		DatabaseFacade databaseFacade2 = sqlDatabaseFactory.factorDatabaseFacade();
+		assertNotSame(databaseFacade, databaseFacade2);
+	}
+
+	@Test
+	public void testFactoriesUseSameSqlConnectionProvider() throws Exception {
+		DatabaseFacadeImp dbFacade = (DatabaseFacadeImp) sqlDatabaseFactory.factorDatabaseFacade();
+		TableFacadeImp tableFacade = (TableFacadeImp) sqlDatabaseFactory.factorTableFacade();
+		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
+
+		assertSame(dbFacade.getSqlConnectionProvider(), databaseFacade.getSqlConnectionProvider());
+
+	}
+
+	@Test
+	public void testName() throws Exception {
+
+	}
 }
 
 class RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext extends SqlDatabaseFactoryImp {
 	RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext() {
+		super("Not important lookup name");
+	}
+
+	@Override
+	void createContextConnectionProvider() {
+		throw SqlDatabaseException.withMessage("Error from overriding test class");
+	}
+}
+
+class SqlDatabaseFactoryImpForThreadTests extends SqlDatabaseFactoryImp {
+	SqlDatabaseFactoryImpForThreadTests() {
 		super("Not important lookup name");
 	}
 

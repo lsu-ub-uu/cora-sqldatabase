@@ -31,18 +31,18 @@ import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 
 public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 	private SqlConnectionProvider sqlConnectionProvider;
-	private String name;
+	private String lookupName;
 	private String url;
 	private String user;
 	private String password;
 
-	public static SqlDatabaseFactoryImp usingLookupNameFromContext(String name) {
-		return new SqlDatabaseFactoryImp(name);
+	public static SqlDatabaseFactoryImp usingLookupNameFromContext(String lookupName) {
+		return new SqlDatabaseFactoryImp(lookupName);
 	}
 
-	SqlDatabaseFactoryImp(String name) {
+	SqlDatabaseFactoryImp(String lookupName) {
 		// package private for test reasons
-		this.name = name;
+		this.lookupName = lookupName;
 	}
 
 	public static SqlDatabaseFactoryImp usingUriAndUserAndPassword(String url, String user,
@@ -57,11 +57,15 @@ public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 	}
 
 	@Override
-	public TableFacade factor() {
-		createConnectionProviderIfNotCreatedSinceBefore();
-		DatabaseFacade dbFacade = DatabaseFacadeImp
-				.usingSqlConnectionProvider(sqlConnectionProvider);
+	public TableFacade factorTableFacade() {
+		DatabaseFacade dbFacade = factorDatabaseFacade();
 		return TableFacadeImp.usingDatabaseFacade(dbFacade);
+	}
+
+	@Override
+	public DatabaseFacade factorDatabaseFacade() {
+		createConnectionProviderIfNotCreatedSinceBefore();
+		return DatabaseFacadeImp.usingSqlConnectionProvider(sqlConnectionProvider);
 	}
 
 	private void createConnectionProviderIfNotCreatedSinceBefore() {
@@ -91,13 +95,13 @@ public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 	}
 
 	private boolean connectionInfoIsProvidedInContext() {
-		return null != name;
+		return null != lookupName;
 	}
 
 	void createContextConnectionProvider() throws NamingException {
 		InitialContext context = new InitialContext();
 		sqlConnectionProvider = ContextConnectionProviderImp.usingInitialContextAndName(context,
-				name);
+				lookupName);
 	}
 
 	private void createParameterConnectionProvider() {
