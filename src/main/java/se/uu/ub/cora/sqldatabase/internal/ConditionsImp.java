@@ -51,4 +51,9 @@ public class ConditionsImp implements Conditions {
 		return new ArrayList<>(conditions.values());
 	}
 
+	@Override
+	public boolean hasConditions() {
+		return conditions.size() > 0;
+	}
+
 }

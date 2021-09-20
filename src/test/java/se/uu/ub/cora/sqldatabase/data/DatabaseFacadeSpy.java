@@ -40,6 +40,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 
 	@Override
 	public List<Row> readUsingSqlAndValues(String sql, List<Object> values) {
+		MCR.addCall("sql", sql, "values", values);
 		this.sql = sql;
 		this.values = values;
 		executePreparedStatementQueryUsingSqlAndValuesWasCalled = true;
@@ -54,6 +55,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 		Row innerResult = createResult();
 		// }
 		result.add(innerResult);
+		MCR.addReturned(result);
 		return result;
 	}
 
@@ -66,6 +68,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 
 	@Override
 	public Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values) {
+		MCR.addCall("sql", sql, "values", values);
 		this.sql = sql;
 		this.values = values;
 		readOneRowFromDbUsingTableAndConditionsWasCalled = true;
@@ -83,6 +86,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 		} else {
 			oneRowResult = createResult();
 		}
+		MCR.addReturned(oneRowResult);
 		return oneRowResult;
 	}
 

@@ -66,4 +66,11 @@ public interface Conditions {
 	 */
 	List<Object> getValues();
 
+	/**
+	 * hasConditions returns true if at least one condition have been added, else false is returned
+	 * 
+	 * @return A boolean, true if there are conditions else false
+	 */
+	boolean hasConditions();
+
 }

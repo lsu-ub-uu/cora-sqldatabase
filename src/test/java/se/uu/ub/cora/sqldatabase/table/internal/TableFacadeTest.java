@@ -268,7 +268,6 @@ public class TableFacadeTest {
 	@Test
 	public void testReadNumberOfRows() {
 		String type = "organisation";
-		// Map<String, Object> conditions = new HashMap<>();
 		conditions.add("domain", "uu");
 
 		DbQueryInfoSpy queryInfo = new DbQueryInfoSpy();
@@ -303,14 +302,7 @@ public class TableFacadeTest {
 
 	@Test
 	public void testReadNumberOfRowsWithFromAndTo() {
-		String type = "organisation";
-		// Map<String, Object> conditions = new HashMap<>();
-		conditions.add("domain", "uu");
-
-		DbQueryInfoImp queryInfo = new DbQueryInfoImp(2, 11);
-
-		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
-				conditions, queryInfo);
+		long numberOfRows = readNumberOfRowsUsingFromNoAndToNo(2, 11);
 
 		assertTrue(databaseFacadeSpy.readOneRowFromDbUsingTableAndConditionsWasCalled);
 		assertEquals(databaseFacadeSpy.sql, "select count(*) from organisation where domain = ?");
@@ -321,15 +313,19 @@ public class TableFacadeTest {
 
 	}
 
-	@Test
-	public void testReadNumberOfRowsWithFromAndToWhenToLargerThanNumOfRows() {
+	private long readNumberOfRowsUsingFromNoAndToNo(Integer fromNo, Integer toNo) {
 		String type = "organisation";
 		conditions.add("domain", "uu");
-
-		DbQueryInfoImp queryInfo = new DbQueryInfoImp(440, 476);
+		DbQueryInfoImp queryInfo = new DbQueryInfoImp(fromNo, toNo);
 
 		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
 				conditions, queryInfo);
+		return numberOfRows;
+	}
+
+	@Test
+	public void testReadNumberOfRowsWithFromAndToWhenToLargerThanNumOfRows() {
+		long numberOfRows = readNumberOfRowsUsingFromNoAndToNo(440, 476);
 
 		assertEquals(numberOfRows, 14);
 
@@ -337,86 +333,42 @@ public class TableFacadeTest {
 
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromLargerThanNumOfRows() {
-		String type = "organisation";
-		// Map<String, Object> conditions = new HashMap<>();
-		conditions.add("domain", "uu");
-
-		DbQueryInfoImp queryInfo = new DbQueryInfoImp(460, 476);
-
-		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
-				conditions, queryInfo);
-
+		long numberOfRows = readNumberOfRowsUsingFromNoAndToNo(460, 476);
 		assertEquals(numberOfRows, 0);
 
 	}
 
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromLargerThanTo() {
-		String type = "organisation";
-		// Map<String, Object> conditions = new HashMap<>();
-		conditions.add("domain", "uu");
-
-		DbQueryInfoImp queryInfo = new DbQueryInfoImp(300, 150);
-
-		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
-				conditions, queryInfo);
-
+		long numberOfRows = readNumberOfRowsUsingFromNoAndToNo(300, 150);
 		assertEquals(numberOfRows, 0);
 
 	}
 
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromAndToIsSameAndMax() {
-		String type = "organisation";
-		// Map<String, Object> conditions = new HashMap<>();
-		conditions.add("domain", "uu");
-
-		DbQueryInfoImp queryInfo = new DbQueryInfoImp(453, 453);
-		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
-				conditions, queryInfo);
-
+		long numberOfRows = readNumberOfRowsUsingFromNoAndToNo(453, 453);
 		assertEquals(numberOfRows, 1);
 
 	}
 
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenToIsNull() {
-		String type = "organisation";
-		// Map<String, Object> conditions = new HashMap<>();
-		conditions.add("domain", "uu");
-
-		DbQueryInfoImp queryInfo = new DbQueryInfoImp(400, null);
-		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
-				conditions, queryInfo);
-
+		long numberOfRows = readNumberOfRowsUsingFromNoAndToNo(400, null);
 		assertEquals(numberOfRows, 54);
 
 	}
 
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromIsZeroUseOneAsFrom() {
-		String type = "organisation";
-		// Map<String, Object> conditions = new HashMap<>();
-		conditions.add("domain", "uu");
-
-		DbQueryInfoImp queryInfo = new DbQueryInfoImp(0, 10);
-		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(type,
-				conditions, queryInfo);
-
+		long numberOfRows = readNumberOfRowsUsingFromNoAndToNo(0, 10);
 		assertEquals(numberOfRows, 10);
 
 	}
 
 	@Test
 	public void testReadNumberOfRowsWithFromAndToWhenFromIsNullUseOneAsFrom() {
-		String tableName = "organisation";
-		// Map<String, Object> conditions = new HashMap<>();
-		conditions.add("domain", "uu");
-
-		DbQueryInfoImp queryInfo = new DbQueryInfoImp(null, 10);
-		long numberOfRows = tableFacade.numberOfRowsInTableForConditionsAndQueryInfo(tableName,
-				conditions, queryInfo);
-
+		long numberOfRows = readNumberOfRowsUsingFromNoAndToNo(null, 10);
 		assertEquals(numberOfRows, 10);
 
 	}

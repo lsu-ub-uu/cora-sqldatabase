@@ -48,11 +48,11 @@ public final class TableFacadeImp implements TableFacade {
 
 	@Override
 	public List<Row> readRowsFromTable(String tableName) {
-		String sql = createSelectAllFor(tableName);
+		String sql = assembleSqlForReadAllFromTable(tableName);
 		return readAllFromTableUsingSql(tableName, sql);
 	}
 
-	private String createSelectAllFor(String tableName) {
+	private String assembleSqlForReadAllFromTable(String tableName) {
 		return "select * from " + tableName;
 	}
 
@@ -88,7 +88,7 @@ public final class TableFacadeImp implements TableFacade {
 
 	private String createSqlForTableNameAndConditionsNames(String tableName,
 			Conditions conditions) {
-		return createSelectAllFor(tableName) + possiblyAddConditionsToSql(conditions);
+		return assembleSqlForReadAllFromTable(tableName) + possiblyAddConditionsToSql(conditions);
 	}
 
 	@Override
@@ -120,7 +120,7 @@ public final class TableFacadeImp implements TableFacade {
 
 	@Override
 	public List<Row> readRowsFromTable(String tableName, DbQueryInfo queryInfo) {
-		String sql = createSelectAllFor(tableName);
+		String sql = assembleSqlForReadAllFromTable(tableName);
 		sql += getSortPart(queryInfo);
 		sql += getDelimiter(queryInfo);
 		return readAllFromTableUsingSql(tableName, sql);
@@ -166,10 +166,10 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	private String possiblyAddConditionsToSql(Conditions conditions) {
-		if (conditions.getNames().isEmpty()) {
-			return "";
+		if (conditions.hasConditions()) {
+			return createWherePartOfSqlStatement(conditions);
 		}
-		return createWherePartOfSqlStatement(conditions);
+		return "";
 	}
 
 	private String createWherePartOfSqlStatement(Conditions conditions) {

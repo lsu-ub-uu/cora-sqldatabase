@@ -19,6 +19,7 @@
 package se.uu.ub.cora.sqldatabase.data.internal;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
@@ -93,6 +94,18 @@ public class ConditionsTest {
 		assertEquals(myList.get(0), "someValue1");
 		assertEquals(myList.get(1), "someValue2");
 		assertEquals(myList.get(2), "someValue3");
+	}
+
+	@Test
+	public void testHasConditions() throws Exception {
+		assertFalse(conditions.hasConditions());
+	}
+
+	@Test
+	public void testHasConditionsOneIsAdded() throws Exception {
+		conditions.add("someCondition1", "someValue1");
+		assertTrue(conditions.hasConditions());
+
 	}
 
 }
