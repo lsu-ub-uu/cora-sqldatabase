@@ -25,6 +25,8 @@ import static org.testng.Assert.assertNotSame;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -63,7 +65,7 @@ public class SqlDatabaseFactoryTest {
 
 	@Test
 	public void testInitFromContextError() throws Exception {
-		SqlDatabaseFactory tableFacadeFactory = new RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext();
+		SqlDatabaseFactory tableFacadeFactory = new SqlDatabaseFactoryImpForThrowErrorInsteadOfCreatingContext();
 		Exception error = null;
 		try {
 			tableFacadeFactory.factorTableFacade();
@@ -179,24 +181,16 @@ public class SqlDatabaseFactoryTest {
 	}
 
 	@Test
-	public void testName() throws Exception {
+	public void testThreadsWhenCreatingConnectionProvider() throws Exception {
+		Method declaredMethod = SqlDatabaseFactoryImp.class
+				.getDeclaredMethod("createConnectionProviderIfNotCreatedSinceBefore");
+		assertTrue(Modifier.isSynchronized(declaredMethod.getModifiers()));
 
 	}
 }
 
-class RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext extends SqlDatabaseFactoryImp {
-	RecordReaderFactoryImpForThrowErrorInsteadOfCreatingContext() {
-		super("Not important lookup name");
-	}
-
-	@Override
-	void createContextConnectionProvider() {
-		throw SqlDatabaseException.withMessage("Error from overriding test class");
-	}
-}
-
-class SqlDatabaseFactoryImpForThreadTests extends SqlDatabaseFactoryImp {
-	SqlDatabaseFactoryImpForThreadTests() {
+class SqlDatabaseFactoryImpForThrowErrorInsteadOfCreatingContext extends SqlDatabaseFactoryImp {
+	SqlDatabaseFactoryImpForThrowErrorInsteadOfCreatingContext() {
 		super("Not important lookup name");
 	}
 

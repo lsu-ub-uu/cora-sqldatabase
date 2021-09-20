@@ -68,7 +68,7 @@ public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 		return DatabaseFacadeImp.usingSqlConnectionProvider(sqlConnectionProvider);
 	}
 
-	private void createConnectionProviderIfNotCreatedSinceBefore() {
+	private synchronized void createConnectionProviderIfNotCreatedSinceBefore() {
 		if (connectionProviderNeedsToBeCreated()) {
 			createConnectionProvider();
 		}
