@@ -37,27 +37,16 @@ public interface TableFacade {
 
 	/**
 	 * insertRowInTableWithValues creates a new row in the named table using the provided values
-	 * 
-	 * @param tableName
-	 *            A String with the name of the table to insert values into
-	 * @param parameters
+	 * @param tableQuery TODO
 	 */
-	void insertRowInTableWithValues(String tableName, Parameters parameters);
+	void insertRowUsingQuery(TableQuery tableQuery);
 
 	/**
 	 * 
 	 * @param tableName
 	 * @return
 	 */
-	List<Row> readRowsFromTable(String tableName);
-
-	/**
-	 * 
-	 * @param tableName
-	 * @param queryInfo
-	 * @return
-	 */
-	List<Row> readRowsFromTable(String tableName, DbQueryInfo queryInfo);
+	List<Row> readRowsForQuery(TableQuery tableQuery);
 
 	/**
 	 * readOneRowFromDbUsingTableAndConditions reads one row from the database using a tablename and
@@ -67,38 +56,18 @@ public interface TableFacade {
 	 * {@link SqlDatabaseException} be thrown, indicating that the requested single row can not be
 	 * realibly read.
 	 * 
-	 * @param tableName
+	 * @param tableQuery
 	 *            the table to read from
-	 * @param conditions
-	 *            A Map<String, Object> with the columnName as key and requested value as value to
-	 *            use in the query.
 	 * @return A Map<String, Object> with the columnNames from the result as key and the
 	 *         corresponding values
 	 */
-	Row readOneRowFromTableUsingConditions(String tableName, Conditions conditions);
-
-	/**
-	 * 
-	 * @param tableName
-	 * @param conditions
-	 * @return
-	 */
-	List<Row> readRowsFromTableUsingConditions(String tableName, Conditions conditions);
-
-	/**
-	 * 
-	 * @param tableName
-	 * @param conditions
-	 * @param queryInfo
-	 * @return
-	 */
-	List<Row> readRowsFromTableUsingConditionsAndQueryInfo(String tableName, Conditions conditions,
-			DbQueryInfo queryInfo);
+	Row readOneRowForQuery(TableQuery tableQuery);
 
 	/**
 	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions. The number
 	 * of rows also depends on limitations set in the DbQueryInfo. The readNumberOfRows SHOULD never
 	 * return a larger number than actual result size.
+	 * @param tableQuery TODO
 	 * 
 	 * @param tableName,
 	 *            the table to read from
@@ -111,24 +80,20 @@ public interface TableFacade {
 	 * @param DbQueryInfo,
 	 *            the dbQueryInfo used to limit the query
 	 */
-	long numberOfRowsInTableForConditionsAndQueryInfo(String tableName, Conditions conditions,
-			DbQueryInfo queryInfo);
+	long readNumberOfRows(TableQuery tableQuery);
 
 	/**
 	 * 
-	 * @param tableName
+	 * @param tableQuery TODO
 	 * @param values
-	 * @param conditions
 	 */
-	void updateRowInTableUsingValuesAndConditions(String tableName, Parameters parameters,
-			Conditions conditions);
+	void updateRowsUsingQuery(TableQuery tableQuery);
 
 	/**
 	 * 
-	 * @param tableName
-	 * @param conditions
+	 * @param tableQuery
 	 */
-	void deleteRowFromTableUsingConditions(String tableName, Conditions conditions);
+	void deleteRowsForQuery(TableQuery tableQuery);
 
 	/**
 	 * <p>

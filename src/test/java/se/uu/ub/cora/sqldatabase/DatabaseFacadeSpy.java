@@ -44,7 +44,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 		executePreparedStatementQueryUsingSqlAndValuesWasCalled = true;
 		if (throwError) {
 			throw SqlDatabaseException.withMessage(
-					"Error from executePreparedStatementQueryUsingSqlAndValues in DataReaderSpy");
+					"Error from executePreparedStatementQueryUsingSqlAndValues in DatabaseFacadeSpy");
 		}
 		// Map<String, Object> innerResult = new HashMap<>();
 		// if (sql.startsWith("select count")) {
@@ -71,12 +71,12 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 		this.values = values;
 		readOneRowFromDbUsingTableAndConditionsWasCalled = true;
 		if (throwError) {
-			throw SqlDatabaseException
-					.withMessage("Error from readOneRowOrFailUsingSqlAndValues in DataReaderSpy");
+			throw SqlDatabaseException.withMessage(
+					"Error from readOneRowOrFailUsingSqlAndValues in DatabaseFacadeSpy");
 		}
 
 		oneRowResult = new RowImp();
-		if (sql.startsWith("select count")) {
+		if (sql.startsWith("sql for count from spy")) {
 			oneRowResult.addColumnWithValue("count", 453L);
 		} else if (sql.startsWith("select nextval")) {
 			String nextValName = sql.substring(sql.lastIndexOf(" ") + 1, sql.length());
@@ -91,6 +91,10 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 	@Override
 	public int executeSqlWithValues(String sql, List<Object> values) {
 		MCR.addCall("sql", sql, "values", values);
+		if (throwError) {
+			throw SqlDatabaseException
+					.withMessage("Error from executeSqlWithValues in DatabaseFacadeSpy");
+		}
 
 		int returnValue = 0;
 
