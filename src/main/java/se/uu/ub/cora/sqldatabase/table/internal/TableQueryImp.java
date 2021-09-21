@@ -32,6 +32,8 @@ public class TableQueryImp implements TableQuery {
 	private Map<String, Object> parameters = new LinkedHashMap<>();
 	private Map<String, Object> conditions = new LinkedHashMap<>();
 	private List<String> orderBy = new ArrayList<>();
+	private Long offset;
+	private Long lastRecordNumberToShowInQuery;
 
 	public static TableQueryImp usingTableName(String tableName) {
 		return new TableQueryImp(tableName);
@@ -63,15 +65,13 @@ public class TableQueryImp implements TableQuery {
 	}
 
 	@Override
-	public void setFromNo(Integer fromNo) {
-		// TODO Auto-generated method stub
-
+	public void setFromNo(Long fromNo) {
+		this.offset = fromNo - 1;
 	}
 
 	@Override
-	public void setToNo(Integer toNo) {
-		// TODO Auto-generated method stub
-
+	public void setToNo(Long toNo) {
+		this.lastRecordNumberToShowInQuery = toNo;
 	}
 
 	@Override
@@ -101,6 +101,8 @@ public class TableQueryImp implements TableQuery {
 		String sql = assembleSelectSql();
 		sql += possiblyAddConditionsToSql();
 		sql += possiblyAddOrderBy();
+		sql += possiblyAddOffsetPart();
+		sql += possiblyAddLimitPart();
 		return sql;
 	}
 
@@ -149,6 +151,29 @@ public class TableQueryImp implements TableQuery {
 		return joiner.toString();
 	}
 
+	private String possiblyAddOffsetPart() {
+		if (offset != null) {
+			return " offset " + offset;
+		}
+		return "";
+	}
+
+	private String possiblyAddLimitPart() {
+		if (lastRecordNumberToShowInQuery != null) {
+			return " limit " + calculateLimit();
+		}
+		return "";
+	}
+
+	private String calculateLimit() {
+		if (offset == null) {
+			return lastRecordNumberToShowInQuery.toString();
+		} else {
+			Long limit = lastRecordNumberToShowInQuery - offset - 1;
+			return limit.toString();
+		}
+	}
+
 	@Override
 	public String assembleUpdateSql() {
 		return createUpdateSql();
@@ -174,6 +199,11 @@ public class TableQueryImp implements TableQuery {
 		values.addAll(parameters.values());
 		values.addAll(conditions.values());
 		return values;
+	}
+
+	@Override
+	public String assembleCountSql() {
+		return "select count (*) from (" + assembleReadSql() + ") as count";
 	}
 
 }

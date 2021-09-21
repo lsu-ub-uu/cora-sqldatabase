@@ -23,7 +23,6 @@ import java.util.List;
 import se.uu.ub.cora.sqldatabase.DatabaseNull;
 
 public interface TableQuery {
-	// String tableName;
 	/**
 	 * The add method adds a parameter with name and value to this parameters.
 	 * <p>
@@ -53,46 +52,32 @@ public interface TableQuery {
 	void addCondition(String name, Object value);
 
 	/**
-	 * setOrderBy sets the order by to use in a sql query
+	 * getOffset returns the offset to use in a sql query, based on the fromNo set in the instance.
+	 * FromNo is expected to be 1 if the result should start with the first record. Offset however
+	 * starts at zero, and will never be lower than zero. If no fromNo is set in the instance, zero
+	 * will be returned.
 	 * 
-	 * @param String
-	 *            orderBy, the name of the column to order by
+	 * @return Integer offset
 	 */
-	// void setOrderBy(String orderBy);
 
 	/**
-	 * setSortOrder sets the sort order to use in a sql query
+	 * setFromNo sets the from number (in the result), indicating the first record that the
+	 * generated sql query should return. A from number of 1 is for the first record in the
+	 * resultset.
 	 * 
-	 * @param {@link
-	 *            OrderCriteria}, the sort order to set
+	 * @param fromNo
+	 *            An Integer with the from number
 	 */
-	// void setSortOrder(OrderCriteria sortOrder);
+	void setFromNo(Long fromNo);
 
 	/**
-	 * factorUsingFromAndToNo factores a DbQueryInfo, using fromNo and toNo. The method SHOULD
-	 * handle the possibilty that either fromNo or toNo is null, and return an instance of
-	 * DbQueryInfo regardless.
+	 * setToNo sets the to number (in the result), indicating the last record that the generated sql
+	 * query should return. A to number of 10 should return the first 10 records in the resultset.
 	 * 
-	 * @param Integer
-	 *            fromNo, the from number to set in the DbQueryInfo
-	 * 
-	 * @param Integer
-	 *            toNo, the to number to set in the DbQueryInfo
+	 * @param toNo
+	 *            An Integer with the to number
 	 */
-	// DbQueryInfo factorUsingFromNoAndToNo(Integer fromNo, Integer toNo);
-	void setFromNo(Integer fromNo);
-
-	void setToNo(Integer toNo);
-
-	String assembleCreateSql();
-
-	String assembleReadSql();
-
-	String assembleUpdateSql();
-
-	String assembleDeleteSql();
-
-	List<Object> getQueryValues();
+	void setToNo(Long toNo);
 
 	/**
 	 * addOrderByAsc adds an ascending order by column to the query, if more then one order by is
@@ -111,4 +96,17 @@ public interface TableQuery {
 	 *            A String with a column to order the result by
 	 */
 	void addOrderByDesc(String column);
+
+	String assembleCreateSql();
+
+	String assembleReadSql();
+
+	String assembleUpdateSql();
+
+	String assembleDeleteSql();
+
+	List<Object> getQueryValues();
+
+	String assembleCountSql();
+
 }

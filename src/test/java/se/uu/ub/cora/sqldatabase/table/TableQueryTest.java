@@ -92,10 +92,43 @@ public class TableQueryTest {
 				"select * from " + tableName + " where conditionName1 = ? and conditionName2 = ?");
 		assertQueryValues("conditionValue1", "conditionValue2");
 	}
-	// setOrderBy(String orderBy);
-	// setSortOrder(SortOrder sortOrder);
-	// setFromNo(Integer fromNo);
-	// setToNo(Integer toNo);
+
+	@Test
+	public void testReadSqlWithFromNo() throws Exception {
+		tableQuery.setFromNo(1L);
+		assertEquals(tableQuery.assembleReadSql(), "select * from " + tableName + " offset 0");
+		assertTrue(tableQuery.getQueryValues().isEmpty());
+	}
+
+	@Test
+	public void testReadSqlWithFromNo10() throws Exception {
+		tableQuery.setFromNo(10L);
+		assertEquals(tableQuery.assembleReadSql(), "select * from " + tableName + " offset 9");
+		assertTrue(tableQuery.getQueryValues().isEmpty());
+	}
+
+	@Test
+	public void testReadSqlWithToNo() throws Exception {
+		tableQuery.setToNo(10L);
+		assertEquals(tableQuery.assembleReadSql(), "select * from " + tableName + " limit 10");
+		assertTrue(tableQuery.getQueryValues().isEmpty());
+	}
+
+	@Test
+	public void testReadSqlWithFromNoAndToNo() throws Exception {
+		tableQuery.setFromNo(10L);
+		tableQuery.setToNo(20L);
+		assertEquals(tableQuery.assembleReadSql(),
+				"select * from " + tableName + " offset 9 limit 10");
+	}
+
+	@Test
+	public void testReadSqlWithFromNoAndToNoOrderOfSetUnimportant() throws Exception {
+		tableQuery.setToNo(20L);
+		tableQuery.setFromNo(10L);
+		assertEquals(tableQuery.assembleReadSql(),
+				"select * from " + tableName + " offset 9 limit 10");
+	}
 
 	@Test
 	public void testReadSqlWithOneOrderBy() throws Exception {
@@ -130,6 +163,33 @@ public class TableQueryTest {
 		assertEquals(tableQuery.assembleReadSql(),
 				"select * from " + tableName + " order by column1 asc, column2 desc");
 		assertTrue(tableQuery.getQueryValues().isEmpty());
+	}
+
+	@Test
+	public void testReadSqlWithEverything() throws Exception {
+		tableQuery.addCondition("conditionName1", "conditionValue1");
+		tableQuery.addCondition("conditionName2", "conditionValue2");
+		tableQuery.setFromNo(10L);
+		tableQuery.setToNo(20L);
+		tableQuery.addOrderByDesc("column1");
+		tableQuery.addOrderByAsc("column2");
+		assertEquals(tableQuery.assembleReadSql(),
+				"select * from " + tableName + " where conditionName1 = ? and conditionName2 = ?"
+						+ " order by column1 desc, column2 asc offset 9 limit 10");
+		assertQueryValues("conditionValue1", "conditionValue2");
+	}
+
+	@Test
+	public void testCountSql() throws Exception {
+		tableQuery.addCondition("conditionName1", "conditionValue1");
+		tableQuery.addCondition("conditionName2", "conditionValue2");
+		tableQuery.setFromNo(10L);
+		tableQuery.setToNo(20L);
+		assertEquals(tableQuery.assembleCountSql(),
+				"select count (*) from (select * from " + tableName
+						+ " where conditionName1 = ? and conditionName2 = ?"
+						+ " offset 9 limit 10) as count");
+		assertQueryValues("conditionValue1", "conditionValue2");
 	}
 
 	@Test
