@@ -18,12 +18,12 @@
  */
 package se.uu.ub.cora.sqldatabase.table;
 
-public enum SortOrder {
+public enum OrderCriteria {
 	ASC("asc"), DESC("desc");
 
 	public final String order;
 
-	SortOrder(String order) {
+	OrderCriteria(String order) {
 		this.order = order;
 	}
 

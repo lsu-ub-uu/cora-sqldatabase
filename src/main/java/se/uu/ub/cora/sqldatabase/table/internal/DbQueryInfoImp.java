@@ -19,14 +19,14 @@
 package se.uu.ub.cora.sqldatabase.table.internal;
 
 import se.uu.ub.cora.sqldatabase.table.DbQueryInfo;
-import se.uu.ub.cora.sqldatabase.table.SortOrder;
+import se.uu.ub.cora.sqldatabase.table.OrderCriteria;
 
 public class DbQueryInfoImp implements DbQueryInfo {
 	private static final int MIN_OFFSET = 0;
 	private Integer fromNo;
 	private Integer toNo;
 	private String orderBy;
-	private SortOrder sortOrder;
+	private OrderCriteria sortOrder;
 
 	public DbQueryInfoImp() {
 	}
@@ -121,7 +121,7 @@ public class DbQueryInfoImp implements DbQueryInfo {
 	}
 
 	@Override
-	public void setSortOrder(SortOrder sortOrder) {
+	public void setSortOrder(OrderCriteria sortOrder) {
 		this.sortOrder = sortOrder;
 	}
 

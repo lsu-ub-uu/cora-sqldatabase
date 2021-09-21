@@ -52,6 +52,7 @@ public final class TableFacadeImp implements TableFacade {
 		return readAllFromTableUsingSql(tableName, sql);
 	}
 
+	// REMOVE
 	private String assembleSqlForReadAllFromTable(String tableName) {
 		return "select * from " + tableName;
 	}

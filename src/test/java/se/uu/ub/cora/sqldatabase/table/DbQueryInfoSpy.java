@@ -19,7 +19,7 @@
 package se.uu.ub.cora.sqldatabase.table;
 
 import se.uu.ub.cora.sqldatabase.table.DbQueryInfo;
-import se.uu.ub.cora.sqldatabase.table.SortOrder;
+import se.uu.ub.cora.sqldatabase.table.OrderCriteria;
 
 public class DbQueryInfoSpy implements DbQueryInfo {
 
@@ -81,7 +81,7 @@ public class DbQueryInfoSpy implements DbQueryInfo {
 		return " order by from spy";
 	}
 
-	public void setSortOrder(SortOrder asc) {
+	public void setSortOrder(OrderCriteria asc) {
 		// TODO Auto-generated method stub
 
 	}

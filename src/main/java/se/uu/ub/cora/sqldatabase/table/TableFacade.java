@@ -27,9 +27,11 @@ import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
 /**
- * TableFacade interacts with data from sql database without the need to write sql statements.
+ * TableFacade interacts with data from a sql database without the need to write sql statements.
  * <p>
  * If you need to use more generic sql statements use {@link DatabaseFacade} instead.
+ * <p>
+ * Implementations of TableFacade are generally not threadsafe.
  */
 public interface TableFacade {
 

@@ -29,6 +29,11 @@ import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 
+/**
+ * SqlDatabaseFactoryImp implements SqlDatabaseFactory. To get an instance of this class look at
+ * {@link #usingLookupNameFromContext(String)} and
+ * {@link #usingUriAndUserAndPassword(String, String, String)} respectively.
+ */
 public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 	private SqlConnectionProvider sqlConnectionProvider;
 	private String lookupName;
@@ -36,6 +41,15 @@ public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 	private String user;
 	private String password;
 
+	/**
+	 * usingLookupNameFromContext creates a new instance of this class that uses the provided
+	 * lookupName to find connection details for the database in the context.
+	 * 
+	 * @param lookupName
+	 *            A String with the lookup name to use to find connection details for the database
+	 *            from the context.
+	 * @return A new instance of SqlDatabaseFactoryImp
+	 */
 	public static SqlDatabaseFactoryImp usingLookupNameFromContext(String lookupName) {
 		return new SqlDatabaseFactoryImp(lookupName);
 	}
@@ -45,6 +59,18 @@ public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 		this.lookupName = lookupName;
 	}
 
+	/**
+	 * usingUriAndUserAndPassword creates a new instance of this class that uses the provided url,
+	 * user and password as connection details for the database.
+	 * 
+	 * @param url
+	 *            A String with url to the database
+	 * @param user
+	 *            A String with the username
+	 * @param password
+	 *            A String with the password
+	 * @return A new instance of SqlDatabaseFactoryImp
+	 */
 	public static SqlDatabaseFactoryImp usingUriAndUserAndPassword(String url, String user,
 			String password) {
 		return new SqlDatabaseFactoryImp(url, user, password);

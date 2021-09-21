@@ -37,7 +37,7 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.table.Conditions;
 import se.uu.ub.cora.sqldatabase.table.DbQueryInfoSpy;
 import se.uu.ub.cora.sqldatabase.table.Parameters;
-import se.uu.ub.cora.sqldatabase.table.SortOrder;
+import se.uu.ub.cora.sqldatabase.table.OrderCriteria;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class TableFacadeTest {
@@ -113,7 +113,7 @@ public class TableFacadeTest {
 		String tableName = "someTableName";
 		DbQueryInfoSpy queryInfo = new DbQueryInfoSpy(10, 109);
 		queryInfo.setOrderBy("organistion_id");
-		queryInfo.setSortOrder(SortOrder.ASC);
+		queryInfo.setSortOrder(OrderCriteria.ASC);
 
 		tableFacade.readRowsFromTable(tableName, queryInfo);
 		assertEquals(databaseFacadeSpy.sql,

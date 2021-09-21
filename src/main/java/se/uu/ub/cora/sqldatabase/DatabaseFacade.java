@@ -26,8 +26,10 @@ import se.uu.ub.cora.sqldatabase.table.TableFacade;
 /**
  * DatabaseFacade reads and changes data in a sql database using prepared statements.
  * <p>
- * If you only need to read and update data from one table have a look at {@link TableFacade}
- * instead.
+ * If you only need to read and update data from one table at a time have a look at
+ * {@link TableFacade} instead.
+ * <p>
+ * Implementations of DatabaseFacade are generally not threadsafe.
  */
 public interface DatabaseFacade {
 	/**

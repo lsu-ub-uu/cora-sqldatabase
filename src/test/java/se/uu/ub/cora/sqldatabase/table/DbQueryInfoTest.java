@@ -26,7 +26,7 @@ import static org.testng.Assert.assertTrue;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.sqldatabase.table.DbQueryInfo;
-import se.uu.ub.cora.sqldatabase.table.SortOrder;
+import se.uu.ub.cora.sqldatabase.table.OrderCriteria;
 import se.uu.ub.cora.sqldatabase.table.internal.DbQueryInfoImp;
 
 public class DbQueryInfoTest {
@@ -129,9 +129,9 @@ public class DbQueryInfoTest {
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
 		queryInfo.setOrderBy("organisation_id");
 
-		queryInfo.setSortOrder(SortOrder.ASC);
+		queryInfo.setSortOrder(OrderCriteria.ASC);
 		assertEquals(queryInfo.getOrderByPartOfQuery(),
-				" order by " + "organisation_id" + " " + SortOrder.ASC.order);
+				" order by " + "organisation_id" + " " + OrderCriteria.ASC.order);
 	}
 
 	@Test
@@ -139,9 +139,9 @@ public class DbQueryInfoTest {
 		DbQueryInfoImp queryInfo = new DbQueryInfoImp();
 		queryInfo.setOrderBy("organisation_id");
 
-		queryInfo.setSortOrder(SortOrder.DESC);
+		queryInfo.setSortOrder(OrderCriteria.DESC);
 		assertEquals(queryInfo.getOrderByPartOfQuery(),
-				" order by " + "organisation_id" + " " + SortOrder.DESC.order);
+				" order by " + "organisation_id" + " " + OrderCriteria.DESC.order);
 	}
 
 }

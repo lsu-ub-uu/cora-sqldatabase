@@ -21,10 +21,32 @@ package se.uu.ub.cora.sqldatabase;
 
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
+/**
+ * SqlDatabaseFactory is a factory interface that provides instances of classes in the sqlDatabase
+ * module.
+ * <p>
+ * To be able to fullfill this interface must implementing factories be supplied with connection
+ * details for the database, how this is done is up to the implementing classes to decide.
+ * <p>
+ * Implementations of SqlDatabaseFactory MUST be threadsafe.
+ */
 public interface SqlDatabaseFactory {
-
-	TableFacade factorTableFacade();
-
+	/**
+	 * factorDatabaseFacade creates and returns a new instance of DatabaseFacade. The returned
+	 * DatabaseFacade should by the implementing factory be set up with database connection details
+	 * so that it can be used to interact with the database without any further configuration.
+	 * 
+	 * @return A DatabaseFacade set up with connection details for the database
+	 */
 	DatabaseFacade factorDatabaseFacade();
+
+	/**
+	 * factorTableFacade creates and returns a new instance of TableFacade. The returned TableFacade
+	 * should by the implementing factory be set up with database connection details so that it can
+	 * be used to interact with the database without any further configuration.
+	 * 
+	 * @return A TableFacade set up with connection details for the database
+	 */
+	TableFacade factorTableFacade();
 
 }

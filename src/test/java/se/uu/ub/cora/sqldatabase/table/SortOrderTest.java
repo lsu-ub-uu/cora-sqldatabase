@@ -22,14 +22,14 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.sqldatabase.table.SortOrder;
+import se.uu.ub.cora.sqldatabase.table.OrderCriteria;
 
 public class SortOrderTest {
 
 	@Test
 	public void testSortOrder() {
-		assertEquals(SortOrder.ASC.order, "asc");
-		assertEquals(SortOrder.DESC.order, "desc");
+		assertEquals(OrderCriteria.ASC.order, "asc");
+		assertEquals(OrderCriteria.DESC.order, "desc");
 	}
 
 }

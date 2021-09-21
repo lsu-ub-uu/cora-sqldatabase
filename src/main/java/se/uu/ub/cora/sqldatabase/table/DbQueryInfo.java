@@ -87,9 +87,9 @@ public interface DbQueryInfo {
 	 * setSortOrder sets the sort order to use in a sql query
 	 * 
 	 * @param {@link
-	 *            SortOrder}, the sort order to set
+	 *            OrderCriteria}, the sort order to set
 	 */
-	void setSortOrder(SortOrder sortOrder);
+	void setSortOrder(OrderCriteria sortOrder);
 
 	/**
 	 * getOrderByPartOfQuery uses the order by and the sort order set to compose a sort part of a
