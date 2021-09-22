@@ -13,6 +13,9 @@ import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
+import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
+import se.uu.ub.cora.sqldatabase.table.internal.TableQueryImp;
 
 public class RealDbTest {
 
@@ -32,8 +35,7 @@ public class RealDbTest {
 		DatabaseFacadeImp dataReaderImp = DatabaseFacadeImp.usingSqlConnectionProvider(sProvider);
 		String sql = "select * from country;";
 		List<Object> values = new ArrayList<>();
-		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql,
-				values);
+		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql, values);
 		assertNotNull(result);
 	}
 
@@ -46,8 +48,7 @@ public class RealDbTest {
 		// String sql = "select * from organisation ;";
 		List<Object> values = new ArrayList<>();
 		values.add(51);
-		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql,
-				values);
+		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql, values);
 		assertNotNull(result);
 	}
 
@@ -60,8 +61,7 @@ public class RealDbTest {
 		// String sql = "select * from organisation ;";
 		List<Object> values = new ArrayList<>();
 		values.add("Stockholms organisation");
-		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql,
-				values);
+		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql, values);
 		assertNotNull(result);
 	}
 
@@ -76,9 +76,32 @@ public class RealDbTest {
 		List<Object> values = new ArrayList<>();
 		values.add("organisation");
 		values.add(false);
-		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql,
-				values);
+		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql, values);
 		assertNotNull(result);
+	}
+
+	@Test(enabled = false)
+	public void testTableFacadeInsertCrap() throws Exception {
+		SqlDatabaseFactory factory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
+				"jdbc:postgresql://diva-docker-mock-classic-postgresql:5432/diva", "diva", "diva");
+		TableFacade tableFacade = factory.factorTableFacade();
+		TableQuery query = TableQueryImp.usingTableName("organisation");
+		query.addParameter("organisation_id", 666);
+		query.addParameter("organisation_name_locale", "sv");
+		query.addParameter("organisation_type_id", 54);
+		query.addParameter("domain", "test");
+		query.addParameter("organisation_name", "mail@yahoo.se; DROP person2");
+		tableFacade.insertRowUsingQuery(query);
+	}
+
+	@Test(enabled = false)
+	public void testTableFacadeInsertCrap2() throws Exception {
+		SqlDatabaseFactory factory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
+				"jdbc:postgresql://diva-docker-mock-classic-postgresql:5432/diva", "diva", "diva");
+		TableFacade tableFacade = factory.factorTableFacade();
+		TableQuery query = TableQueryImp.usingTableName("organisation");
+		query.addCondition("organisation_name", "somerecord; DROP person2");
+		tableFacade.readRowsForQuery(query);
 	}
 
 	@Test(enabled = false)
@@ -89,8 +112,7 @@ public class RealDbTest {
 		String sql = "update country set defaultname = ? where alpha2code = 'SE';";
 		List<Object> values = new ArrayList<>();
 		values.add("fake name se");
-		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql,
-				values);
+		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql, values);
 		assertNotNull(result);
 	}
 
@@ -103,8 +125,7 @@ public class RealDbTest {
 		// String sql = "select * from organisation ;";
 		List<Object> values = new ArrayList<>();
 		// values.add(51);
-		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql,
-				values);
+		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql, values);
 		assertNotNull(result);
 	}
 
@@ -120,8 +141,7 @@ public class RealDbTest {
 		// String sql = "select * from organisation ;";
 		List<Object> values = new ArrayList<>();
 		// values.add(51);
-		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql,
-				values);
+		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql, values);
 		for (Row row : result) {
 			System.out.println(row);
 		}

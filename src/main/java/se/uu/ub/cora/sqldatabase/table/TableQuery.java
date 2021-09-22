@@ -21,26 +21,32 @@ package se.uu.ub.cora.sqldatabase.table;
 import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.DatabaseNull;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
 public interface TableQuery {
 	/**
-	 * The add method adds a parameter with name and value to this parameters.
+	 * The add method adds a parameter with name and value to this query.
 	 * <p>
 	 * If a parameter is to use null, MUST the value of the added parameter be {@link DatabaseNull}
+	 * <p>
+	 * If the name contains characters that are problematic for sql injection MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param name
-	 *            A String with the name to use in the sql query
-	 * 
+	 *            A String with the name to use in the sql.
 	 * @param value
-	 *            A String with the value to use in the sql query
+	 *            A String with the value to use in the sql
 	 *
 	 */
 	void addParameter(String name, Object value);
 
 	/**
-	 * The add method adds a condition with name and value to this conditions.
+	 * The addCondition method adds a condition with name and value to this query.
 	 * <p>
 	 * If a condition is to use null, MUST the value of the added condition be {@link DatabaseNull}
+	 * <p>
+	 * If the name contains characters that are problematic for sql injection MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param name
 	 *            A String with the name to use in the sql query
@@ -50,15 +56,6 @@ public interface TableQuery {
 	 *
 	 */
 	void addCondition(String name, Object value);
-
-	/**
-	 * getOffset returns the offset to use in a sql query, based on the fromNo set in the instance.
-	 * FromNo is expected to be 1 if the result should start with the first record. Offset however
-	 * starts at zero, and will never be lower than zero. If no fromNo is set in the instance, zero
-	 * will be returned.
-	 * 
-	 * @return Integer offset
-	 */
 
 	/**
 	 * setFromNo sets the from number (in the result), indicating the first record that the
@@ -82,6 +79,9 @@ public interface TableQuery {
 	/**
 	 * addOrderByAsc adds an ascending order by column to the query, if more then one order by is
 	 * added MUST they be added to generated sql in the order they are added.
+	 * <p>
+	 * If the name contains characters that are problematic for sql injection MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param column
 	 *            A String with a column to order the result by
@@ -91,22 +91,62 @@ public interface TableQuery {
 	/**
 	 * addOrderByDesc adds an descending order by column to the query, if more then one order by is
 	 * added MUST they be added to generated sql in the order they are added.
+	 * <p>
+	 * If the name contains characters that are problematic for sql injection MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param column
 	 *            A String with a column to order the result by
 	 */
 	void addOrderByDesc(String column);
 
+	/**
+	 * assembleCreateSql assembles an insert prepared statement sql based on the table and
+	 * parameters added.
+	 * 
+	 * @return A String with a sql insert statement
+	 */
 	String assembleCreateSql();
 
+	/**
+	 * assembleReadSql assembles a read prepared statement sql based on the table, parameters,
+	 * conditions, fromNo, toNo and sortorders added.
+	 * 
+	 * @return A String with an sql read statement
+	 */
 	String assembleReadSql();
 
+	/**
+	 * assembleUpdateSql assembles an update prepared statement sql based on the table, parameters
+	 * and conditions added.
+	 * 
+	 * @return A String with a sql update statement
+	 */
 	String assembleUpdateSql();
 
+	/**
+	 * assembleDeleteSql assembles a delete prepared statement sql based on the table and conditions
+	 * added.
+	 * 
+	 * @return A String with a sql delete statement
+	 */
 	String assembleDeleteSql();
 
+	/**
+	 * getQueryValues returns a list of values that is needed to set values in the prepared
+	 * statements created by the assemble sql methods. The list of query values contains values from
+	 * all parameters and conditions added.
+	 * 
+	 * @return A List of Objects containing values for the prepared statements
+	 */
 	List<Object> getQueryValues();
 
+	/**
+	 * assembleCountSql assembles an count prepared statement sql based on the table, parameters,
+	 * conditions, fromNo, toNo added.
+	 * 
+	 * @return A String with a sql count statement
+	 */
 	String assembleCountSql();
 
 }

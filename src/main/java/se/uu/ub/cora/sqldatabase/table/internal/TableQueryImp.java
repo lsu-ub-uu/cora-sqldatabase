@@ -23,7 +23,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 public class TableQueryImp implements TableQuery {
@@ -34,9 +37,24 @@ public class TableQueryImp implements TableQuery {
 	private List<String> orderBy = new ArrayList<>();
 	private Long offset;
 	private Long lastRecordNumberToShowInQuery;
+	private static final String ALLOWED_REGEX = "^[A-Za-z\\-_]*$";
+	private static Pattern allowedPattern = Pattern.compile(ALLOWED_REGEX);
 
 	public static TableQueryImp usingTableName(String tableName) {
+		throwErrorIfInputContainsForbiddenCharacters(tableName);
 		return new TableQueryImp(tableName);
+	}
+
+	private static void throwErrorIfInputContainsForbiddenCharacters(String text) {
+		if (hasForbiddenCharacters(text)) {
+			throw SqlDatabaseException
+					.withMessage("Input contains character outside the allowed regexp.");
+		}
+	}
+
+	private static boolean hasForbiddenCharacters(String text) {
+		Matcher allowedMatcher = allowedPattern.matcher(text);
+		return !allowedMatcher.matches();
 	}
 
 	private TableQueryImp(String tableName) {
@@ -45,23 +63,29 @@ public class TableQueryImp implements TableQuery {
 
 	@Override
 	public void addParameter(String name, Object value) {
+		throwErrorIfInputContainsForbiddenCharacters(name);
 		parameters.put(name, value);
 	}
 
 	@Override
 	public void addCondition(String name, Object value) {
+		throwErrorIfInputContainsForbiddenCharacters(name);
 		conditions.put(name, value);
 	}
 
 	@Override
 	public void addOrderByAsc(String column) {
-		this.orderBy.add(column + " asc");
+		tryToAddOrderByPart(column, "asc");
 	}
 
 	@Override
 	public void addOrderByDesc(String column) {
-		this.orderBy.add(column + " desc");
+		tryToAddOrderByPart(column, "desc");
+	}
 
+	private void tryToAddOrderByPart(String column, String orderDirection) {
+		throwErrorIfInputContainsForbiddenCharacters(column);
+		this.orderBy.add(column + " " + orderDirection);
 	}
 
 	@Override
@@ -205,5 +229,4 @@ public class TableQueryImp implements TableQuery {
 	public String assembleCountSql() {
 		return "select count (*) from (" + assembleReadSql() + ") as count";
 	}
-
 }

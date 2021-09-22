@@ -19,24 +19,162 @@
 package se.uu.ub.cora.sqldatabase.table;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.table.internal.TableQueryImp;
 
 public class TableQueryTest {
 
+	List<String> textsWithForbiddenCharacters = new ArrayList<>();
+	List<String> textsWithAllowedCharacters = new ArrayList<>();
 	String tableName = "someTableName";
 
 	TableQuery tableQuery;
 
+	TableQueryTest() {
+		textsWithForbiddenCharacters.add("(select * from person) as person");
+		textsWithForbiddenCharacters.add("table Name");
+		textsWithForbiddenCharacters.add("table where 1=1");
+		textsWithForbiddenCharacters.add("table=Name");
+		textsWithForbiddenCharacters.add("table\"Name");
+		textsWithForbiddenCharacters.add("table*Name");
+		textsWithForbiddenCharacters.add("table\\Name");
+		textsWithForbiddenCharacters.add("table+Name");
+		textsWithForbiddenCharacters.add("table+Name");
+		textsWithForbiddenCharacters.add("table\\u0054Name");
+		textsWithForbiddenCharacters.add("DROP\stableName");
+
+		textsWithAllowedCharacters.add("tableName");
+		textsWithAllowedCharacters.add("TABLENAME");
+		textsWithAllowedCharacters.add("tablename");
+		textsWithAllowedCharacters.add("table-Name");
+		textsWithAllowedCharacters.add("table_Name");
+	}
+
 	@BeforeMethod
 	public void beforeMethod() {
 		tableQuery = TableQueryImp.usingTableName(tableName);
+	}
+
+	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
+			+ "Input contains character outside the allowed regexp.")
+	public void testTableNameContainsUncommonLetters() throws Exception {
+		TableQueryImp.usingTableName("table'Name");
+	}
+
+	@Test
+	public void testConstructorFindsForbiddenCharacters() throws Exception {
+		for (String text : textsWithForbiddenCharacters) {
+			assertConstructorHandlesForbiddenCharacters(text);
+		}
+	}
+
+	private void assertConstructorHandlesForbiddenCharacters(String name) {
+		try {
+			TableQueryImp.usingTableName(name);
+			assertFalse(true);
+		} catch (Exception e) {
+			assertTrue(true);
+		}
+	}
+
+	@Test
+	public void testOkTableNames() throws Exception {
+		for (String text : textsWithAllowedCharacters) {
+			TableQueryImp.usingTableName(text);
+		}
+		assertTrue(true);
+	}
+
+	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
+			+ "Input contains character outside the allowed regexp.")
+	public void testAddParameterNameContainsUncommonLetters() throws Exception {
+		tableQuery.addParameter("some'Paramter", "someValue");
+	}
+
+	@Test
+	public void testAddParameterFindsForbiddenCharacters() throws Exception {
+		for (String text : textsWithForbiddenCharacters) {
+			assertAddParameterHandlesForbiddenCharacters(text);
+		}
+	}
+
+	private void assertAddParameterHandlesForbiddenCharacters(String name) {
+		try {
+			tableQuery.addParameter(name, "someValue");
+			assertFalse(true);
+		} catch (Exception e) {
+			assertTrue(true);
+		}
+	}
+
+	@Test
+	public void testAddParameterNames() throws Exception {
+		for (String text : textsWithAllowedCharacters) {
+			tableQuery.addParameter(text, "someValue");
+		}
+		assertTrue(true);
+	}
+
+	@Test
+	public void testAddConditionFindsForbiddenCharacters() throws Exception {
+		for (String text : textsWithForbiddenCharacters) {
+			assertAddConditionsHandlesForbiddenCharacters(text);
+		}
+	}
+
+	private void assertAddConditionsHandlesForbiddenCharacters(String name) {
+		try {
+			tableQuery.addCondition(name, "someValue");
+			assertFalse(true);
+		} catch (Exception e) {
+			assertTrue(true);
+		}
+	}
+
+	@Test
+	public void testAddConditionNames() throws Exception {
+		for (String text : textsWithAllowedCharacters) {
+			tableQuery.addCondition(text, "someValue");
+		}
+		assertTrue(true);
+	}
+
+	@Test
+	public void testAddOrderByFindsForbiddenCharacters() throws Exception {
+		for (String text : textsWithForbiddenCharacters) {
+			assertAddOrderBysHandlesForbiddenCharacters(text, "asc");
+			assertAddOrderBysHandlesForbiddenCharacters(text, "desc");
+		}
+	}
+
+	private void assertAddOrderBysHandlesForbiddenCharacters(String name, String orderDirection) {
+		try {
+			if ("asc".equals(orderDirection))
+				tableQuery.addOrderByAsc(name);
+			else
+				tableQuery.addOrderByDesc(name);
+			assertFalse(true);
+		} catch (Exception e) {
+			assertTrue(true);
+		}
+	}
+
+	@Test
+	public void testAddOrderByNames() throws Exception {
+		for (String text : textsWithAllowedCharacters) {
+			tableQuery.addOrderByAsc(text);
+			tableQuery.addOrderByDesc(text);
+		}
+		assertTrue(true);
 	}
 
 	@Test
@@ -46,18 +184,18 @@ public class TableQueryTest {
 
 	@Test
 	public void testCreateSqlOneParameter() throws Exception {
-		tableQuery.addParameter("parameterName1", "parameterValue1");
+		tableQuery.addParameter("parameterNameA", "parameterValue1");
 		assertEquals(tableQuery.assembleCreateSql(),
-				"insert into " + tableName + "(parameterName1) values(?)");
+				"insert into " + tableName + "(parameterNameA) values(?)");
 		assertQueryValues("parameterValue1");
 	}
 
 	@Test
 	public void testCreateSqlTwoParameters() throws Exception {
-		tableQuery.addParameter("parameterName1", "parameterValue1");
-		tableQuery.addParameter("parameterName2", "parameterValue2");
+		tableQuery.addParameter("parameterNameA", "parameterValue1");
+		tableQuery.addParameter("parameterNameB", "parameterValue2");
 		assertEquals(tableQuery.assembleCreateSql(),
-				"insert into " + tableName + "(parameterName1, parameterName2) values(?, ?)");
+				"insert into " + tableName + "(parameterNameA, parameterNameB) values(?, ?)");
 		assertQueryValues("parameterValue1", "parameterValue2");
 	}
 
@@ -78,18 +216,18 @@ public class TableQueryTest {
 
 	@Test
 	public void testReadSqlWithOneCondition() throws Exception {
-		tableQuery.addCondition("conditionName1", "conditionValue1");
+		tableQuery.addCondition("conditionNameA", "conditionValue1");
 		assertEquals(tableQuery.assembleReadSql(),
-				"select * from " + tableName + " where conditionName1 = ?");
+				"select * from " + tableName + " where conditionNameA = ?");
 		assertQueryValues("conditionValue1");
 	}
 
 	@Test
 	public void testReadSqlWithTwoConditions() throws Exception {
-		tableQuery.addCondition("conditionName1", "conditionValue1");
-		tableQuery.addCondition("conditionName2", "conditionValue2");
+		tableQuery.addCondition("conditionNameA", "conditionValue1");
+		tableQuery.addCondition("conditionNameB", "conditionValue2");
 		assertEquals(tableQuery.assembleReadSql(),
-				"select * from " + tableName + " where conditionName1 = ? and conditionName2 = ?");
+				"select * from " + tableName + " where conditionNameA = ? and conditionNameB = ?");
 		assertQueryValues("conditionValue1", "conditionValue2");
 	}
 
@@ -132,92 +270,92 @@ public class TableQueryTest {
 
 	@Test
 	public void testReadSqlWithOneOrderBy() throws Exception {
-		tableQuery.addOrderByAsc("column1");
+		tableQuery.addOrderByAsc("columnA");
 		assertEquals(tableQuery.assembleReadSql(),
-				"select * from " + tableName + " order by column1 asc");
+				"select * from " + tableName + " order by columnA asc");
 		assertTrue(tableQuery.getQueryValues().isEmpty());
 	}
 
 	@Test
 	public void testReadSqlWithTwoOrderBy() throws Exception {
-		tableQuery.addOrderByAsc("column1");
-		tableQuery.addOrderByAsc("column2");
+		tableQuery.addOrderByAsc("columnA");
+		tableQuery.addOrderByAsc("columnB");
 		assertEquals(tableQuery.assembleReadSql(),
-				"select * from " + tableName + " order by column1 asc, column2 asc");
+				"select * from " + tableName + " order by columnA asc, columnB asc");
 		assertTrue(tableQuery.getQueryValues().isEmpty());
 	}
 
 	@Test
 	public void testReadSqlWithTwoOrderByDescAsc() throws Exception {
-		tableQuery.addOrderByDesc("column1");
-		tableQuery.addOrderByAsc("column2");
+		tableQuery.addOrderByDesc("columnA");
+		tableQuery.addOrderByAsc("columnB");
 		assertEquals(tableQuery.assembleReadSql(),
-				"select * from " + tableName + " order by column1 desc, column2 asc");
+				"select * from " + tableName + " order by columnA desc, columnB asc");
 		assertTrue(tableQuery.getQueryValues().isEmpty());
 	}
 
 	@Test
 	public void testReadSqlWithTwoOrderByAscDesc() throws Exception {
-		tableQuery.addOrderByAsc("column1");
-		tableQuery.addOrderByDesc("column2");
+		tableQuery.addOrderByAsc("columnA");
+		tableQuery.addOrderByDesc("columnB");
 		assertEquals(tableQuery.assembleReadSql(),
-				"select * from " + tableName + " order by column1 asc, column2 desc");
+				"select * from " + tableName + " order by columnA asc, columnB desc");
 		assertTrue(tableQuery.getQueryValues().isEmpty());
 	}
 
 	@Test
 	public void testReadSqlWithEverything() throws Exception {
-		tableQuery.addCondition("conditionName1", "conditionValue1");
-		tableQuery.addCondition("conditionName2", "conditionValue2");
+		tableQuery.addCondition("conditionNameA", "conditionValue1");
+		tableQuery.addCondition("conditionNameB", "conditionValue2");
 		tableQuery.setFromNo(10L);
 		tableQuery.setToNo(20L);
-		tableQuery.addOrderByDesc("column1");
-		tableQuery.addOrderByAsc("column2");
+		tableQuery.addOrderByDesc("columnA");
+		tableQuery.addOrderByAsc("columnB");
 		assertEquals(tableQuery.assembleReadSql(),
-				"select * from " + tableName + " where conditionName1 = ? and conditionName2 = ?"
-						+ " order by column1 desc, column2 asc offset 9 limit 10");
+				"select * from " + tableName + " where conditionNameA = ? and conditionNameB = ?"
+						+ " order by columnA desc, columnB asc offset 9 limit 10");
 		assertQueryValues("conditionValue1", "conditionValue2");
 	}
 
 	@Test
 	public void testCountSql() throws Exception {
-		tableQuery.addCondition("conditionName1", "conditionValue1");
-		tableQuery.addCondition("conditionName2", "conditionValue2");
+		tableQuery.addCondition("conditionNameA", "conditionValue1");
+		tableQuery.addCondition("conditionNameB", "conditionValue2");
 		tableQuery.setFromNo(10L);
 		tableQuery.setToNo(20L);
 		assertEquals(tableQuery.assembleCountSql(),
 				"select count (*) from (select * from " + tableName
-						+ " where conditionName1 = ? and conditionName2 = ?"
+						+ " where conditionNameA = ? and conditionNameB = ?"
 						+ " offset 9 limit 10) as count");
 		assertQueryValues("conditionValue1", "conditionValue2");
 	}
 
 	@Test
 	public void testUpdateSqlOneParameter() throws Exception {
-		tableQuery.addParameter("parameterName1", "parameterValue1");
+		tableQuery.addParameter("parameterNameA", "parameterValue1");
 		assertEquals(tableQuery.assembleUpdateSql(),
-				"update " + tableName + " set parameterName1 = ?");
+				"update " + tableName + " set parameterNameA = ?");
 		assertQueryValues("parameterValue1");
 	}
 
 	@Test
 	public void testUpdateSqlTwoParameters() throws Exception {
-		tableQuery.addParameter("parameterName1", "parameterValue1");
-		tableQuery.addParameter("parameterName2", "parameterValue2");
+		tableQuery.addParameter("parameterNameA", "parameterValue1");
+		tableQuery.addParameter("parameterNameB", "parameterValue2");
 		assertEquals(tableQuery.assembleUpdateSql(),
-				"update " + tableName + " set parameterName1 = ?, parameterName2 = ?");
+				"update " + tableName + " set parameterNameA = ?, parameterNameB = ?");
 		assertQueryValues("parameterValue1", "parameterValue2");
 	}
 
 	@Test
 	public void testUpdateSqlTwoParametersTwoConditions() throws Exception {
-		tableQuery.addParameter("parameterName1", "parameterValue1");
-		tableQuery.addParameter("parameterName2", "parameterValue2");
-		tableQuery.addCondition("conditionName1", "conditionValue1");
-		tableQuery.addCondition("conditionName2", "conditionValue2");
+		tableQuery.addParameter("parameterNameA", "parameterValue1");
+		tableQuery.addParameter("parameterNameB", "parameterValue2");
+		tableQuery.addCondition("conditionNameA", "conditionValue1");
+		tableQuery.addCondition("conditionNameB", "conditionValue2");
 		assertEquals(tableQuery.assembleUpdateSql(),
-				"update " + tableName + " set parameterName1 = ?, parameterName2 = ?"
-						+ " where conditionName1 = ? and conditionName2 = ?");
+				"update " + tableName + " set parameterNameA = ?, parameterNameB = ?"
+						+ " where conditionNameA = ? and conditionNameB = ?");
 		assertQueryValues("parameterValue1", "parameterValue2", "conditionValue1",
 				"conditionValue2");
 	}
@@ -230,10 +368,10 @@ public class TableQueryTest {
 
 	@Test
 	public void testDeleteSqlTwoConditions() throws Exception {
-		tableQuery.addCondition("conditionName1", "conditionValue1");
-		tableQuery.addCondition("conditionName2", "conditionValue2");
+		tableQuery.addCondition("conditionNameA", "conditionValue1");
+		tableQuery.addCondition("conditionNameB", "conditionValue2");
 		assertEquals(tableQuery.assembleDeleteSql(),
-				"delete from " + tableName + " where conditionName1 = ? and conditionName2 = ?");
+				"delete from " + tableName + " where conditionNameA = ? and conditionNameB = ?");
 		assertQueryValues("conditionValue1", "conditionValue2");
 	}
 
