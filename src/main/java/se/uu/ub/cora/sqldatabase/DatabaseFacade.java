@@ -35,8 +35,8 @@ import se.uu.ub.cora.sqldatabase.table.TableFacade;
  * the {@link #close()} method to release the used database resources. </em>
  * <p>
  * Implementations of DatabaseFacade MUST ensure that the underlying {@link Connection} is using
- * autocommit(true) when the implementing class is instansiated (transaction support is turned off).
- * Using transactions is an active choice. If a client wants to use a transaction must the
+ * autocommit(true) (transaction support is turned off) if {@link #startTransaction()} has not been
+ * called. Using transactions is an active choice. If a client wants to use a transaction must the
  * {@link #startTransaction()} method be called and to finnish the transaction must the
  * {@link #endTransaction()} be called.
  * <p>
@@ -75,9 +75,8 @@ public interface DatabaseFacade extends AutoCloseable {
 	 */
 	Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values);
 
-	// TODO: update
 	/**
-	 * ExecuteSqlWithValues executes a sql statement as a preparedQuery returning the number of rows
+	 * executeSqlWithValues executes a sql statement as a preparedQuery returning the number of rows
 	 * affected.
 	 * 
 	 * @param sql

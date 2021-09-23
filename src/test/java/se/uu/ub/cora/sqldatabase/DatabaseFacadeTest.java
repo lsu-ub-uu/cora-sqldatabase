@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -78,19 +78,6 @@ public class DatabaseFacadeTest {
 	public void testDatabaseFacadeExtendsAutoclosable() throws Exception {
 		assertTrue(databaseFacade instanceof AutoCloseable);
 	}
-
-	// @Test(expectedExceptions = SqlDatabaseException.class)
-	// public void testConnectionCreatedAtStartupThrowsErrorIfProblemGettingConnection()
-	// throws Exception {
-	// sqlConnectionProviderSpy.throwErrorGettingConnection = true;
-	// DatabaseFacadeImp.usingSqlConnectionProvider(sqlConnectionProviderSpy);
-	// }
-	//
-	// @Test
-	// public void testConnectionCreatedAtStartup() throws Exception {
-	// assertTrue(sqlConnectionProviderSpy.getConnectionHasBeenCalled);
-	// assertFalse(connectionSpy.closeWasCalled);
-	// }
 
 	@Test
 	public void testCloseThrowsExceptionIfCloseFails() throws Exception {

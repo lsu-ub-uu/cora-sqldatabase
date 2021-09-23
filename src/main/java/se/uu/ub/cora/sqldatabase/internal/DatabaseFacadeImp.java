@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -45,7 +45,6 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 
 	private DatabaseFacadeImp(SqlConnectionProvider sqlConnectionProvider) {
 		this.sqlConnectionProvider = sqlConnectionProvider;
-		// connection = sqlConnectionProvider.getConnection();
 	}
 
 	public static DatabaseFacadeImp usingSqlConnectionProvider(
@@ -108,7 +107,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 
 	private List<Row> tryToReadUsingSqlAndValues(String sql, List<Object> values)
 			throws SQLException {
-		startConnectionIfNotExists();
+		createConnectionIfNotCreatedSinceBefore();
 		try (PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
 			addValuesToPreparedStatement(values, prepareStatement);
 			return getResultUsingQuery(prepareStatement);
@@ -195,14 +194,14 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	}
 
 	private int updateUsingSqlAndValues(String sql, List<Object> values) throws SQLException {
-		startConnectionIfNotExists();
+		createConnectionIfNotCreatedSinceBefore();
 		try (PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
 			addValuesToPreparedStatement(values, prepareStatement);
 			return prepareStatement.executeUpdate();
 		}
 	}
 
-	private void startConnectionIfNotExists() {
+	private void createConnectionIfNotCreatedSinceBefore() {
 		if (connection == null) {
 			connection = sqlConnectionProvider.getConnection();
 		}
@@ -220,7 +219,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	@Override
 	public void startTransaction() {
 		try {
-			startConnectionIfNotExists();
+			createConnectionIfNotCreatedSinceBefore();
 			connection.setAutoCommit(false);
 		} catch (SQLException e) {
 			throw throwSqlDatabaseException("Error starting transaction.", e);
