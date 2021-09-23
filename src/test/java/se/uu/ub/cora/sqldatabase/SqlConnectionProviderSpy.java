@@ -23,19 +23,28 @@ import java.sql.Connection;
 
 import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 
 public class SqlConnectionProviderSpy implements SqlConnectionProvider {
 
 	public ConnectionSpy connection = new ConnectionSpy();
+	public boolean throwErrorGettingConnection = false;
 	public boolean returnErrorConnection = false;
 	public boolean getConnectionHasBeenCalled = false;
+	MethodCallRecorder MCR = new MethodCallRecorder();
 
 	@Override
 	public Connection getConnection() {
+		MCR.addCall();
 		getConnectionHasBeenCalled = true;
-		if (returnErrorConnection) {
-			connection.returnErrorConnection = true;
+		if (throwErrorGettingConnection) {
+			throw SqlDatabaseException
+					.withMessage("error from SqlConnectionProviderSpy getting connection");
 		}
+		if (returnErrorConnection) {
+			connection.throwErrorConnection = true;
+		}
+		MCR.addReturned(connection);
 		return connection;
 	}
 

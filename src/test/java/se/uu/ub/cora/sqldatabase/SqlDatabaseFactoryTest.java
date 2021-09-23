@@ -152,8 +152,8 @@ public class SqlDatabaseFactoryTest {
 
 		TableFacadeImp tableFacade = (TableFacadeImp) tableFacadeFactory.factorTableFacade();
 
-		DatabaseFacadeImp dataReader = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
-		assertSame(dataReader.getSqlConnectionProvider(),
+		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
+		assertSame(databaseFacade.getSqlConnectionProvider(),
 				tableFacadeFactory.getSqlConnectionProvider());
 	}
 

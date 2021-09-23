@@ -19,6 +19,7 @@
 
 package se.uu.ub.cora.sqldatabase;
 
+import java.sql.Connection;
 import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
@@ -29,9 +30,19 @@ import se.uu.ub.cora.sqldatabase.table.TableFacade;
  * If you only need to read and update data from one table at a time have a look at
  * {@link TableFacade} instead.
  * <p>
+ * <em> DatabaseFacade uses the AutoClosable structure to close used database resources. Clients
+ * using an implementation of DatabaseFacade MUST use a try-with-resources block or manually call
+ * the {@link #close()} method to release the used database resources. </em>
+ * <p>
+ * Implementations of DatabaseFacade MUST ensure that the underlying {@link Connection} is using
+ * autocommit(true) when the implementing class is instansiated (transaction support is turned off).
+ * Using transactions is an active choice. If a client wants to use a transaction must the
+ * {@link #startTransaction()} method be called and to finnish the transaction must the
+ * {@link #endTransaction()} be called.
+ * <p>
  * Implementations of DatabaseFacade are generally not threadsafe.
  */
-public interface DatabaseFacade {
+public interface DatabaseFacade extends AutoCloseable {
 	/**
 	 * readUsingSqlAndValues reads rows from the database using the supplied sql (prepared
 	 * statement) and the supplied values.
@@ -77,4 +88,7 @@ public interface DatabaseFacade {
 	 */
 	int executeSqlWithValues(String sql, List<Object> values);
 
+	public void startTransaction();
+
+	public void endTransaction();
 }

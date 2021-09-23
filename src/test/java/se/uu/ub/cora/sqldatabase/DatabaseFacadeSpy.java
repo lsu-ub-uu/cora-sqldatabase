@@ -102,4 +102,22 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 		return returnValue;
 	}
 
+	@Override
+	public void close() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void startTransaction() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void endTransaction() {
+		// TODO Auto-generated method stub
+
+	}
+
 }

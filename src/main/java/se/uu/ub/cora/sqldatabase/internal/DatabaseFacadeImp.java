@@ -37,12 +37,15 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 
 public final class DatabaseFacadeImp implements DatabaseFacade {
-	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
 	private SqlConnectionProvider sqlConnectionProvider;
+	private Connection connection;
 	private Logger log = LoggerProvider.getLoggerForClass(DatabaseFacadeImp.class);
+	private static final int SQL_NULL = java.sql.Types.NULL;
+	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
 
 	private DatabaseFacadeImp(SqlConnectionProvider sqlConnectionProvider) {
 		this.sqlConnectionProvider = sqlConnectionProvider;
+		// connection = sqlConnectionProvider.getConnection();
 	}
 
 	public static DatabaseFacadeImp usingSqlConnectionProvider(
@@ -53,9 +56,17 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	@Override
 	public Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values) {
 		List<Row> readRows = readUsingSqlAndValues(sql, values);
+		return tryToReadOnRow(sql, readRows);
+	}
+
+	private Row tryToReadOnRow(String sql, List<Row> readRows) {
+		throwErrorIfLessOrMoreThanOneRowRead(sql, readRows);
+		return getFirstRowFromReadRows(readRows);
+	}
+
+	private void throwErrorIfLessOrMoreThanOneRowRead(String sql, List<Row> readRows) {
 		throwErrorIfNoRowIsReturned(sql, readRows);
 		throwErrorIfMoreThanOneRowIsReturned(sql, readRows);
-		return getSingleResultFromList(readRows);
 	}
 
 	private void throwErrorIfNoRowIsReturned(String sql, List<Row> readRows) {
@@ -76,7 +87,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		return readRows.size() > 1;
 	}
 
-	private Row getSingleResultFromList(List<Row> readRows) {
+	private Row getFirstRowFromReadRows(List<Row> readRows) {
 		return readRows.get(0);
 	}
 
@@ -87,39 +98,55 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		} catch (SQLException e) {
 			String message = ERROR_READING_DATA_USING_SQL + sql;
 			log.logErrorUsingMessageAndException(message, e);
-			throw SqlDatabaseException.withMessageAndException(message, e);
+			throw throwSqlDatabaseException(message, e);
 		}
+	}
+
+	private SqlDatabaseException throwSqlDatabaseException(String message, SQLException e) {
+		return SqlDatabaseException.withMessageAndException(message, e);
 	}
 
 	private List<Row> tryToReadUsingSqlAndValues(String sql, List<Object> values)
 			throws SQLException {
-		try (Connection connection = sqlConnectionProvider.getConnection();
-				PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
-
-			addParameterValuesToPreparedStatement(values, prepareStatement);
+		startConnectionIfNotExists();
+		try (PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
+			addValuesToPreparedStatement(values, prepareStatement);
 			return getResultUsingQuery(prepareStatement);
 		}
 	}
 
-	private void addParameterValuesToPreparedStatement(List<Object> values,
+	private void addValuesToPreparedStatement(List<Object> values,
 			PreparedStatement preparedStatement) throws SQLException {
 		int position = 1;
 		for (Object value : values) {
-			if (value instanceof Timestamp) {
-				preparedStatement.setTimestamp(position, (Timestamp) value);
-			} else if (value instanceof DatabaseNull) {
-				preparedStatement.setNull(position, java.sql.Types.NULL);
-			} else {
-				preparedStatement.setObject(position, value);
-			}
+			setValueUsingPoperType(preparedStatement, position, value);
 			position++;
 		}
 	}
 
+	private void setValueUsingPoperType(PreparedStatement preparedStatement, int position,
+			Object value) throws SQLException {
+		if (isTimestamp(value)) {
+			preparedStatement.setTimestamp(position, (Timestamp) value);
+		} else if (isDatabaseNull(value)) {
+			preparedStatement.setNull(position, SQL_NULL);
+		} else {
+			preparedStatement.setObject(position, value);
+		}
+	}
+
+	private boolean isTimestamp(Object value) {
+		return value instanceof Timestamp;
+	}
+
+	private boolean isDatabaseNull(Object value) {
+		return value instanceof DatabaseNull;
+	}
+
 	private List<Row> getResultUsingQuery(PreparedStatement prepareStatement) throws SQLException {
-		try (ResultSet resultSet = prepareStatement.executeQuery();) {
-			List<String> columnNames = createListOfColumnNamesFromResultSet(resultSet);
-			return createListOfMapsFromResultSetUsingColumnNames(resultSet, columnNames);
+		try (ResultSet result = prepareStatement.executeQuery();) {
+			List<String> columnNames = createListOfColumnNamesFromResultSet(result);
+			return createListOfMapsFromResultSetUsingColumnNames(result, columnNames);
 		}
 	}
 
@@ -163,17 +190,51 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		try {
 			return updateUsingSqlAndValues(sql, values);
 		} catch (SQLException e) {
-			throw SqlDatabaseException.withMessageAndException("Error executing statement: " + sql,
-					e);
+			throw throwSqlDatabaseException("Error executing statement: " + sql, e);
 		}
 	}
 
 	private int updateUsingSqlAndValues(String sql, List<Object> values) throws SQLException {
-		try (Connection connection = sqlConnectionProvider.getConnection();
-				PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
-			addParameterValuesToPreparedStatement(values, prepareStatement);
+		startConnectionIfNotExists();
+		try (PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
+			addValuesToPreparedStatement(values, prepareStatement);
 			return prepareStatement.executeUpdate();
 		}
+	}
+
+	private void startConnectionIfNotExists() {
+		if (connection == null) {
+			connection = sqlConnectionProvider.getConnection();
+		}
+	}
+
+	@Override
+	public void close() throws Exception {
+		try {
+			connection.close();
+		} catch (SQLException e) {
+			throw throwSqlDatabaseException("Error closing connection.", e);
+		}
+	}
+
+	@Override
+	public void startTransaction() {
+		try {
+			startConnectionIfNotExists();
+			connection.setAutoCommit(false);
+		} catch (SQLException e) {
+			throw throwSqlDatabaseException("Error starting transaction.", e);
+		}
+	}
+
+	@Override
+	public void endTransaction() {
+		try {
+			connection.setAutoCommit(true);
+		} catch (SQLException e) {
+			throw throwSqlDatabaseException("Error ending transaction.", e);
+		}
+
 	}
 
 	public SqlConnectionProvider getSqlConnectionProvider() {
