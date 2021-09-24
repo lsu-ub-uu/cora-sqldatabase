@@ -31,13 +31,19 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
  * <p>
  * If you need to use more generic sql statements use {@link DatabaseFacade} instead.
  * <p>
+ * <em> TableFacade uses the AutoClosable structure to close used database resources. Clients using
+ * an implementation of TableFacade MUST use a try-with-resources block or manually call the
+ * {@link #close()} method to release the used database resources. </em>
+ * <p>
  * Implementations of TableFacade are generally not threadsafe.
  */
-public interface TableFacade {
+public interface TableFacade extends AutoCloseable {
 
 	/**
 	 * insertRowInTableWithValues creates a new row in the named table using the provided values
-	 * @param tableQuery TODO
+	 * 
+	 * @param tableQuery
+	 *            TODO
 	 */
 	void insertRowUsingQuery(TableQuery tableQuery);
 
@@ -67,7 +73,9 @@ public interface TableFacade {
 	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions. The number
 	 * of rows also depends on limitations set in the DbQueryInfo. The readNumberOfRows SHOULD never
 	 * return a larger number than actual result size.
-	 * @param tableQuery TODO
+	 * 
+	 * @param tableQuery
+	 *            TODO
 	 * 
 	 * @param tableName,
 	 *            the table to read from
@@ -84,7 +92,8 @@ public interface TableFacade {
 
 	/**
 	 * 
-	 * @param tableQuery TODO
+	 * @param tableQuery
+	 *            TODO
 	 * @param values
 	 */
 	void updateRowsUsingQuery(TableQuery tableQuery);
@@ -104,4 +113,15 @@ public interface TableFacade {
 	 */
 	long nextValueFromSequence(String sequenceName);
 
+	/**
+	 * startTransaction starts a new transaction setting the underlying connection to
+	 * autocommit(false). To commit the transaction run {@link #endTransaction()}.
+	 */
+	public void startTransaction();
+
+	/**
+	 * endTransaction ends the currently going transaction, and sets the underlying connection back
+	 * to autocommit(true)
+	 */
+	public void endTransaction();
 }

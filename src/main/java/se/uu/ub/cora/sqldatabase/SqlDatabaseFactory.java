@@ -35,6 +35,9 @@ public interface SqlDatabaseFactory {
 	 * factorDatabaseFacade creates and returns a new instance of DatabaseFacade. The returned
 	 * DatabaseFacade should by the implementing factory be set up with database connection details
 	 * so that it can be used to interact with the database without any further configuration.
+	 * <p>
+	 * <em>Note, DatabaseFacade uses the {@link AutoCloseable} interface so it is adviced to wrapp
+	 * this call in an try-with-resources block.</em>
 	 * 
 	 * @return A DatabaseFacade set up with connection details for the database
 	 */
@@ -44,6 +47,9 @@ public interface SqlDatabaseFactory {
 	 * factorTableFacade creates and returns a new instance of TableFacade. The returned TableFacade
 	 * should by the implementing factory be set up with database connection details so that it can
 	 * be used to interact with the database without any further configuration.
+	 * <p>
+	 * <em>Note, TableFacade uses the {@link AutoCloseable} interface so it is adviced to wrapp this
+	 * call in an try-with-resources block.</em>
 	 * 
 	 * @return A TableFacade set up with connection details for the database
 	 */

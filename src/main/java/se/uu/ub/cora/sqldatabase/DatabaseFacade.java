@@ -87,7 +87,15 @@ public interface DatabaseFacade extends AutoCloseable {
 	 */
 	int executeSqlWithValues(String sql, List<Object> values);
 
+	/**
+	 * startTransaction starts a new transaction setting the underlying connection to
+	 * autocommit(false). To commit the transaction run {@link #endTransaction()}.
+	 */
 	public void startTransaction();
 
+	/**
+	 * endTransaction ends the currently going transaction, and sets the underlying connection back
+	 * to autocommit(true)
+	 */
 	public void endTransaction();
 }

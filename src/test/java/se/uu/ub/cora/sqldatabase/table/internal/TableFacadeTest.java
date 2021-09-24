@@ -45,6 +45,29 @@ public class TableFacadeTest {
 	}
 
 	@Test
+	public void testTableFacadeUsesAutoclosable() throws Exception {
+		assertTrue(tableFacade instanceof AutoCloseable);
+	}
+
+	@Test
+	public void testCloseCallsCloseInDbFacade() throws Exception {
+		tableFacade.close();
+		databaseFacadeSpy.MCR.assertMethodWasCalled("close");
+	}
+
+	@Test
+	public void testStartTransactionCallsDbFacade() throws Exception {
+		tableFacade.startTransaction();
+		databaseFacadeSpy.MCR.assertMethodWasCalled("startTransaction");
+	}
+
+	@Test
+	public void testEndTransactionCallsDbFacade() throws Exception {
+		tableFacade.endTransaction();
+		databaseFacadeSpy.MCR.assertMethodWasCalled("endTransaction");
+	}
+
+	@Test
 	public void testReadSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
 		databaseFacadeSpy.throwError = true;
 		try {

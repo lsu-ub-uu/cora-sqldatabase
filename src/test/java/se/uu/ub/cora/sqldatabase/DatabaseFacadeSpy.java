@@ -104,20 +104,28 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 
 	@Override
 	public void close() throws Exception {
-		// TODO Auto-generated method stub
-
+		MCR.addCall();
+		if (throwError) {
+			throw SqlDatabaseException.withMessage("Error from close in DatabaseFacadeSpy");
+		}
 	}
 
 	@Override
 	public void startTransaction() {
-		// TODO Auto-generated method stub
-
+		MCR.addCall();
+		if (throwError) {
+			throw SqlDatabaseException
+					.withMessage("Error from startTransaction in DatabaseFacadeSpy");
+		}
 	}
 
 	@Override
 	public void endTransaction() {
-		// TODO Auto-generated method stub
-
+		MCR.addCall();
+		if (throwError) {
+			throw SqlDatabaseException
+					.withMessage("Error from endTransaction in DatabaseFacadeSpy");
+		}
 	}
 
 }

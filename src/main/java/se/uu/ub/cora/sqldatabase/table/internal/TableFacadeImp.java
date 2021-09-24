@@ -129,4 +129,19 @@ public final class TableFacadeImp implements TableFacade {
 		return dbFacade;
 	}
 
+	@Override
+	public void close() throws Exception {
+		dbFacade.close();
+	}
+
+	@Override
+	public void startTransaction() {
+		dbFacade.startTransaction();
+	}
+
+	@Override
+	public void endTransaction() {
+		dbFacade.endTransaction();
+	}
+
 }
