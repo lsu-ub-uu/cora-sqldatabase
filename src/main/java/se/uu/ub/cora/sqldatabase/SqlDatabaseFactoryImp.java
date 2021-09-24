@@ -27,7 +27,9 @@ import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
+import se.uu.ub.cora.sqldatabase.table.internal.TableQueryImp;
 
 /**
  * SqlDatabaseFactoryImp implements SqlDatabaseFactory. To get an instance of this class look at
@@ -138,6 +140,11 @@ public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 	SqlConnectionProvider getSqlConnectionProvider() {
 		// needed for tests
 		return sqlConnectionProvider;
+	}
+
+	@Override
+	public TableQuery factorTableQuery(String tableName) {
+		return TableQueryImp.usingTableName(tableName);
 	}
 
 }

@@ -43,7 +43,9 @@ import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
 import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
+import se.uu.ub.cora.sqldatabase.table.internal.TableQueryImp;
 
 public class SqlDatabaseFactoryTest {
 	private SqlDatabaseFactoryImp sqlDatabaseFactory;
@@ -187,6 +189,21 @@ public class SqlDatabaseFactoryTest {
 		assertTrue(Modifier.isSynchronized(declaredMethod.getModifiers()));
 
 	}
+
+	@Test
+	public void testFactorTableQuery() throws Exception {
+		String tableName = "someTableName";
+		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(tableName);
+		assertTrue(tableQuery instanceof TableQueryImp);
+	}
+
+	@Test
+	public void testFactorTableQueryNameIsSet() throws Exception {
+		String tableName = "someTableName";
+		TableQueryImp tableQuery = (TableQueryImp) sqlDatabaseFactory.factorTableQuery(tableName);
+		assertEquals(tableQuery.getTableName(), tableName);
+	}
+
 }
 
 class SqlDatabaseFactoryImpForThrowErrorInsteadOfCreatingContext extends SqlDatabaseFactoryImp {
@@ -198,4 +215,5 @@ class SqlDatabaseFactoryImpForThrowErrorInsteadOfCreatingContext extends SqlData
 	void createContextConnectionProvider() {
 		throw SqlDatabaseException.withMessage("Error from overriding test class");
 	}
+
 }

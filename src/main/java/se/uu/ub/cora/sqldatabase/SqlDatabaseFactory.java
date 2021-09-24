@@ -20,6 +20,7 @@
 package se.uu.ub.cora.sqldatabase;
 
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
+import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
 /**
  * SqlDatabaseFactory is a factory interface that provides instances of classes in the sqlDatabase
@@ -54,5 +55,15 @@ public interface SqlDatabaseFactory {
 	 * @return A TableFacade set up with connection details for the database
 	 */
 	TableFacade factorTableFacade();
+
+	/**
+	 * factorTableQuery creates and returns a new instance of TableQuery for the specified database
+	 * table.
+	 * 
+	 * @param tableName
+	 *            A String with the table name to use in the query
+	 * @return A TableQuery set up to use the specified table
+	 */
+	TableQuery factorTableQuery(String tableName);
 
 }

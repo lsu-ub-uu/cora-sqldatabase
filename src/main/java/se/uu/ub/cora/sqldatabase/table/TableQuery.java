@@ -22,7 +22,20 @@ import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.DatabaseNull;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
+/**
+ * TableQuery contains methods for setting all parts needed to create prepared statements for
+ * performing operations agains a specific table or view in a database. Implementations of
+ * TableQuery MUST written so that they handle one table or view at a time. This is normally set at
+ * creationtime when using the {@link SqlDatabaseFactory#factorTableQuery(String)} method to get
+ * access to an instance of this interface.
+ * <p>
+ * TableQuery is used with {@link TableFacade} and its different methods to perform operations on a
+ * specific table or view in a database.
+ * <p>
+ * Implementations of TableQuery are generally not threadsafe.
+ */
 public interface TableQuery {
 	/**
 	 * The add method adds a parameter with name and value to this query.
@@ -80,8 +93,8 @@ public interface TableQuery {
 	 * addOrderByAsc adds an ascending order by column to the query, if more then one order by is
 	 * added MUST they be added to generated sql in the order they are added.
 	 * <p>
-	 * If the name contains characters that are problematic for sql injection MUST an
-	 * {@link SqlDatabaseException} be thrown.
+	 * If the name of the specified column contains characters that are problematic for sql
+	 * injection MUST an {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param column
 	 *            A String with a column to order the result by
@@ -92,8 +105,8 @@ public interface TableQuery {
 	 * addOrderByDesc adds an descending order by column to the query, if more then one order by is
 	 * added MUST they be added to generated sql in the order they are added.
 	 * <p>
-	 * If the name contains characters that are problematic for sql injection MUST an
-	 * {@link SqlDatabaseException} be thrown.
+	 * If the name of the specified column contains characters that are problematic for sql
+	 * injection MUST an {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param column
 	 *            A String with a column to order the result by

@@ -220,4 +220,9 @@ public class TableQueryImp implements TableQuery {
 	public String assembleCountSql() {
 		return "select count (*) from (" + assembleReadSql() + ") as count";
 	}
+
+	public String getTableName() {
+		// needed for test
+		return tableName;
+	}
 }
