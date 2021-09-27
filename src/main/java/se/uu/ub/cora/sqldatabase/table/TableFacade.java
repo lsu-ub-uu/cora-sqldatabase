@@ -40,8 +40,7 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 public interface TableFacade extends AutoCloseable {
 
 	/**
-	 * insertRowInTableWithValues creates a new row in database according to the specified
-	 * TableQuery
+	 * insertRowUsingQuery creates a new row in database according to the specified TableQuery
 	 * 
 	 * @param tableQuery
 	 *            A TableQuery with the table, parameters and values to add to the database
@@ -59,8 +58,7 @@ public interface TableFacade extends AutoCloseable {
 	List<Row> readRowsForQuery(TableQuery tableQuery);
 
 	/**
-	 * readOneRowFromDbUsingTableAndConditions reads one row from the database as specified in the
-	 * provided TableQuery.
+	 * readOneRowForQuery reads one row from the database as specified in the provided TableQuery.
 	 * <p>
 	 * Implementations MUST make sure that if no row or more than one row is found matching the
 	 * conditions will a {@link SqlDatabaseException} be thrown, indicating that the requested
