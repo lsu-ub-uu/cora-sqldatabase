@@ -203,7 +203,6 @@ public class SqlDatabaseFactoryTest {
 		TableQueryImp tableQuery = (TableQueryImp) sqlDatabaseFactory.factorTableQuery(tableName);
 		assertEquals(tableQuery.getTableName(), tableName);
 	}
-
 }
 
 class SqlDatabaseFactoryImpForThrowErrorInsteadOfCreatingContext extends SqlDatabaseFactoryImp {

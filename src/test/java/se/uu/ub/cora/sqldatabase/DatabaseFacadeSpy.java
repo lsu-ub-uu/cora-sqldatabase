@@ -128,4 +128,13 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 		}
 	}
 
+	@Override
+	public void rollback() {
+		MCR.addCall();
+		if (throwError) {
+			throw SqlDatabaseException.withMessage("Error from rollback in DatabaseFacadeSpy");
+		}
+
+	}
+
 }

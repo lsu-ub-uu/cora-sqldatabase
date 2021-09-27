@@ -68,6 +68,12 @@ public class TableFacadeTest {
 	}
 
 	@Test
+	public void testRollback() throws Exception {
+		tableFacade.rollback();
+		databaseFacadeSpy.MCR.assertMethodWasCalled("rollback");
+	}
+
+	@Test
 	public void testReadSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
 		databaseFacadeSpy.throwError = true;
 		try {

@@ -81,7 +81,8 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testCloseThrowsExceptionIfCloseFails() throws Exception {
-		databaseFacade.startTransaction();
+		setValuesInResultSetSpy(resultSetSpy);
+		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
 		connectionSpy.throwErrorConnection = true;
 		try {
 			databaseFacade.close();
@@ -96,8 +97,46 @@ public class DatabaseFacadeTest {
 	@Test
 	public void testCloseClosesConnection() throws Exception {
 		databaseFacade.startTransaction();
+		databaseFacade.endTransaction();
 		databaseFacade.close();
 		assertTrue(connectionSpy.closeWasCalled);
+	}
+
+	@Test
+	public void testCloseOnRunningTransactionShouldRollbackCloseAndThrowError() throws Exception {
+		try {
+			databaseFacade.startTransaction();
+			databaseFacade.close();
+			makeSureErrorIsThrownFromAboveStatements();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlDatabaseException);
+			assertEquals(e.getMessage(),
+					"Close called on running transaction, rollback perfromed.");
+			connectionSpy.MCR.assertMethodWasCalled("rollback");
+			assertTrue(connectionSpy.closeWasCalled);
+		}
+	}
+
+	@Test
+	public void testCloseOnRunningTransactionShouldRollbackIfFailsCloseShouldBeCalled()
+			throws Exception {
+		try {
+			connectionSpy.throwErrorRollback = true;
+			databaseFacade.startTransaction();
+			databaseFacade.close();
+			makeSureErrorIsThrownFromAboveStatements();
+		} catch (Exception e) {
+			connectionSpy.MCR.assertMethodWasCalled("rollback");
+			assertTrue(connectionSpy.closeWasCalled);
+			assertTrue(e instanceof SqlDatabaseException);
+			assertEquals(e.getMessage(), "Error doing rollBack on connection.");
+		}
+	}
+
+	@Test
+	public void testCloseShouldCompleteWithoutConnection() throws Exception {
+		databaseFacade.close();
+		assertTrue(true);
 	}
 
 	@Test
@@ -151,6 +190,26 @@ public class DatabaseFacadeTest {
 		databaseFacade.endTransaction();
 
 		sqlConnectionProviderSpy.MCR.assertNumberOfCallsToMethod("getConnection", 1);
+	}
+
+	@Test
+	public void testRollbackError() throws Exception {
+		connectionSpy.throwErrorRollback = true;
+		try {
+			databaseFacade.startTransaction();
+			databaseFacade.rollback();
+			makeSureErrorIsThrownFromAboveStatements();
+		} catch (Exception e) {
+			assertEquals(e.getMessage(), "Error doing rollBack on connection.");
+			assertEquals(e.getCause().getMessage(), "error thrown from rollback in ConnectionSpy");
+		}
+	}
+
+	@Test
+	public void testRollback() throws Exception {
+		databaseFacade.startTransaction();
+		databaseFacade.rollback();
+		connectionSpy.MCR.assertMethodWasCalled("rollback");
 	}
 
 	@Test

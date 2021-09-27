@@ -1,6 +1,7 @@
 package se.uu.ub.cora.sqldatabase;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +93,16 @@ public class RealDbTest {
 		query.addParameter("domain", "test");
 		query.addParameter("organisation_name", "mail@yahoo.se; DROP person2");
 		tableFacade.insertRowUsingQuery(query);
+	}
+
+	@Test(enabled = false)
+	public void testAutoClosableNoCalls() throws Exception {
+		SqlDatabaseFactory factory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
+				"jdbc:postgresql://diva-docker-mock-classic-postgresql:5432/diva", "diva", "diva");
+		try (TableFacade tableFacade = factory.factorTableFacade()) {
+
+		}
+		assertTrue(true);
 	}
 
 	@Test(enabled = false)

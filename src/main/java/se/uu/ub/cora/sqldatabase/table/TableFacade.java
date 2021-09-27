@@ -124,4 +124,9 @@ public interface TableFacade extends AutoCloseable {
 	 * to autocommit(true)
 	 */
 	public void endTransaction();
+
+	/**
+	 * rollback method calls a database rollback on an started transaction.
+	 */
+	void rollback();
 }

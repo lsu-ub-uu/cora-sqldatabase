@@ -202,18 +202,42 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	}
 
 	private void createConnectionIfNotCreatedSinceBefore() {
-		if (connection == null) {
+		if (noConnection()) {
 			connection = sqlConnectionProvider.getConnection();
 		}
 	}
 
+	private boolean noConnection() {
+		return !connectionExists();
+	}
+
+	private boolean connectionExists() {
+		return connection != null;
+	}
+
 	@Override
 	public void close() throws Exception {
-		try {
-			connection.close();
+		closingConnectionUsingAutoClosable();
+	}
+
+	private void closingConnectionUsingAutoClosable() {
+		try (Connection makingConnectionAutoClosable = connection) {
+			rollbackAndThrowExceptionIfTransactionIsNotEnded();
 		} catch (SQLException e) {
 			throw throwSqlDatabaseException("Error closing connection.", e);
 		}
+	}
+
+	private void rollbackAndThrowExceptionIfTransactionIsNotEnded() throws SQLException {
+		if (transactionIsStarted()) {
+			rollback();
+			throw SqlDatabaseException
+					.withMessage("Close called on running transaction, rollback perfromed.");
+		}
+	}
+
+	private boolean transactionIsStarted() throws SQLException {
+		return connectionExists() && !connection.getAutoCommit();
 	}
 
 	@Override
@@ -239,6 +263,16 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	public SqlConnectionProvider getSqlConnectionProvider() {
 		// needed for test
 		return sqlConnectionProvider;
+	}
+
+	@Override
+	public void rollback() {
+		try {
+			connection.rollback();
+		} catch (SQLException e) {
+			throw throwSqlDatabaseException("Error doing rollBack on connection.", e);
+		}
+
 	}
 
 }

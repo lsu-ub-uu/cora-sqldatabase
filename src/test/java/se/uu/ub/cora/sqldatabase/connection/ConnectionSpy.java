@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+
 public class ConnectionSpy implements Connection {
 
 	public boolean throwErrorConnection = false;
@@ -26,6 +28,8 @@ public class ConnectionSpy implements Connection {
 	public PreparedStatementSpy preparedStatementSpy = new PreparedStatementSpy();
 	public boolean closeWasCalled = false;
 	private boolean autoCommit = true;
+	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public boolean throwErrorRollback = false;
 
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -87,7 +91,10 @@ public class ConnectionSpy implements Connection {
 
 	@Override
 	public void rollback() throws SQLException {
-		// TODO Auto-generated method stub
+		MCR.addCall();
+		if (throwErrorRollback) {
+			throw new SQLException("error thrown from rollback in ConnectionSpy");
+		}
 
 	}
 

@@ -98,4 +98,18 @@ public interface DatabaseFacade extends AutoCloseable {
 	 * to autocommit(true)
 	 */
 	public void endTransaction();
+
+	/**
+	 * rollback rollbacks a started transaction.
+	 */
+	void rollback();
+
+	/**
+	 * close closes the underlying connection.
+	 * <p>
+	 * Implementations MUST make sure that if a transaction is started but not ended, is rollback
+	 * called and a {@link SqlDatabaseException} is thrown.
+	 */
+	@Override
+	void close() throws Exception;
 }

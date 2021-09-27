@@ -144,4 +144,9 @@ public final class TableFacadeImp implements TableFacade {
 		dbFacade.endTransaction();
 	}
 
+	@Override
+	public void rollback() {
+		dbFacade.rollback();
+	}
+
 }
