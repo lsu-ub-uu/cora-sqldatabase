@@ -65,8 +65,8 @@ public interface TableFacade extends AutoCloseable {
 	 * single row can not be realibly read.
 	 * 
 	 * @param tableQuery
-	 *            A TableQuery with the table, conditions and other settings to use to read one row
-	 *            from the database.
+	 *            A TableQuery with the table and conditions to use when reading one row from the
+	 *            database.
 	 * @return A Row with the result of the query
 	 */
 	Row readOneRowForQuery(TableQuery tableQuery);
