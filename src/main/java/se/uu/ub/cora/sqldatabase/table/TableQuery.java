@@ -27,8 +27,8 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 /**
  * TableQuery contains methods for setting all parts needed to create prepared statements for
  * performing operations agains a specific table or view in a database. Implementations of
- * TableQuery MUST written so that they handle one table or view at a time. This is normally set at
- * creation time when using the {@link SqlDatabaseFactory#factorTableQuery(String)} method to get
+ * TableQuery MUST be written so that they handle one table or view at a time. This is normally set
+ * at creation time when using the {@link SqlDatabaseFactory#factorTableQuery(String)} method to get
  * access to an instance of this interface.
  * <p>
  * TableQuery is used with {@link TableFacade} and its different methods to perform operations on a
