@@ -131,4 +131,13 @@ public interface TableFacade extends AutoCloseable {
 	 * rollback method calls a database rollback on an started transaction.
 	 */
 	void rollback();
+
+	/**
+	 * close closes the underlying database resources.
+	 * <p>
+	 * Implementations MUST make sure that if a transaction is started but not ended, is rollback
+	 * called and a {@link SqlDatabaseException} is thrown.
+	 */
+	@Override
+	void close();
 }

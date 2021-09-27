@@ -130,7 +130,7 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		dbFacade.close();
 	}
 

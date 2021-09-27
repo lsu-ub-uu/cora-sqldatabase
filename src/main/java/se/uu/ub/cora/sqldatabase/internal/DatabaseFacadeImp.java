@@ -216,7 +216,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		closingConnectionUsingAutoClosable();
 	}
 

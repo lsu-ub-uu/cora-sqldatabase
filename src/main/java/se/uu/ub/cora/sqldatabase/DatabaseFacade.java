@@ -109,5 +109,5 @@ public interface DatabaseFacade extends AutoCloseable {
 	 * called and a {@link SqlDatabaseException} is thrown.
 	 */
 	@Override
-	void close() throws Exception;
+	void close();
 }

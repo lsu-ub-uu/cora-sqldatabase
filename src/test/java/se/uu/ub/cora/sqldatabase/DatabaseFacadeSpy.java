@@ -103,7 +103,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		MCR.addCall();
 		if (throwError) {
 			throw SqlDatabaseException.withMessage("Error from close in DatabaseFacadeSpy");
