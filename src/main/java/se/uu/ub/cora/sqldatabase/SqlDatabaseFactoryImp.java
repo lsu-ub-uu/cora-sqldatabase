@@ -32,9 +32,11 @@ import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 import se.uu.ub.cora.sqldatabase.table.internal.TableQueryImp;
 
 /**
- * SqlDatabaseFactoryImp implements SqlDatabaseFactory. To get an instance of this class look at
- * {@link #usingLookupNameFromContext(String)} and
+ * SqlDatabaseFactoryImp implements {@link SqlDatabaseFactory}. To get an instance of this class
+ * look at {@link #usingLookupNameFromContext(String)} and
  * {@link #usingUriAndUserAndPassword(String, String, String)} respectively.
+ * <p>
+ * SqlDatabaseFactoryImp is threadsafe
  */
 public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 	private SqlConnectionProvider sqlConnectionProvider;

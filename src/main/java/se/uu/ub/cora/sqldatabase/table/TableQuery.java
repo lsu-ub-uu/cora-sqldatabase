@@ -28,7 +28,7 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
  * TableQuery contains methods for setting all parts needed to create prepared statements for
  * performing operations agains a specific table or view in a database. Implementations of
  * TableQuery MUST written so that they handle one table or view at a time. This is normally set at
- * creationtime when using the {@link SqlDatabaseFactory#factorTableQuery(String)} method to get
+ * creation time when using the {@link SqlDatabaseFactory#factorTableQuery(String)} method to get
  * access to an instance of this interface.
  * <p>
  * TableQuery is used with {@link TableFacade} and its different methods to perform operations on a
@@ -42,8 +42,8 @@ public interface TableQuery {
 	 * <p>
 	 * If a parameter is to use null, MUST the value of the added parameter be {@link DatabaseNull}
 	 * <p>
-	 * If the name contains characters that are problematic for sql injection MUST an
-	 * {@link SqlDatabaseException} be thrown.
+	 * Implementations MUST ensure that if the name contains characters that are problematic for sql
+	 * injection will an {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param name
 	 *            A String with the name to use in the sql.
@@ -58,8 +58,8 @@ public interface TableQuery {
 	 * <p>
 	 * If a condition is to use null, MUST the value of the added condition be {@link DatabaseNull}
 	 * <p>
-	 * If the name contains characters that are problematic for sql injection MUST an
-	 * {@link SqlDatabaseException} be thrown.
+	 * Implementations MUST ensure that if the name contains characters that are problematic for sql
+	 * injection will an {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param name
 	 *            A String with the name to use in the sql query

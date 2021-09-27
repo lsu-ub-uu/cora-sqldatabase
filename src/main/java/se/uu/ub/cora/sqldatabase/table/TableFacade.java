@@ -40,76 +40,80 @@ import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 public interface TableFacade extends AutoCloseable {
 
 	/**
-	 * insertRowInTableWithValues creates a new row in the named table using the provided values
+	 * insertRowInTableWithValues creates a new row in database according to the specified
+	 * TableQuery
 	 * 
 	 * @param tableQuery
-	 *            TODO
+	 *            A TableQuery with the table, parameters and values to add to the database
 	 */
 	void insertRowUsingQuery(TableQuery tableQuery);
 
 	/**
+	 * readRowsForQuery reads rows from a table or view as specified in the provided TableQuery
 	 * 
-	 * @param tableName
-	 * @return
+	 * @param tableQuery
+	 *            A TableQuery with the table, conditions and other settings to use to read rows
+	 *            from the database.
+	 * @return A List of Rows with the result of the query
 	 */
 	List<Row> readRowsForQuery(TableQuery tableQuery);
 
 	/**
-	 * readOneRowFromDbUsingTableAndConditions reads one row from the database using a tablename and
-	 * conditions.
+	 * readOneRowFromDbUsingTableAndConditions reads one row from the database as specified in the
+	 * provided TableQuery.
 	 * <p>
-	 * If no row or more than one row is found matching the conditions MUST a
-	 * {@link SqlDatabaseException} be thrown, indicating that the requested single row can not be
-	 * realibly read.
+	 * Implementations MUST make sure that if no row or more than one row is found matching the
+	 * conditions will a {@link SqlDatabaseException} be thrown, indicating that the requested
+	 * single row can not be realibly read.
 	 * 
 	 * @param tableQuery
-	 *            the table to read from
-	 * @return A Map<String, Object> with the columnNames from the result as key and the
-	 *         corresponding values
+	 *            A TableQuery with the table, conditions and other settings to use to read one row
+	 *            from the database.
+	 * @return A Row with the result of the query
 	 */
 	Row readOneRowForQuery(TableQuery tableQuery);
 
 	/**
-	 * readNumberOfRows returns the numberOfRows in storage that matches the conditions. The number
-	 * of rows also depends on limitations set in the DbQueryInfo. The readNumberOfRows SHOULD never
-	 * return a larger number than actual result size.
+	 * readNumberOfRows returns the numberOfRows in storage that matches the provided TableQuery.
+	 * The returned number should be the same as the number of rows in the list returned by invoking
+	 * {@link #readRowsForQuery(TableQuery)} with the same TableQuery.
 	 * 
 	 * @param tableQuery
-	 *            TODO
+	 *            A TableQuery with the table, conditions and other settings to use to count the
+	 *            number of rows that match this TableQuery.
 	 * 
-	 * @param tableName,
-	 *            the table to read from
-	 * 
-	 * @param conditions,
-	 *            A Map<String, Object> with the columnName as key and requested value as value to
-	 *            use in the query. If the conditions map is empty, are no parameters added to the
-	 *            query.
-	 * 
-	 * @param DbQueryInfo,
-	 *            the dbQueryInfo used to limit the query
+	 * @return A long with the number of rows matching the specified TableQuery
 	 */
 	long readNumberOfRows(TableQuery tableQuery);
 
 	/**
+	 * updateRowsUsingQuery updates rows in a table or view in the database according to the
+	 * specified TableQuery
 	 * 
 	 * @param tableQuery
-	 *            TODO
-	 * @param values
+	 *            A TableQuery with the table, conditions and other settings to use to update data
+	 *            in the database.
 	 */
 	void updateRowsUsingQuery(TableQuery tableQuery);
 
 	/**
+	 * deleteRowsForQuery deletes rows from a table or view in the database according to the
+	 * specified TableQuery
 	 * 
 	 * @param tableQuery
+	 *            A TableQuery with the table, conditions and other settings to use to delete rows
+	 *            from the database.
 	 */
 	void deleteRowsForQuery(TableQuery tableQuery);
 
 	/**
+	 * nextValueFromSequence returns the next value for the specified sequence
 	 * <p>
 	 * If the sequence does not exist MUST an {@link SQLException} thrown.
 	 * 
 	 * @param sequenceName
-	 * @return
+	 *            A String with the name of the sequenece to get the next value for
+	 * @return a long with the next value of the sequence
 	 */
 	long nextValueFromSequence(String sequenceName);
 

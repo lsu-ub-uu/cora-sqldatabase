@@ -28,22 +28,29 @@ import java.util.Set;
 public interface Row {
 
 	/**
+	 * getValueByColumn returns the value for the requested column.
+	 * <p>
+	 * Implemementations MUST return {@link DatabaseNull} for null values found in the database.
 	 * 
 	 * @param columnName
-	 * @return
+	 *            A String with the name of the column to return the value for
+	 * @return An Object with the value for the column
 	 */
 	Object getValueByColumn(String columnName);
 
 	/**
+	 * columnSet returns a Set with the column names that this Row has
 	 * 
-	 * @return
+	 * @return A Set of Strings with the names that exist in this Row
 	 */
 	Set<String> columnSet();
 
 	/**
+	 * hasColumn returns true if this Row has a column with the requested column name
 	 * 
 	 * @param columnName
-	 * @return
+	 *            A String with the name of the column to check for in this Row
+	 * @return A boolean true if the requested column exists in this Row
 	 */
 	boolean hasColumn(String columnName);
 

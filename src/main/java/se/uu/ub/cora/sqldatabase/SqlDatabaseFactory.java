@@ -34,7 +34,7 @@ import se.uu.ub.cora.sqldatabase.table.TableQuery;
 public interface SqlDatabaseFactory {
 	/**
 	 * factorDatabaseFacade creates and returns a new instance of DatabaseFacade. The returned
-	 * DatabaseFacade should by the implementing factory be set up with database connection details
+	 * DatabaseFacade SHOULD by the implementing factory be set up with database connection details
 	 * so that it can be used to interact with the database without any further configuration.
 	 * <p>
 	 * <em>Note, DatabaseFacade uses the {@link AutoCloseable} interface so it is adviced to wrapp
@@ -46,7 +46,7 @@ public interface SqlDatabaseFactory {
 
 	/**
 	 * factorTableFacade creates and returns a new instance of TableFacade. The returned TableFacade
-	 * should by the implementing factory be set up with database connection details so that it can
+	 * SHOULD by the implementing factory be set up with database connection details so that it can
 	 * be used to interact with the database without any further configuration.
 	 * <p>
 	 * <em>Note, TableFacade uses the {@link AutoCloseable} interface so it is adviced to wrapp this

@@ -47,14 +47,13 @@ public interface DatabaseFacade extends AutoCloseable {
 	 * readUsingSqlAndValues reads rows from the database using the supplied sql (prepared
 	 * statement) and the supplied values.
 	 * <p>
-	 * If no is found matching the sql and values MUST an empty list be returned.
+	 * If no result is found matching the sql and values MUST an empty list be returned.
 	 * 
 	 * @param sql
 	 *            A String with a prepared statement
 	 * @param values
-	 *            A List<Object> matching the values for the prepared statement
-	 * @return A List<Row> with one entry in the list for each row with a map containing the
-	 *         columnNames from the result as key and the corresponding values
+	 *            A List of Objects matching the values for the prepared statement
+	 * @return A List with {@link Row}s with one entry in the list for each row in the result
 	 */
 	List<Row> readUsingSqlAndValues(String sql, List<Object> values);
 
@@ -70,8 +69,7 @@ public interface DatabaseFacade extends AutoCloseable {
 	 *            A String with a prepared statement
 	 * @param values
 	 *            A List<Object> matching the values for the prepared statement
-	 * @return A Map<String, Object> with the columnNames from the result as key and the
-	 *         corresponding values
+	 * @return A Row with the read row
 	 */
 	Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values);
 
