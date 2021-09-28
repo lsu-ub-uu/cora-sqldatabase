@@ -614,7 +614,7 @@ public class DatabaseFacadeTest {
 
 	private List<Object> prepareValuesWithDatabaseNullValue() {
 		List<Object> valuesWithNull = new ArrayList<>();
-		valuesWithNull.add(new DatabaseNull());
+		valuesWithNull.add(DatabaseValues.NULL);
 		valuesWithNull.add("someValue");
 		return valuesWithNull;
 	}

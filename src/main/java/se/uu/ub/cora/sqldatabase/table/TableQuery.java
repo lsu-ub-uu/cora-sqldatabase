@@ -20,7 +20,7 @@ package se.uu.ub.cora.sqldatabase.table;
 
 import java.util.List;
 
-import se.uu.ub.cora.sqldatabase.DatabaseNull;
+import se.uu.ub.cora.sqldatabase.DatabaseValues;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseFactory;
 
@@ -40,7 +40,8 @@ public interface TableQuery {
 	/**
 	 * The add method adds a parameter with name and value to this query.
 	 * <p>
-	 * If a parameter is to use null, MUST the value of the added parameter be {@link DatabaseNull}
+	 * If a parameter is to use null, MUST the value of the added parameter be
+	 * {@link DatabaseValues#NULL}
 	 * <p>
 	 * Implementations MUST ensure that if the name contains characters that are problematic for sql
 	 * injection will an {@link SqlDatabaseException} be thrown.
@@ -56,7 +57,8 @@ public interface TableQuery {
 	/**
 	 * The addCondition method adds a condition with name and value to this query.
 	 * <p>
-	 * If a condition is to use null, MUST the value of the added condition be {@link DatabaseNull}
+	 * If a condition is to use null, MUST the value of the added condition be
+	 * {@link DatabaseValues#NULL}
 	 * <p>
 	 * Implementations MUST ensure that if the name contains characters that are problematic for sql
 	 * injection will an {@link SqlDatabaseException} be thrown.

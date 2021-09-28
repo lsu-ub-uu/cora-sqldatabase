@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import se.uu.ub.cora.sqldatabase.DatabaseNull;
+import se.uu.ub.cora.sqldatabase.DatabaseValues;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
@@ -32,7 +32,7 @@ public class RowImp implements Row {
 
 	public void addColumnWithValue(String columnName, Object object) {
 		if (object == null) {
-			columnValues.put(columnName, new DatabaseNull());
+			columnValues.put(columnName, DatabaseValues.NULL);
 		} else {
 			columnValues.put(columnName, object);
 		}

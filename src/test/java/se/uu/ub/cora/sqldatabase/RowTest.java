@@ -68,7 +68,7 @@ public class RowTest {
 
 		Object valueFromColumn = row.getValueByColumn("aColumn");
 
-		assertTrue(valueFromColumn instanceof DatabaseNull);
+		assertTrue(DatabaseValues.NULL.equals(valueFromColumn));
 	}
 
 	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""

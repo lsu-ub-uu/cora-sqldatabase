@@ -30,7 +30,8 @@ public interface Row {
 	/**
 	 * getValueByColumn returns the value for the requested column.
 	 * <p>
-	 * Implemementations MUST return {@link DatabaseNull} for null values found in the database.
+	 * Implemementations MUST return {@link DatabaseValues#NULL} for null values found in the
+	 * database.
 	 * 
 	 * @param columnName
 	 *            A String with the name of the column to return the value for
