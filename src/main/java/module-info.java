@@ -4,12 +4,9 @@
  */
 module se.uu.ub.cora.sqldatabase {
 	requires transitive java.naming;
-	requires transitive java.sql;
+	requires java.sql;
 	requires se.uu.ub.cora.logger;
 
 	exports se.uu.ub.cora.sqldatabase;
-	exports se.uu.ub.cora.sqldatabase.connection;
-	exports se.uu.ub.cora.sqldatabase.data;
-	exports se.uu.ub.cora.sqldatabase.record;
-
+	exports se.uu.ub.cora.sqldatabase.table;
 }

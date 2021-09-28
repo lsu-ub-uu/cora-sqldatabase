@@ -19,12 +19,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+
 public class ConnectionSpy implements Connection {
 
-	public boolean returnErrorConnection = false;
+	public boolean throwErrorConnection = false;
 	public String sql;
 	public PreparedStatementSpy preparedStatementSpy = new PreparedStatementSpy();
 	public boolean closeWasCalled = false;
+	private boolean autoCommit = true;
+	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public boolean throwErrorRollback = false;
 
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -47,7 +52,7 @@ public class ConnectionSpy implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		this.sql = sql;
-		if (returnErrorConnection) {
+		if (throwErrorConnection) {
 			throw new SQLException("error thrown from prepareStatement in spy");
 		}
 		return preparedStatementSpy;
@@ -67,14 +72,15 @@ public class ConnectionSpy implements Connection {
 
 	@Override
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
-		// TODO Auto-generated method stub
-
+		if (throwErrorConnection) {
+			throw new SQLException("error thrown from setAutoCommit in spy");
+		}
+		this.autoCommit = autoCommit;
 	}
 
 	@Override
 	public boolean getAutoCommit() throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
+		return autoCommit;
 	}
 
 	@Override
@@ -85,13 +91,19 @@ public class ConnectionSpy implements Connection {
 
 	@Override
 	public void rollback() throws SQLException {
-		// TODO Auto-generated method stub
+		MCR.addCall();
+		if (throwErrorRollback) {
+			throw new SQLException("error thrown from rollback in ConnectionSpy");
+		}
 
 	}
 
 	@Override
 	public void close() throws SQLException {
 		closeWasCalled = true;
+		if (throwErrorConnection) {
+			throw new SQLException("error thrown from close in ConnectionSpy");
+		}
 	}
 
 	@Override
