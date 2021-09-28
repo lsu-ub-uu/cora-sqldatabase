@@ -139,7 +139,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	}
 
 	private boolean isDatabaseNull(Object value) {
-		return DatabaseValues.NULL.equals(value);
+		return DatabaseValues.NULL == value;
 	}
 
 	private List<Row> getResultUsingQuery(PreparedStatement prepareStatement) throws SQLException {
