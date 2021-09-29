@@ -56,4 +56,21 @@ public class RowImp implements Row {
 		return columnValues.containsKey(columnName);
 	}
 
+	@Override
+	public boolean hasColumnWithNonEmptyValue(String columnName) {
+		if (hasColumn(columnName)) {
+			return columnHasValue(columnName);
+		}
+		return false;
+	}
+
+	private boolean columnHasValue(String columnName) {
+		Object value = columnValues.get(columnName);
+		return (DatabaseValues.NULL != value && !isStringWithoutValue(value));
+	}
+
+	private boolean isStringWithoutValue(Object value) {
+		return (value instanceof String stringValue && stringValue.isBlank());
+	}
+
 }

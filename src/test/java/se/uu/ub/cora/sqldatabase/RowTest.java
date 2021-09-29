@@ -94,4 +94,25 @@ public class RowTest {
 		assertTrue(row.hasColumn("aColumn1"));
 	}
 
+	@Test
+	public void testHasColumnWithNonEmptyValue() throws Exception {
+		addFourColumnsForEmptyValuesTest();
+		assertFalse(row.hasColumnWithNonEmptyValue("nonExistingColumnName"));
+		assertFalse(row.hasColumnWithNonEmptyValue("aColumn1"));
+		assertFalse(row.hasColumnWithNonEmptyValue("aColumn2"));
+		assertFalse(row.hasColumnWithNonEmptyValue("aColumn3"));
+
+		assertTrue(row.hasColumnWithNonEmptyValue("aColumn4"));
+		assertTrue(row.hasColumnWithNonEmptyValue("aColumn5"));
+		assertTrue(row.hasColumnWithNonEmptyValue("aColumn6"));
+	}
+
+	private void addFourColumnsForEmptyValuesTest() {
+		row.addColumnWithValue("aColumn1", "");
+		row.addColumnWithValue("aColumn2", "  ");
+		row.addColumnWithValue("aColumn3", DatabaseValues.NULL);
+		row.addColumnWithValue("aColumn4", "someValue");
+		row.addColumnWithValue("aColumn5", 1);
+		row.addColumnWithValue("aColumn6", 2L);
+	}
 }

@@ -55,4 +55,14 @@ public interface Row {
 	 */
 	boolean hasColumn(String columnName);
 
+	/**
+	 * hasColumnWithNonEmptyValue returns true if this Row has a column with the requested column
+	 * name. The column has a value that is non empty (not {@link DatabaseValues#NULL} or a blank
+	 * String).
+	 * 
+	 * @param columnName
+	 *            A String with the name of the column to check for in this Row
+	 * @return A boolean true if the requested column exists in this Row and has a non empty value
+	 */
+	boolean hasColumnWithNonEmptyValue(String columnName);
 }
