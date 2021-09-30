@@ -96,6 +96,21 @@ public class RealDbTest {
 	}
 
 	@Test(enabled = false)
+	public void testTableFacadeUpdateCrap() throws Exception {
+		SqlDatabaseFactory factory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
+				"jdbc:postgresql://diva-docker-mock-classic-postgresql:5432/diva", "diva", "diva");
+		TableFacade tableFacade = factory.factorTableFacade();
+		TableQuery query = TableQueryImp.usingTableName("organisation");
+		query.addParameter("organisation_aaid", 666);
+		query.addParameter("organisation_name_locale", "sv");
+		query.addParameter("organisation_type_id", 54);
+		query.addParameter("domain", "test");
+		query.addParameter("organisation_name", "mail@yahoo.se; DROP person2");
+		query.addCondition("organisation_aaid", 667);
+		tableFacade.updateRowsUsingQuery(query);
+	}
+
+	@Test(enabled = false)
 	public void testAutoClosableNoCalls() throws Exception {
 		SqlDatabaseFactory factory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
 				"jdbc:postgresql://diva-docker-mock-classic-postgresql:5432/diva", "diva", "diva");

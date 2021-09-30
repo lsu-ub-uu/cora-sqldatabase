@@ -35,6 +35,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 	public RowImp oneRowResult;
 
 	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public boolean throwDuplicatedKeyError = false;
 
 	@Override
 	public List<Row> readUsingSqlAndValues(String sql, List<Object> values) {
@@ -46,12 +47,8 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 			throw SqlDatabaseException.withMessage(
 					"Error from executePreparedStatementQueryUsingSqlAndValues in DatabaseFacadeSpy");
 		}
-		// Map<String, Object> innerResult = new HashMap<>();
-		// if (sql.startsWith("select count")) {
-		// innerResult.put("count", 453);
-		// } else {
 		Row innerResult = createResult();
-		// }
+
 		result.add(innerResult);
 		MCR.addReturned(result);
 		return result;
@@ -93,6 +90,10 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 		MCR.addCall("sql", sql, "values", values);
 		if (throwError) {
 			throw SqlDatabaseException
+					.withMessage("Error from executeSqlWithValues in DatabaseFacadeSpy");
+		}
+		if (throwDuplicatedKeyError) {
+			throw SqlConflictException
 					.withMessage("Error from executeSqlWithValues in DatabaseFacadeSpy");
 		}
 

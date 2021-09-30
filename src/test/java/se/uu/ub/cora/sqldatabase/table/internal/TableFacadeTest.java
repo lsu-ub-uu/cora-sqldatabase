@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.sqldatabase.DatabaseFacadeSpy;
 import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
@@ -184,6 +185,21 @@ public class TableFacadeTest {
 	}
 
 	@Test
+	public void testInsertWithDuplicatedKeyError() throws Exception {
+		databaseFacadeSpy.throwDuplicatedKeyError = true;
+		try {
+			tableFacade.insertRowUsingQuery(tableQuerySpy);
+			assertTrue(false);
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlConflictException);
+			assertEquals(e.getMessage(),
+					"Error inserting row, duplicated key, using sql: sql for create from spy");
+			assertEquals(e.getCause().getMessage(),
+					"Error from executeSqlWithValues in DatabaseFacadeSpy");
+		}
+	}
+
+	@Test
 	public void testInsertRowsForQuery() {
 		tableFacade.insertRowUsingQuery(tableQuerySpy);
 
@@ -200,6 +216,21 @@ public class TableFacadeTest {
 			assertTrue(false);
 		} catch (Exception e) {
 			assertEquals(e.getMessage(), "Error updating rows using sql: sql for update from spy");
+			assertEquals(e.getCause().getMessage(),
+					"Error from executeSqlWithValues in DatabaseFacadeSpy");
+		}
+	}
+
+	@Test
+	public void testUpdateWithDuplicatedKeyError() throws Exception {
+		databaseFacadeSpy.throwDuplicatedKeyError = true;
+		try {
+			tableFacade.updateRowsUsingQuery(tableQuerySpy);
+			assertTrue(false);
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlConflictException);
+			assertEquals(e.getMessage(),
+					"Error updating rows, duplicated key, using sql: sql for update from spy");
 			assertEquals(e.getCause().getMessage(),
 					"Error from executeSqlWithValues in DatabaseFacadeSpy");
 		}

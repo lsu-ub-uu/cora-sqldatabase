@@ -24,6 +24,7 @@ import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
@@ -46,6 +47,9 @@ public final class TableFacadeImp implements TableFacade {
 		List<Object> values = tableQuery.getQueryValues();
 		try {
 			dbFacade.executeSqlWithValues(sql, values);
+		} catch (SqlConflictException e) {
+			throw SqlConflictException.withMessageAndException(
+					"Error inserting row, duplicated key, using sql: " + sql, e);
 		} catch (SqlDatabaseException e) {
 			throw SqlDatabaseException
 					.withMessageAndException("Error inserting row using sql: " + sql, e);
@@ -99,6 +103,9 @@ public final class TableFacadeImp implements TableFacade {
 		List<Object> values = tableQuery.getQueryValues();
 		try {
 			dbFacade.executeSqlWithValues(sql, values);
+		} catch (SqlConflictException e) {
+			throw SqlConflictException.withMessageAndException(
+					"Error updating rows, duplicated key, using sql: " + sql, e);
 		} catch (SqlDatabaseException e) {
 			throw SqlDatabaseException
 					.withMessageAndException("Error updating rows using sql: " + sql, e);

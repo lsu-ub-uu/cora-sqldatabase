@@ -33,6 +33,7 @@ import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.DatabaseValues;
 import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 
@@ -187,13 +188,17 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	@Override
 	public int executeSqlWithValues(String sql, List<Object> values) {
 		try {
-			return updateUsingSqlAndValues(sql, values);
+			return executeUsingSqlAndValues(sql, values);
 		} catch (SQLException e) {
+			if (e.getMessage().contains("duplicate key")) {
+				throw SqlConflictException.withMessageAndException(
+						"Error executing statement, duplicated key: " + sql, e);
+			}
 			throw throwSqlDatabaseException("Error executing statement: " + sql, e);
 		}
 	}
 
-	private int updateUsingSqlAndValues(String sql, List<Object> values) throws SQLException {
+	private int executeUsingSqlAndValues(String sql, List<Object> values) throws SQLException {
 		createConnectionIfNotCreatedSinceBefore();
 		try (PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
 			addValuesToPreparedStatement(values, prepareStatement);

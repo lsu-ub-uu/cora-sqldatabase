@@ -48,6 +48,9 @@ public interface DatabaseFacade extends AutoCloseable {
 	 * statement) and the supplied values.
 	 * <p>
 	 * If no result is found matching the sql and values MUST an empty list be returned.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param sql
 	 *            A String with a prepared statement
@@ -64,6 +67,9 @@ public interface DatabaseFacade extends AutoCloseable {
 	 * If no row or more than one row is found matching the sql and values MUST a
 	 * {@link SqlDatabaseException} be thrown, indicating that the requested single row can not be
 	 * realibly read.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param sql
 	 *            A String with a prepared statement
@@ -76,6 +82,12 @@ public interface DatabaseFacade extends AutoCloseable {
 	/**
 	 * executeSqlWithValues executes a sql statement as a preparedQuery returning the number of rows
 	 * affected.
+	 * <p>
+	 * If an executions finds a duplicate key a {@link SqlConflictException} MUST be thrown,
+	 * indicating that the execution will not be performed.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param sql
 	 *            A String with the prepared statement to execute
@@ -88,17 +100,26 @@ public interface DatabaseFacade extends AutoCloseable {
 	/**
 	 * startTransaction starts a new transaction setting the underlying connection to
 	 * autocommit(false). To commit the transaction run {@link #endTransaction()}.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 */
 	public void startTransaction();
 
 	/**
 	 * endTransaction ends the currently going transaction, and sets the underlying connection back
 	 * to autocommit(true)
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 */
 	public void endTransaction();
 
 	/**
 	 * rollback rollbacks a started transaction.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 */
 	void rollback();
 
@@ -107,6 +128,9 @@ public interface DatabaseFacade extends AutoCloseable {
 	 * <p>
 	 * Implementations MUST make sure that if a transaction is started but not ended, is rollback
 	 * called and a {@link SqlDatabaseException} is thrown.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 */
 	@Override
 	void close();

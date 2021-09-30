@@ -51,10 +51,14 @@ public class ConnectionSpy implements Connection {
 
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
+		MCR.addCall("sql", sql);
+
 		this.sql = sql;
 		if (throwErrorConnection) {
 			throw new SQLException("error thrown from prepareStatement in spy");
 		}
+
+		MCR.addReturned(preparedStatementSpy);
 		return preparedStatementSpy;
 	}
 

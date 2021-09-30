@@ -24,6 +24,7 @@ import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
+import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 
 /**
@@ -41,6 +42,11 @@ public interface TableFacade extends AutoCloseable {
 
 	/**
 	 * insertRowUsingQuery creates a new row in database according to the specified TableQuery
+	 * <p>
+	 * If an execution finds a duplicate key a {@link SqlConflictException} MUST be thrown.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param tableQuery
 	 *            A TableQuery with the table, parameters and values to add to the database
@@ -49,6 +55,9 @@ public interface TableFacade extends AutoCloseable {
 
 	/**
 	 * readRowsForQuery reads rows from a table or view as specified in the provided TableQuery
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param tableQuery
 	 *            A TableQuery with the table, conditions and other settings to use to read rows
@@ -63,6 +72,9 @@ public interface TableFacade extends AutoCloseable {
 	 * Implementations MUST make sure that if no row or more than one row is found matching the
 	 * conditions will a {@link SqlDatabaseException} be thrown, indicating that the requested
 	 * single row can not be realibly read.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param tableQuery
 	 *            A TableQuery with the table and conditions to use when reading one row from the
@@ -75,6 +87,9 @@ public interface TableFacade extends AutoCloseable {
 	 * readNumberOfRows returns the numberOfRows in storage that matches the provided TableQuery.
 	 * The returned number should be the same as the number of rows in the list returned by invoking
 	 * {@link #readRowsForQuery(TableQuery)} with the same TableQuery.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param tableQuery
 	 *            A TableQuery with the table, conditions and other settings to use to count the
@@ -87,6 +102,9 @@ public interface TableFacade extends AutoCloseable {
 	/**
 	 * updateRowsUsingQuery updates rows in a table or view in the database according to the
 	 * specified TableQuery
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param tableQuery
 	 *            A TableQuery with the table, conditions and other settings to use to update data
@@ -97,6 +115,11 @@ public interface TableFacade extends AutoCloseable {
 	/**
 	 * deleteRowsForQuery deletes rows from a table or view in the database according to the
 	 * specified TableQuery
+	 * <p>
+	 * If an execution finds a duplicate key a {@link SqlConflictException} MUST be thrown.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param tableQuery
 	 *            A TableQuery with the table, conditions and other settings to use to delete rows
@@ -108,6 +131,9 @@ public interface TableFacade extends AutoCloseable {
 	 * nextValueFromSequence returns the next value for the specified sequence
 	 * <p>
 	 * If the sequence does not exist MUST an {@link SQLException} thrown.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 * 
 	 * @param sequenceName
 	 *            A String with the name of the sequenece to get the next value for
@@ -118,17 +144,26 @@ public interface TableFacade extends AutoCloseable {
 	/**
 	 * startTransaction starts a new transaction setting the underlying connection to
 	 * autocommit(false). To commit the transaction run {@link #endTransaction()}.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 */
 	public void startTransaction();
 
 	/**
 	 * endTransaction ends the currently going transaction, and sets the underlying connection back
 	 * to autocommit(true)
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 */
 	public void endTransaction();
 
 	/**
 	 * rollback method calls a database rollback on an started transaction.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 */
 	void rollback();
 
@@ -137,6 +172,9 @@ public interface TableFacade extends AutoCloseable {
 	 * <p>
 	 * Implementations MUST make sure that if a transaction is started but not ended, is rollback
 	 * called and a {@link SqlDatabaseException} is thrown.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
 	 */
 	@Override
 	void close();

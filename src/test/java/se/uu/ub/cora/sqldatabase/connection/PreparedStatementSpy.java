@@ -39,6 +39,8 @@ public class PreparedStatementSpy implements PreparedStatement {
 	public int noOfAffectedRows = 0;
 
 	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public static String DUPLICATE_ERROR_MESSAGE = "duplicate key value violates unique constraint \"organisation_pkey\"";;
+	public boolean throwDuplicateKeyException = false;
 
 	@Override
 	public ResultSet executeQuery(String sql) throws SQLException {
@@ -48,7 +50,7 @@ public class PreparedStatementSpy implements PreparedStatement {
 
 	@Override
 	public int executeUpdate(String sql) throws SQLException {
-		// TODO Auto-generated method stub
+
 		return 0;
 	}
 
@@ -312,6 +314,9 @@ public class PreparedStatementSpy implements PreparedStatement {
 	@Override
 	public int executeUpdate() throws SQLException {
 		executeUpdateWasCalled = true;
+		if (throwDuplicateKeyException) {
+			throw new SQLException(DUPLICATE_ERROR_MESSAGE);
+		}
 		return noOfAffectedRows;
 	}
 

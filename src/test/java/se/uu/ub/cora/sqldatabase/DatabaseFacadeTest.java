@@ -69,9 +69,9 @@ public class DatabaseFacadeTest {
 
 	private void setupConnectionSpies() {
 		sqlConnectionProviderSpy = new SqlConnectionProviderSpy();
+		connectionSpy = sqlConnectionProviderSpy.connection;
 		preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
 		resultSetSpy = preparedStatementSpy.resultSet;
-		connectionSpy = sqlConnectionProviderSpy.connection;
 	}
 
 	@Test
@@ -531,6 +531,21 @@ public class DatabaseFacadeTest {
 	public void testExecuteSqlThrowsError() throws Exception {
 		connectionSpy.throwErrorConnection = true;
 		databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
+	}
+
+	@Test
+	public void testExecuteSqlThrowsSqlConflictException() throws Exception {
+		preparedStatementSpy.throwDuplicateKeyException = true;
+		try {
+			databaseFacade.executeSqlWithValues("someSQL", values);
+			makeSureErrorIsThrownFromAboveStatements();
+
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlConflictException);
+			assertEquals(e.getMessage(), "Error executing statement, duplicated key: someSQL");
+			assertEquals(e.getCause().getMessage(),
+					"duplicate key value violates unique constraint \"organisation_pkey\"");
+		}
 	}
 
 	@Test
