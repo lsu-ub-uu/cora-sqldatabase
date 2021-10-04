@@ -149,4 +149,8 @@ public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 		return TableQueryImp.usingTableName(tableName);
 	}
 
+	public String onlyForTestGetLookupName() {
+		return lookupName;
+	}
+
 }

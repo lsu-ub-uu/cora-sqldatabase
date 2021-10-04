@@ -203,6 +203,11 @@ public class SqlDatabaseFactoryTest {
 		TableQueryImp tableQuery = (TableQueryImp) sqlDatabaseFactory.factorTableQuery(tableName);
 		assertEquals(tableQuery.getTableName(), tableName);
 	}
+
+	@Test
+	public void testOnlyForTestGetLookupName() throws Exception {
+		assertEquals(sqlDatabaseFactory.onlyForTestGetLookupName(), lookupName);
+	}
 }
 
 class SqlDatabaseFactoryImpForThrowErrorInsteadOfCreatingContext extends SqlDatabaseFactoryImp {

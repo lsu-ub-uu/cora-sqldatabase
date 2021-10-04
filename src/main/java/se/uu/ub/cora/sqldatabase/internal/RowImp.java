@@ -70,7 +70,13 @@ public class RowImp implements Row {
 	}
 
 	private boolean isStringWithoutValue(Object value) {
-		return (value instanceof String stringValue && stringValue.isBlank());
+		// using longer version as we do not get full coverage with short version
+		// return (value instanceof String stringValue && stringValue.isBlank());
+		if (value instanceof String) {
+			String stringValue = (String) value;
+			return stringValue.isBlank();
+		}
+		return false;
 	}
 
 }
