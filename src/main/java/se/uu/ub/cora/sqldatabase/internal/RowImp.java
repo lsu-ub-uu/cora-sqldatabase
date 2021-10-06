@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.postgresql.util.PGobject;
+
 import se.uu.ub.cora.sqldatabase.DatabaseValues;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
@@ -31,11 +33,18 @@ public class RowImp implements Row {
 	private Map<String, Object> columnValues = new HashMap<>();
 
 	public void addColumnWithValue(String columnName, Object object) {
+		columnValues.put(columnName, get(object));
+	}
+
+	private Object get(Object object) {
 		if (object == null) {
-			columnValues.put(columnName, DatabaseValues.NULL);
-		} else {
-			columnValues.put(columnName, object);
+			return DatabaseValues.NULL;
 		}
+		if (object instanceof PGobject) {
+			PGobject pgObject = (PGobject) object;
+			return pgObject.getValue();
+		}
+		return object;
 	}
 
 	@Override

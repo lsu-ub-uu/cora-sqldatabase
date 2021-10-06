@@ -24,14 +24,15 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Set;
 
+import org.postgresql.util.PGobject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.sqldatabase.internal.RowImp;
 
 public class RowTest {
-
 	private RowImp row;
+	private PGobject pgObject = new PGobject();
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -40,11 +41,18 @@ public class RowTest {
 
 	@Test
 	public void testAddColumnWithValues() throws Exception {
-
 		row.addColumnWithValue("aColumn", "anObject");
 
 		Object valueFromColumn = row.getValueByColumn("aColumn");
 		assertEquals(valueFromColumn, "anObject");
+	}
+
+	@Test
+	public void testAddColumnWithJsonValue() throws Exception {
+		row.addColumnWithValue("aColumn", pgObject);
+
+		Object valueFromColumn = row.getValueByColumn("aColumn");
+		assertEquals(valueFromColumn, pgObject.getValue());
 	}
 
 	@Test

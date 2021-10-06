@@ -1,5 +1,6 @@
 package se.uu.ub.cora.sqldatabase;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -64,6 +65,20 @@ public class RealDbTest {
 		values.add("Stockholms organisation");
 		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql, values);
 		assertNotNull(result);
+	}
+
+	@Test(enabled = false)
+	private void testReadJson() {
+		SqlConnectionProvider sProvider = ParameterConnectionProviderImp.usingUriAndUserAndPassword(
+				"jdbc:postgresql://diva-cora-docker-postgresql:5432/diva", "diva", "diva");
+		DatabaseFacadeImp dataReaderImp = DatabaseFacadeImp.usingSqlConnectionProvider(sProvider);
+		String sql = "select * from record_person where id= ?";
+		// String sql = "select * from organisation ;";
+		List<Object> values = new ArrayList<>();
+		values.add("authority-person:111");
+		Row result = dataReaderImp.readOneRowOrFailUsingSqlAndValues(sql, values);
+		assertNotNull(result);
+		assertEquals((String) result.getValueByColumn("record"), "");
 	}
 
 	@Test(enabled = false)
