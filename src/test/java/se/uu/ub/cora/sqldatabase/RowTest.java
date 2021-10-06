@@ -34,7 +34,7 @@ public class RowTest {
 	private RowImp row;
 
 	@BeforeMethod
-	void beforeMethod() {
+	public void beforeMethod() {
 		row = new RowImp();
 	}
 

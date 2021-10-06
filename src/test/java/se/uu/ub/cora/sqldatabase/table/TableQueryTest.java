@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
@@ -33,13 +34,17 @@ import se.uu.ub.cora.sqldatabase.table.internal.TableQueryImp;
 
 public class TableQueryTest {
 
-	List<String> textsWithForbiddenCharacters = new ArrayList<>();
-	List<String> textsWithAllowedCharacters = new ArrayList<>();
+	List<String> textsWithForbiddenCharacters;
+	List<String> textsWithAllowedCharacters;
 	String tableName = "someTableName";
 
 	TableQuery tableQuery;
 
-	TableQueryTest() {
+	@BeforeTest
+	public void beforeTest() {
+		textsWithForbiddenCharacters = new ArrayList<>();
+		textsWithAllowedCharacters = new ArrayList<>();
+
 		textsWithForbiddenCharacters.add("(select * from person) as person");
 		textsWithForbiddenCharacters.add("table Name");
 		textsWithForbiddenCharacters.add("table where 1=1");
