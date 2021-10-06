@@ -38,7 +38,7 @@ public class TableQueryImp implements TableQuery {
 	private List<String> orderBy = new ArrayList<>();
 	private Long offset;
 	private Long toNumber;
-	private static final String ALLOWED_REGEX = "^[A-Za-z\\-_]*$";
+	private static final String ALLOWED_REGEX = "^[.A-Za-z\\-_]*$";
 	private static Pattern allowedPattern = Pattern.compile(ALLOWED_REGEX);
 
 	public static TableQueryImp usingTableName(String tableName) {

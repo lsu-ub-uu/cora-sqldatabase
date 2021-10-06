@@ -51,12 +51,14 @@ public class TableQueryTest {
 		textsWithForbiddenCharacters.add("table+Name");
 		textsWithForbiddenCharacters.add("table\\u0054Name");
 		textsWithForbiddenCharacters.add("DROP\stableName");
+		textsWithForbiddenCharacters.add("table\\Name");
 
 		textsWithAllowedCharacters.add("tableName");
 		textsWithAllowedCharacters.add("TABLENAME");
 		textsWithAllowedCharacters.add("tablename");
 		textsWithAllowedCharacters.add("table-Name");
 		textsWithAllowedCharacters.add("table_Name");
+		textsWithAllowedCharacters.add("table.Name");
 	}
 
 	@BeforeMethod
