@@ -262,14 +262,14 @@ public class TableQueryTest {
 	@Test
 	public void testReadSqlWithFromNoAndToNo() throws Exception {
 		tableQuery.setFromNo(10L);
-		tableQuery.setToNo(20L);
+		tableQuery.setToNo(19L);
 		assertEquals(tableQuery.assembleReadSql(),
 				"select * from " + tableName + " offset 9 limit 10");
 	}
 
 	@Test
 	public void testReadSqlWithFromNoAndToNoOrderOfSetUnimportant() throws Exception {
-		tableQuery.setToNo(20L);
+		tableQuery.setToNo(19L);
 		tableQuery.setFromNo(10L);
 		assertEquals(tableQuery.assembleReadSql(),
 				"select * from " + tableName + " offset 9 limit 10");
@@ -315,7 +315,7 @@ public class TableQueryTest {
 		tableQuery.addCondition("conditionNameA", "conditionValue1");
 		tableQuery.addCondition("conditionNameB", "conditionValue2");
 		tableQuery.setFromNo(10L);
-		tableQuery.setToNo(20L);
+		tableQuery.setToNo(19L);
 		tableQuery.addOrderByDesc("columnA");
 		tableQuery.addOrderByAsc("columnB");
 		assertEquals(tableQuery.assembleReadSql(),
@@ -329,11 +329,24 @@ public class TableQueryTest {
 		tableQuery.addCondition("conditionNameA", "conditionValue1");
 		tableQuery.addCondition("conditionNameB", "conditionValue2");
 		tableQuery.setFromNo(10L);
-		tableQuery.setToNo(20L);
+		tableQuery.setToNo(19L);
 		assertEquals(tableQuery.assembleCountSql(),
 				"select count (*) from (select * from " + tableName
 						+ " where conditionNameA = ? and conditionNameB = ?"
 						+ " offset 9 limit 10) as count");
+		assertQueryValues("conditionValue1", "conditionValue2");
+	}
+
+	@Test
+	public void testCountSql2() throws Exception {
+		tableQuery.addCondition("conditionNameA", "conditionValue1");
+		tableQuery.addCondition("conditionNameB", "conditionValue2");
+		tableQuery.setFromNo(1L);
+		tableQuery.setToNo(2L);
+		assertEquals(tableQuery.assembleCountSql(),
+				"select count (*) from (select * from " + tableName
+						+ " where conditionNameA = ? and conditionNameB = ?"
+						+ " offset 0 limit 2) as count");
 		assertQueryValues("conditionValue1", "conditionValue2");
 	}
 

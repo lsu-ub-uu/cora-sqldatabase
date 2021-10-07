@@ -182,7 +182,7 @@ public class TableQueryImp implements TableQuery {
 
 	private Long calculateLimit() {
 		if (offsetIsSet()) {
-			return toNumber - offset - OFFSET_DIFF;
+			return toNumber - offset;
 		}
 		return toNumber;
 	}
