@@ -153,4 +153,16 @@ public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 		return lookupName;
 	}
 
+	public String onlyForTestGetUrl() {
+		return url;
+	}
+
+	public String onlyForTestGetUser() {
+		return user;
+	}
+
+	public String onlyForTestGetPassword() {
+		return password;
+	}
+
 }
