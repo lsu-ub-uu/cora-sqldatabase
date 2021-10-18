@@ -81,7 +81,12 @@ public class SqlDatabaseFactoryTest {
 	}
 
 	@Test
-	public void testInitFromContext() throws Exception {
+	public void testInitFromContext() {
+		assertEquals(sqlDatabaseFactory.onlyForTestGetLookupName(), lookupName);
+	}
+
+	@Test
+	public void testConnectionProvider() throws Exception {
 		sqlDatabaseFactory.factorTableFacade();
 
 		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) sqlDatabaseFactory
@@ -92,6 +97,14 @@ public class SqlDatabaseFactoryTest {
 
 	@Test
 	public void testInitFromUriUserPassword() throws Exception {
+		sqlDatabaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(url, user, password);
+		assertEquals(sqlDatabaseFactory.onlyForTestGetUrl(), url);
+		assertEquals(sqlDatabaseFactory.onlyForTestGetUser(), user);
+		assertEquals(sqlDatabaseFactory.onlyForTestGetPassword(), password);
+	}
+
+	@Test
+	public void testFactorTableFacadeFromUriUserPassword() throws Exception {
 		driver = new DriverSpy();
 		DriverManager.registerDriver(driver);
 		sqlDatabaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(url, user, password);
