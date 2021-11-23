@@ -17,7 +17,7 @@
 	</parent>
 
 	<artifactId>sqldatabase</artifactId>
-	<version>5.1.0-SNAPSHOT</version>
+	<version>5.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>cora-sqldatabase</name>
@@ -34,7 +34,7 @@
 		<connection>scm:git:https://github.com/lsu-ub-uu/cora-sqldatabase.git</connection>
 		<developerConnection>scm:git:https://github.com/lsu-ub-uu/cora-sqldatabase.git</developerConnection>
 		<url>https://github.com/lsu-ub-uu/cora-sqldatabase.git</url>
-		<tag>release/5.1</tag>
+		<tag>sqldatabase-5.1.0</tag>
 	</scm>
 
 
