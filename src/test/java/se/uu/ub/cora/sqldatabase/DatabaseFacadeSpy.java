@@ -36,6 +36,7 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 
 	public MethodCallRecorder MCR = new MethodCallRecorder();
 	public boolean throwDuplicatedKeyError = false;
+	public int numberOfAffectedRows = 0;
 
 	@Override
 	public List<Row> readUsingSqlAndValues(String sql, List<Object> values) {
@@ -97,10 +98,8 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 					.withMessage("Error from executeSqlWithValues in DatabaseFacadeSpy");
 		}
 
-		int returnValue = 0;
-
-		MCR.addReturned(returnValue);
-		return returnValue;
+		MCR.addReturned(numberOfAffectedRows);
+		return numberOfAffectedRows;
 	}
 
 	@Override

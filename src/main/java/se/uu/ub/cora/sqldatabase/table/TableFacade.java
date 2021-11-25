@@ -109,8 +109,9 @@ public interface TableFacade extends AutoCloseable {
 	 * @param tableQuery
 	 *            A TableQuery with the table, conditions and other settings to use to update data
 	 *            in the database.
+	 * @return An int with the number of rows updated by the tablequery
 	 */
-	void updateRowsUsingQuery(TableQuery tableQuery);
+	int updateRowsUsingQuery(TableQuery tableQuery);
 
 	/**
 	 * deleteRowsForQuery deletes rows from a table or view in the database according to the
@@ -124,8 +125,9 @@ public interface TableFacade extends AutoCloseable {
 	 * @param tableQuery
 	 *            A TableQuery with the table, conditions and other settings to use to delete rows
 	 *            from the database.
+	 * @return An int with the number of rows deleted by the tablequery
 	 */
-	void deleteRowsForQuery(TableQuery tableQuery);
+	int deleteRowsForQuery(TableQuery tableQuery);
 
 	/**
 	 * nextValueFromSequence returns the next value for the specified sequence

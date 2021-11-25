@@ -98,11 +98,11 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	@Override
-	public void updateRowsUsingQuery(TableQuery tableQuery) {
+	public int updateRowsUsingQuery(TableQuery tableQuery) {
 		String sql = tableQuery.assembleUpdateSql();
 		List<Object> values = tableQuery.getQueryValues();
 		try {
-			dbFacade.executeSqlWithValues(sql, values);
+			return dbFacade.executeSqlWithValues(sql, values);
 		} catch (SqlConflictException e) {
 			throw SqlConflictException.withMessageAndException(
 					"Error updating rows, duplicated key, using sql: " + sql, e);
@@ -113,11 +113,11 @@ public final class TableFacadeImp implements TableFacade {
 	}
 
 	@Override
-	public void deleteRowsForQuery(TableQuery tableQuery) {
+	public int deleteRowsForQuery(TableQuery tableQuery) {
 		String sql = tableQuery.assembleDeleteSql();
 		List<Object> values = tableQuery.getQueryValues();
 		try {
-			dbFacade.executeSqlWithValues(sql, values);
+			return dbFacade.executeSqlWithValues(sql, values);
 		} catch (SqlDatabaseException e) {
 			throw SqlDatabaseException
 					.withMessageAndException("Error deleting rows using sql: " + sql, e);

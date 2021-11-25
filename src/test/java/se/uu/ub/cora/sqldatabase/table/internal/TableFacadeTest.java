@@ -164,8 +164,11 @@ public class TableFacadeTest {
 
 	@Test
 	public void testDeleteRowsForQuery() {
-		tableFacade.deleteRowsForQuery(tableQuerySpy);
+		databaseFacadeSpy.numberOfAffectedRows = 23;
 
+		int deletedRows = tableFacade.deleteRowsForQuery(tableQuerySpy);
+
+		databaseFacadeSpy.MCR.assertReturn("executeSqlWithValues", 0, deletedRows);
 		databaseFacadeSpy.MCR.assertParameters("executeSqlWithValues", 0,
 				tableQuerySpy.MCR.getReturnValue("assembleDeleteSql", 0),
 				tableQuerySpy.MCR.getReturnValue("getQueryValues", 0));
@@ -238,8 +241,11 @@ public class TableFacadeTest {
 
 	@Test
 	public void testUpdateRowsForQuery() {
-		tableFacade.updateRowsUsingQuery(tableQuerySpy);
+		databaseFacadeSpy.numberOfAffectedRows = 19;
 
+		int updateRows = tableFacade.updateRowsUsingQuery(tableQuerySpy);
+
+		databaseFacadeSpy.MCR.assertReturn("executeSqlWithValues", 0, updateRows);
 		databaseFacadeSpy.MCR.assertParameters("executeSqlWithValues", 0,
 				tableQuerySpy.MCR.getReturnValue("assembleUpdateSql", 0),
 				tableQuerySpy.MCR.getReturnValue("getQueryValues", 0));
