@@ -56,10 +56,10 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	@Override
 	public Row readOneRowOrFailUsingSqlAndValues(String sql, List<Object> values) {
 		List<Row> readRows = readUsingSqlAndValues(sql, values);
-		return tryToReadOnRow(sql, readRows);
+		return tryToReadOneRow(sql, readRows);
 	}
 
-	private Row tryToReadOnRow(String sql, List<Row> readRows) {
+	private Row tryToReadOneRow(String sql, List<Row> readRows) {
 		throwErrorIfLessOrMoreThanOneRowRead(sql, readRows);
 		return getFirstRowFromReadRows(readRows);
 	}
