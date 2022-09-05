@@ -26,8 +26,8 @@
 
 	<properties>
 		<logger.version>2.5.0</logger.version>
-		<postgres.version>42.3.4</postgres.version>
-		<testutils.version>1.4.0</testutils.version>
+		<postgres.version>42.5.0</postgres.version>
+		<testutils.version>1.5.0</testutils.version>
 	</properties>
 
 	<scm>
