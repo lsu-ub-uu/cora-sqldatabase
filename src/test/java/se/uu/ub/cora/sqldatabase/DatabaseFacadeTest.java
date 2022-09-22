@@ -523,6 +523,12 @@ public class DatabaseFacadeTest {
 	}
 
 	@Test
+	public void testReadSeveralValuesForACondition() throws Exception {
+		List<Object> possibleValues = List.of("value1", "value2");
+		databaseFacade.readUsingSqlAndValues(SOME_SQL, possibleValues);
+	}
+
+	@Test
 	public void testNoAffectedRows() {
 		int updatedRows = databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 
