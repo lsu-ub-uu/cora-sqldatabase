@@ -479,7 +479,7 @@ public class PreparedStatementSpy implements PreparedStatement {
 
 	@Override
 	public void setArray(int parameterIndex, Array x) throws SQLException {
-		// TODO Auto-generated method stub
+		MCR.addCall("parameterIndex", parameterIndex, "x", x);
 
 	}
 

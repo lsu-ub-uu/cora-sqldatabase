@@ -1,4 +1,5 @@
 /*
+
  * Copyright 2018, 2019, 2021 Uppsala University Library
  *
  * This file is part of Cora.
@@ -524,9 +525,24 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testReadSeveralValuesForACondition() throws Exception {
-		List<Object> possibleValues = List.of("value1", "value2");
+		List<Object> values = List.of(List.of("inList1", "inList1"));
 
-		databaseFacade.readUsingSqlAndValues(SOME_SQL, possibleValues);
+		String sqlWithIn = "select * from y where column in (?)";
+		// String sqlWithInAlternative = "select * from y WHERE field = ANY (?)";
+		// String sqlWithInAlternative = "select * from y WHERE field = ANY (?,?,?) AND BLA= ?";
+
+		databaseFacade.readUsingSqlAndValues(sqlWithIn, values);
+
+		connectionSpy.MCR.assertParameters("createArrayOf", 0, "varchar");
+		Object[] arrayPossibleValues = (Object[]) connectionSpy.MCR
+				.getValueForMethodNameAndCallNumberAndParameterName("createArrayOf", 0, "elements");
+		List possibleValues = (List) values.get(0);
+		assertEquals(arrayPossibleValues.length, possibleValues.size());
+		assertEquals(arrayPossibleValues[0], possibleValues.get(0));
+		assertEquals(arrayPossibleValues[1], possibleValues.get(1));
+
+		var sqlArray = connectionSpy.MCR.getReturnValue("createArrayOf", 0);
+		preparedStatementSpy.MCR.assertParameters("setArray", 0, 1, sqlArray);
 
 		// preparedStatementSpy.MCR.a
 		// assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");

@@ -30,6 +30,18 @@ public class RealDbTest {
 
 	}
 
+	@Test(enabled = true)
+	private void testWithIn() {
+		SqlConnectionProvider sProvider = ParameterConnectionProviderImp.usingUriAndUserAndPassword(
+				"jdbc:postgresql://systemone-cora-docker-postgresql:5432/systemone", "systemone",
+				"systemone");
+		DatabaseFacadeImp dataReaderImp = DatabaseFacadeImp.usingSqlConnectionProvider(sProvider);
+		String sql = "select * from record where type in(?);";
+		List<Object> values = new ArrayList<>();
+		List<Row> result = dataReaderImp.readUsingSqlAndValues(sql, values);
+		assertNotNull(result);
+	}
+
 	@Test(enabled = false)
 	private void test() {
 		SqlConnectionProvider sProvider = ParameterConnectionProviderImp.usingUriAndUserAndPassword(

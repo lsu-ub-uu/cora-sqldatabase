@@ -339,8 +339,11 @@ public class ConnectionSpy implements Connection {
 
 	@Override
 	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+		MCR.addCall("typeName", typeName, "elements", elements);
 		// TODO Auto-generated method stub
-		return null;
+		Array sqlArray = new ArraySpy();
+		MCR.addReturned(sqlArray);
+		return sqlArray;
 	}
 
 	@Override
