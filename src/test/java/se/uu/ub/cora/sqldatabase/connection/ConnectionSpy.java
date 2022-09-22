@@ -55,7 +55,10 @@ public class ConnectionSpy implements Connection {
 
 		this.sql = sql;
 		if (throwErrorConnection) {
-			throw new SQLException("error thrown from prepareStatement in spy");
+			SQLException sqlException = new SQLException(
+					"error thrown from prepareStatement in spy");
+			MCR.addReturned(sqlException);
+			throw sqlException;
 		}
 
 		MCR.addReturned(preparedStatementSpy);

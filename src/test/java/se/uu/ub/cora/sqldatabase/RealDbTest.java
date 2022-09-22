@@ -14,10 +14,10 @@ import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
-import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
 import se.uu.ub.cora.sqldatabase.table.internal.TableQueryImp;
+import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
 
 public class RealDbTest {
 

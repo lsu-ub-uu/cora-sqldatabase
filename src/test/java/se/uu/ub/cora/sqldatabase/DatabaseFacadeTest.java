@@ -41,7 +41,8 @@ import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
 import se.uu.ub.cora.sqldatabase.connection.PreparedStatementSpy;
 import se.uu.ub.cora.sqldatabase.connection.ResultSetSpy;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
-import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
+import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
+import se.uu.ub.cora.testspies.logger.LoggerSpy;
 
 public class DatabaseFacadeTest {
 	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
@@ -396,13 +397,15 @@ public class DatabaseFacadeTest {
 	@Test
 	public void testReadFromTableUsingConditionSqlErrorLogs() throws Exception {
 		connectionSpy.throwErrorConnection = true;
+
 		executePreparedStatementUsingSqlAndValuesMakeSureErrorIsThrown(SOME_SQL, null);
-		assertEquals(loggerFactorySpy.getErrorLogMessageUsingClassNameAndNo(testedClassName, 0),
-				ERROR_READING_DATA_USING_SQL + SOME_SQL);
-		Exception exceptionInErrorLog = loggerFactorySpy
-				.getErrorLogExceptionsUsingClassNameAndNo(testedClassName, 0);
-		assertNotNull(exceptionInErrorLog);
-		assertEquals(exceptionInErrorLog.getMessage(), "error thrown from prepareStatement in spy");
+
+		LoggerSpy errorLogger = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass",
+				0);
+		Object errorThrownFromConnectionSpy = connectionSpy.MCR.getReturnValue("prepareStatement",
+				0);
+		errorLogger.MCR.assertParameters("logErrorUsingMessageAndException", 0,
+				ERROR_READING_DATA_USING_SQL + SOME_SQL, errorThrownFromConnectionSpy);
 	}
 
 	private void executePreparedStatementUsingSqlAndValuesMakeSureErrorIsThrown(String sql,
