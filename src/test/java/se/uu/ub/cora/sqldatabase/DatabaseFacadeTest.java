@@ -525,7 +525,12 @@ public class DatabaseFacadeTest {
 	@Test
 	public void testReadSeveralValuesForACondition() throws Exception {
 		List<Object> possibleValues = List.of("value1", "value2");
+
 		databaseFacade.readUsingSqlAndValues(SOME_SQL, possibleValues);
+
+		// preparedStatementSpy.MCR.a
+		// assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
+		// assertTrue(preparedStatementSpy.usedSetTimestamps.get("2") instanceof Timestamp);
 	}
 
 	@Test
