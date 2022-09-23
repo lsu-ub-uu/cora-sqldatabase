@@ -524,32 +524,6 @@ public class DatabaseFacadeTest {
 	}
 
 	@Test
-	public void testReadSeveralValuesForACondition() throws Exception {
-		List<Object> values = List.of(List.of("inList1", "inList1"));
-
-		String sqlWithIn = "select * from y where column in (?)";
-		// String sqlWithInAlternative = "select * from y WHERE field = ANY (?)";
-		// String sqlWithInAlternative = "select * from y WHERE field = ANY (?,?,?) AND BLA= ?";
-
-		databaseFacade.readUsingSqlAndValues(sqlWithIn, values);
-
-		connectionSpy.MCR.assertParameters("createArrayOf", 0, "varchar");
-		Object[] arrayPossibleValues = (Object[]) connectionSpy.MCR
-				.getValueForMethodNameAndCallNumberAndParameterName("createArrayOf", 0, "elements");
-		List possibleValues = (List) values.get(0);
-		assertEquals(arrayPossibleValues.length, possibleValues.size());
-		assertEquals(arrayPossibleValues[0], possibleValues.get(0));
-		assertEquals(arrayPossibleValues[1], possibleValues.get(1));
-
-		var sqlArray = connectionSpy.MCR.getReturnValue("createArrayOf", 0);
-		preparedStatementSpy.MCR.assertParameters("setArray", 0, 1, sqlArray);
-
-		// preparedStatementSpy.MCR.a
-		// assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
-		// assertTrue(preparedStatementSpy.usedSetTimestamps.get("2") instanceof Timestamp);
-	}
-
-	@Test
 	public void testNoAffectedRows() {
 		int updatedRows = databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 

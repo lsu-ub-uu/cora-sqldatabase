@@ -239,6 +239,14 @@ public class TableQueryTest {
 	}
 
 	@Test
+	public void testReadSqlWithINConditions() throws Exception {
+		tableQuery.addCondition("conditionNameA", List.of("value1", "value2"));
+		assertEquals(tableQuery.assembleReadSql(),
+				"select * from " + tableName + " where conditionNameA in (?, ?)");
+		assertQueryValues("value1", "value2");
+	}
+
+	@Test
 	public void testReadSqlWithFromNo() throws Exception {
 		tableQuery.setFromNo(1L);
 		assertEquals(tableQuery.assembleReadSql(), "select * from " + tableName + " offset 0");

@@ -128,9 +128,6 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 			Object value) throws SQLException {
 		if (isTimestamp(value)) {
 			preparedStatement.setTimestamp(position, (Timestamp) value);
-		} else if (isList(value)) {
-			Object[] arrayValues = ((List) value).stream().toArray(String[]::new);
-			preparedStatement.setArray(position, connection.createArrayOf("varchar", arrayValues));
 		} else if (isDatabaseNull(value)) {
 			preparedStatement.setNull(position, SQL_NULL);
 		} else {

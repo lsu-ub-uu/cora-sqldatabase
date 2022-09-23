@@ -126,6 +126,7 @@ public class TableQueryImp implements TableQuery {
 		sql += possiblyAddOrderBy();
 		sql += possiblyAddOffset();
 		sql += possiblyAddLimit();
+
 		return sql;
 	}
 
@@ -145,12 +146,34 @@ public class TableQueryImp implements TableQuery {
 
 	private String addWherePartOfSqlStatement() {
 		StringBuilder sql = new StringBuilder(" where ");
-		sql.append(joinAllFromListAddingToAndSeparatingBy(conditionNames, " = ?", " and "));
+		sql.append(
+				joinAllFromListAddingToAndSeparatingByConditions(conditionNames, " = ?", " and "));
 		return sql.toString();
 	}
 
 	public boolean hasConditions() {
 		return !conditionNames.isEmpty();
+	}
+
+	private String joinAllFromListAddingToAndSeparatingByConditions(List<String> list, String toAdd,
+			String delimiter) {
+		StringJoiner joiner = new StringJoiner(delimiter);
+		int position = 0;
+		for (String element : list) {
+			if (conditionValues.get(position) instanceof List) {
+				int inElementSize = ((List<Object>) conditionValues.get(position)).size();
+				StringJoiner inJoiner = new StringJoiner(", ");
+				for (int inPosition = 0; inPosition < inElementSize; inPosition++) {
+					inJoiner.add("?");
+				}
+				String string = "(" + inJoiner.toString() + ")";
+				joiner.add(element + " in " + string);
+			} else {
+				joiner.add(element + toAdd);
+			}
+			position++;
+		}
+		return joiner.toString();
 	}
 
 	private String joinAllFromListAddingToAndSeparatingBy(List<String> list, String toAdd,
@@ -212,6 +235,14 @@ public class TableQueryImp implements TableQuery {
 	public List<Object> getQueryValues() {
 		List<Object> values = new ArrayList<>();
 		values.addAll(parameterValues);
+		for (Object value : conditionValues) {
+			if (value instanceof List) {
+				List<Object> inConditions = (List<Object>) value;
+				values.addAll(inConditions);
+			} else {
+				values.add(value);
+			}
+		}
 		values.addAll(conditionValues);
 		return values;
 	}
