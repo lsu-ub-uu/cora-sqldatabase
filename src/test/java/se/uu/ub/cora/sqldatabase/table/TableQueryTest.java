@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Uppsala University Library
+ * Copyright 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -213,6 +213,7 @@ public class TableQueryTest {
 			assertEquals(values.get(i), object);
 			i++;
 		}
+		assertEquals(values.size(), expectedValues.length);
 	}
 
 	@Test
@@ -223,6 +224,7 @@ public class TableQueryTest {
 
 	@Test
 	public void testReadSqlWithOneCondition() throws Exception {
+
 		tableQuery.addCondition("conditionNameA", "conditionValue1");
 		assertEquals(tableQuery.assembleReadSql(),
 				"select * from " + tableName + " where conditionNameA = ?");

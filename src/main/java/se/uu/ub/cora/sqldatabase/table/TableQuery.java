@@ -55,14 +55,18 @@ public interface TableQuery {
 	void addParameter(String name, Object value);
 
 	/**
-	 * The addCondition method adds a condition with name and value to this query. If more than
-	 * condition is added will they be applied using the AND operator.
+	 * The addCondition method adds a condition with name and value to this query. A condition is
+	 * formed with the column name and the value to be evaluated. A condition will be and equals
+	 * evaluation. If more than condition is added will they be applied using the AND operator. If a
+	 * value is a List then the condition will be convereted to a IN condition instead.
 	 * <p>
 	 * If a condition is to use null, MUST the value of the added condition be
 	 * {@link DatabaseValues#NULL}
 	 * <p>
 	 * Implementations MUST ensure that if the name contains characters that are problematic for sql
 	 * injection will an {@link SqlDatabaseException} be thrown.
+	 * <p>
+	 * 
 	 * 
 	 * @param name
 	 *            A String with the name to use in the sql query

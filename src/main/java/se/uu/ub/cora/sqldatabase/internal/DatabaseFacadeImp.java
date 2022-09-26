@@ -135,10 +135,6 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		}
 	}
 
-	private boolean isList(Object value) {
-		return value instanceof List;
-	}
-
 	private boolean isTimestamp(Object value) {
 		return value instanceof Timestamp;
 	}

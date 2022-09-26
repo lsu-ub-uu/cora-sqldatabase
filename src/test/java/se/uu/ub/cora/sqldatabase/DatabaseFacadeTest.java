@@ -51,7 +51,6 @@ public class DatabaseFacadeTest {
 	private SqlConnectionProviderSpy sqlConnectionProviderSpy;
 	private List<Object> values;
 	private LoggerFactorySpy loggerFactorySpy;
-	private String testedClassName = "DatabaseFacadeImp";
 	private static final String SOME_SQL = "select x from y";
 	private static final String SELECT_SQL = "select * from someTableName where alpha2code = ?";;
 	private static final String UPDATE_SQL = "update testTable set x=? where y = ?";
