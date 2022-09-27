@@ -46,7 +46,7 @@ public class RealDbTest {
 		return databaseFactory;
 	}
 
-	@Test(enabled = true)
+	@Test(enabled = false)
 	private void testWithIn() {
 		DatabaseFacade databaseFacade = databaseFactory.factorDatabaseFacade();
 		String deleteSql = "delete from public.record;";
