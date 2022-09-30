@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Uppsala University Library
+ * Copyright 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -126,6 +126,7 @@ public class TableQueryImp implements TableQuery {
 		sql += possiblyAddOrderBy();
 		sql += possiblyAddOffset();
 		sql += possiblyAddLimit();
+
 		return sql;
 	}
 
@@ -138,19 +139,49 @@ public class TableQueryImp implements TableQuery {
 
 	private String possiblyAddConditions() {
 		if (hasConditions()) {
-			return addWherePartOfSqlStatement();
+			return createWherePart();
 		}
 		return "";
 	}
 
-	private String addWherePartOfSqlStatement() {
-		StringBuilder sql = new StringBuilder(" where ");
-		sql.append(joinAllFromListAddingToAndSeparatingBy(conditionNames, " = ?", " and "));
-		return sql.toString();
-	}
-
 	public boolean hasConditions() {
 		return !conditionNames.isEmpty();
+	}
+
+	private String createWherePart() {
+		StringBuilder wherePart = new StringBuilder(" where ");
+		wherePart.append(joinAllFromListSeparatingByConditions(conditionNames));
+		return wherePart.toString();
+	}
+
+	private String joinAllFromListSeparatingByConditions(List<String> conditionNames) {
+		StringJoiner conditionsPart = new StringJoiner(" and ");
+		int position = 0;
+		for (String conditionName : conditionNames) {
+			conditionsPart.add(createCondition(conditionName, conditionValues.get(position)));
+			position++;
+		}
+		return conditionsPart.toString();
+	}
+
+	private String createCondition(String conditionName, Object conditionValue) {
+		String comparison = " = ?";
+		if (conditionValueIsAList(conditionValue)) {
+			comparison = createConditionIN(((List<?>) conditionValue).size());
+		}
+		return conditionName + comparison;
+	}
+
+	private boolean conditionValueIsAList(Object conditionValue) {
+		return conditionValue instanceof List;
+	}
+
+	private String createConditionIN(int numOfConditionsForInPart) {
+		StringJoiner inPart = new StringJoiner(", ", " in (", ")");
+		for (int inPosition = 0; inPosition < numOfConditionsForInPart; inPosition++) {
+			inPart.add("?");
+		}
+		return inPart.toString();
 	}
 
 	private String joinAllFromListAddingToAndSeparatingBy(List<String> list, String toAdd,
@@ -210,10 +241,22 @@ public class TableQueryImp implements TableQuery {
 
 	@Override
 	public List<Object> getQueryValues() {
-		List<Object> values = new ArrayList<>();
-		values.addAll(parameterValues);
-		values.addAll(conditionValues);
-		return values;
+		List<Object> queryValues = new ArrayList<>();
+		queryValues.addAll(parameterValues);
+		queryValues.addAll(flattenConditionValues());
+		return queryValues;
+	}
+
+	private List<Object> flattenConditionValues() {
+		List<Object> flatConditionValues = new ArrayList<>();
+		for (Object conditionValue : conditionValues) {
+			if (conditionValue instanceof List) {
+				flatConditionValues.addAll((List<?>) conditionValue);
+			} else {
+				flatConditionValues.add(conditionValue);
+			}
+		}
+		return flatConditionValues;
 	}
 
 	@Override

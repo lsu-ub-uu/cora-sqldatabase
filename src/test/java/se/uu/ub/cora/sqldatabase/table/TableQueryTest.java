@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Uppsala University Library
+ * Copyright 2021, 2022 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -213,6 +213,7 @@ public class TableQueryTest {
 			assertEquals(values.get(i), object);
 			i++;
 		}
+		assertEquals(values.size(), expectedValues.length);
 	}
 
 	@Test
@@ -223,6 +224,7 @@ public class TableQueryTest {
 
 	@Test
 	public void testReadSqlWithOneCondition() throws Exception {
+
 		tableQuery.addCondition("conditionNameA", "conditionValue1");
 		assertEquals(tableQuery.assembleReadSql(),
 				"select * from " + tableName + " where conditionNameA = ?");
@@ -236,6 +238,14 @@ public class TableQueryTest {
 		assertEquals(tableQuery.assembleReadSql(),
 				"select * from " + tableName + " where conditionNameA = ? and conditionNameB = ?");
 		assertQueryValues("conditionValue1", "conditionValue2");
+	}
+
+	@Test
+	public void testReadSqlWithINConditions() throws Exception {
+		tableQuery.addCondition("conditionNameA", List.of("value1", "value2"));
+		assertEquals(tableQuery.assembleReadSql(),
+				"select * from " + tableName + " where conditionNameA in (?, ?)");
+		assertQueryValues("value1", "value2");
 	}
 
 	@Test

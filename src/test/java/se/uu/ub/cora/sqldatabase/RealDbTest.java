@@ -5,29 +5,83 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
-import se.uu.ub.cora.sqldatabase.log.LoggerFactorySpy;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
+import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 import se.uu.ub.cora.sqldatabase.table.internal.TableQueryImp;
+import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
 
 public class RealDbTest {
 
 	private LoggerFactorySpy loggerFactorySpy;
+	private SqlDatabaseFactoryImp databaseFactory;
+
+	@BeforeTest
+	public void beforeTest() {
+		databaseFactory = createDatabaseFactoryForSystemOne();
+	}
 
 	@BeforeMethod
 	public void beforeMethod() {
 		loggerFactorySpy = new LoggerFactorySpy();
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 
+	}
+
+	private SqlDatabaseFactoryImp createDatabaseFactoryForSystemOne() {
+		SqlDatabaseFactoryImp databaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
+				"jdbc:postgresql://systemone-cora-docker-postgresql:5432/systemone", "systemone",
+				"systemone");
+		return databaseFactory;
+	}
+
+	@Test(enabled = false)
+	private void testWithIn() {
+		DatabaseFacade databaseFacade = databaseFactory.factorDatabaseFacade();
+		String deleteSql = "delete from public.record;";
+		databaseFacade.executeSqlWithValues(deleteSql, Collections.emptyList());
+
+		insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(databaseFacade, "recordType",
+				"recordType", "cora", "{\"trams\":\"trams\"}");
+		insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(databaseFacade, "metadata",
+				"recordType", "cora", "{\"trams\":\"trams\"}");
+		insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(databaseFacade, "otherType",
+				"recordType", "cora", "{\"trams\":\"trams\"}");
+
+		String sql = "select * from record where type in(?, ?);";
+		List<Object> values = List.of("recordType", "metadata");
+		List<Row> result = databaseFacade.readUsingSqlAndValues(sql, values);
+		assertNotNull(result);
+		assertEquals(result.size(), 2);
+
+		TableFacadeImp tableFacade = TableFacadeImp.usingDatabaseFacade(databaseFacade);
+		TableQuery recordTableQuery = databaseFactory.factorTableQuery("record");
+		recordTableQuery.addCondition("type", values);
+
+		long readNumberOfRows = tableFacade.readNumberOfRows(recordTableQuery);
+		assertEquals(readNumberOfRows, 2);
+
+		databaseFacade.executeSqlWithValues(deleteSql, Collections.emptyList());
+	}
+
+	private void insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(
+			DatabaseFacade databaseFacade, String recordType, String recordId, String dataDivider,
+			String json) {
+		String insertSql = "INSERT INTO public.record " + "(type, id, datadivider, data)"
+				+ "VALUES(?, ?, ?, to_json(?::json));";
+		List<Object> insertValues = List.of(recordType, recordId, dataDivider, json);
+		databaseFacade.executeSqlWithValues(insertSql, insertValues);
 	}
 
 	@Test(enabled = false)
