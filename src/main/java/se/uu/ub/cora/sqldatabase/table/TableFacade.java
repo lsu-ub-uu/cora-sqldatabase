@@ -25,7 +25,9 @@ import java.util.List;
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlConflictException;
+import se.uu.ub.cora.sqldatabase.SqlDataException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.SqlNotFoundException;
 
 /**
  * TableFacade interacts with data from a sql database without the need to write sql statements.
@@ -69,9 +71,13 @@ public interface TableFacade extends AutoCloseable {
 	/**
 	 * readOneRowForQuery reads one row from the database as specified in the provided TableQuery.
 	 * <p>
+	 * Implementations MUST make sure that if no row is found matching the conditions will a
+	 * {@link SqlNotFoundException} be thrown, indicating that the requested single row can not be
+	 * realibly read.
+	 * <p>
 	 * Implementations MUST make sure that if no row or more than one row is found matching the
-	 * conditions will a {@link SqlDatabaseException} be thrown, indicating that the requested
-	 * single row can not be realibly read.
+	 * conditions will a {@link SqlDataException} be thrown, indicating that the requested single
+	 * row can not be realibly read.
 	 * <p>
 	 * If an exception occurs while interacting with the database MUST an
 	 * {@link SqlDatabaseException} be thrown.

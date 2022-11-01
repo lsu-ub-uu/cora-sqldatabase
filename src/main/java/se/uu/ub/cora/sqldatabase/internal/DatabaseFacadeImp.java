@@ -34,7 +34,9 @@ import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.DatabaseValues;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlConflictException;
+import se.uu.ub.cora.sqldatabase.SqlDataException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.SqlNotFoundException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 
 public final class DatabaseFacadeImp implements DatabaseFacade {
@@ -71,14 +73,14 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 
 	private void throwErrorIfNoRowIsReturned(String sql, List<Row> readRows) {
 		if (readRows.isEmpty()) {
-			throw SqlDatabaseException
+			throw SqlNotFoundException
 					.withMessage(ERROR_READING_DATA_USING_SQL + sql + ": no row returned");
 		}
 	}
 
 	private void throwErrorIfMoreThanOneRowIsReturned(String sql, List<Row> readRows) {
 		if (resultHasMoreThanOneRow(readRows)) {
-			throw SqlDatabaseException.withMessage(
+			throw SqlDataException.withMessage(
 					ERROR_READING_DATA_USING_SQL + sql + ": more than one row returned");
 		}
 	}

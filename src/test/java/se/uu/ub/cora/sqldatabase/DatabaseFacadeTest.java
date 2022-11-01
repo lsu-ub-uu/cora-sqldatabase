@@ -145,7 +145,7 @@ public class DatabaseFacadeTest {
 		assertEquals(databaseFacade.getSqlConnectionProvider(), sqlConnectionProviderSpy);
 	}
 
-	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
+	@Test(expectedExceptions = SqlNotFoundException.class, expectedExceptionsMessageRegExp = ""
 			+ ERROR_READING_DATA_USING_SQL + SOME_SQL + ": no row returned")
 	public void testReadOneNoResultsThrowsException() throws Exception {
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
@@ -351,7 +351,7 @@ public class DatabaseFacadeTest {
 		assertEquals(readRow.getValueByColumn(columnNames.get(3)), "someOther value four");
 	}
 
-	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
+	@Test(expectedExceptions = SqlDataException.class, expectedExceptionsMessageRegExp = ""
 			+ ERROR_READING_DATA_USING_SQL + SOME_SQL + ": more than one row returned")
 	public void testIfResultSetContainsDataForOneMoreRowsDataReturnedDataContainsValuesFromResultSet()
 			throws Exception {
