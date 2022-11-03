@@ -64,9 +64,11 @@ public interface DatabaseFacade extends AutoCloseable {
 	 * readOneRowOrFailUsingSqlAndValues reads one row from the database using the supplied sql
 	 * (prepared statement) and the supplied values.
 	 * <p>
-	 * If no row or more than one row is found matching the sql and values MUST a
-	 * {@link SqlDatabaseException} be thrown, indicating that the requested single row can not be
-	 * realibly read.
+	 * If no row is found matching the sql and values MUST a {@link SqlNotFoundException} be thrown,
+	 * indicating that the requested single row can not be found.
+	 * <p>
+	 * If more than one row is found matching the sql and values MUST a {@link SqlDataException} be
+	 * thrown, indicating that the requested single row can not be realibly read.
 	 * <p>
 	 * If an exception occurs while interacting with the database MUST an
 	 * {@link SqlDatabaseException} be thrown.
