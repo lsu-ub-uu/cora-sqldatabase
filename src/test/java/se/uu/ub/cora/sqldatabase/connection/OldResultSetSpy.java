@@ -277,7 +277,7 @@ public class OldResultSetSpy implements ResultSet {
 	@Override
 	public ResultSetMetaData getMetaData() throws SQLException {
 		getMetadataWasCalled = true;
-		ResultSetMetaData resultSetMetaData = new ResultSetMetadataSpy(columnNames);
+		ResultSetMetaData resultSetMetaData = new OldResultSetMetadataSpy(columnNames);
 		return resultSetMetaData;
 	}
 

@@ -52,6 +52,8 @@ public class ResultSetSpy implements ResultSet {
 		MCR.useMRV(MRV);
 		MRV.setDefaultReturnValuesSupplier("next", () -> false);
 		MRV.setDefaultReturnValuesSupplier("getString", () -> "someString");
+		MRV.setDefaultReturnValuesSupplier("getMetaData", ResultSetMetadataSpy::new);
+		MRV.setDefaultReturnValuesSupplier("getObject", Object::new);
 	}
 
 	@Override
@@ -293,9 +295,7 @@ public class ResultSetSpy implements ResultSet {
 
 	@Override
 	public ResultSetMetaData getMetaData() throws SQLException {
-		getMetadataWasCalled = true;
-		ResultSetMetaData resultSetMetaData = new ResultSetMetadataSpy(columnNames);
-		return resultSetMetaData;
+		return (ResultSetMetaData) MCR.addCallAndReturnFromMRV();
 	}
 
 	@Override
@@ -306,7 +306,7 @@ public class ResultSetSpy implements ResultSet {
 
 	@Override
 	public Object getObject(String columnLabel) throws SQLException {
-		return rowValues.get(currentRow).get(columnLabel);
+		return MCR.addCallAndReturnFromMRV("columnLabel", columnLabel);
 	}
 
 	@Override

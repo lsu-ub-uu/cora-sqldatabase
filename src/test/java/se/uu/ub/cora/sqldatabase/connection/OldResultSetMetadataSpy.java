@@ -1,38 +1,15 @@
-/*
- * Copyright 2025 Uppsala University Library
- *
- * This file is part of Cora.
- *
- *     Cora is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Cora is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package se.uu.ub.cora.sqldatabase.connection;
 
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.List;
 
-import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
-import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
+public class OldResultSetMetadataSpy implements ResultSetMetaData {
 
-public class ResultSetMetadataSpy implements ResultSetMetaData {
+	private List<String> columnNames;
 
-	public MethodCallRecorder MCR = new MethodCallRecorder();
-	public MethodReturnValues MRV = new MethodReturnValues();
-
-	public ResultSetMetadataSpy() {
-		MCR.useMRV(MRV);
-		MRV.setDefaultReturnValuesSupplier("getColumnCount", () -> 0);
+	public OldResultSetMetadataSpy(List<String> columnNames) {
+		this.columnNames = columnNames;
 	}
 
 	@Override
@@ -49,7 +26,7 @@ public class ResultSetMetadataSpy implements ResultSetMetaData {
 
 	@Override
 	public int getColumnCount() throws SQLException {
-		return (int) MCR.addCallAndReturnFromMRV();
+		return columnNames.size();
 	}
 
 	@Override
@@ -102,8 +79,7 @@ public class ResultSetMetadataSpy implements ResultSetMetaData {
 
 	@Override
 	public String getColumnName(int column) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return columnNames.get(column - 1);
 	}
 
 	@Override
