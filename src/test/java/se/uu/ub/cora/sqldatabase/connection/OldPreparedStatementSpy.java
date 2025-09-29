@@ -22,20 +22,25 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
-import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
-public class PreparedStatementSpy implements PreparedStatement {
+public class OldPreparedStatementSpy implements PreparedStatement {
+
+	public boolean executeQueryWasCalled = false;
+	public boolean executeUpdateWasCalled = false;
+	public OldResultSetSpy resultSet = new OldResultSetSpy();
+	public boolean closeWasCalled = false;
+	public Map<String, String> usedSetStrings = new HashMap<>();
+	public Map<String, Object> usedSetObjects = new HashMap<>();
+	public Map<String, Object> usedSetTimestamps = new HashMap<>();
+	public int noOfAffectedRows = 0;
 
 	public MethodCallRecorder MCR = new MethodCallRecorder();
-	public MethodReturnValues MRV = new MethodReturnValues();
-
-	public PreparedStatementSpy() {
-		MCR.useMRV(MRV);
-		MRV.setDefaultReturnValuesSupplier("executeQuery", ResultSetSpy::new);
-		MRV.setDefaultReturnValuesSupplier("executeUpdate", () -> 1);
-	}
+	public static String DUPLICATE_ERROR_MESSAGE = "duplicate key value violates unique constraint \"organisation_pkey\"";;
+	public boolean throwDuplicateKeyException = false;
 
 	@Override
 	public ResultSet executeQuery(String sql) throws SQLException {
@@ -51,7 +56,7 @@ public class PreparedStatementSpy implements PreparedStatement {
 
 	@Override
 	public void close() throws SQLException {
-		MCR.addCall();
+		closeWasCalled = true;
 	}
 
 	@Override
@@ -302,12 +307,17 @@ public class PreparedStatementSpy implements PreparedStatement {
 
 	@Override
 	public ResultSet executeQuery() throws SQLException {
-		return (ResultSet) MCR.addCallAndReturnFromMRV();
+		executeQueryWasCalled = true;
+		return resultSet;
 	}
 
 	@Override
 	public int executeUpdate() throws SQLException {
-		return (int) MCR.addCallAndReturnFromMRV();
+		executeUpdateWasCalled = true;
+		if (throwDuplicateKeyException) {
+			throw new SQLException(DUPLICATE_ERROR_MESSAGE);
+		}
+		return noOfAffectedRows;
 	}
 
 	@Override
@@ -365,7 +375,7 @@ public class PreparedStatementSpy implements PreparedStatement {
 
 	@Override
 	public void setString(int parameterIndex, String x) throws SQLException {
-		MCR.addCall("parameterIndex", parameterIndex, "x", x);
+		usedSetStrings.put(String.valueOf(parameterIndex), x);
 	}
 
 	@Override
@@ -388,7 +398,8 @@ public class PreparedStatementSpy implements PreparedStatement {
 
 	@Override
 	public void setTimestamp(int parameterIndex, Timestamp x) throws SQLException {
-		MCR.addCall("parameterIndex", parameterIndex, "x", x);
+		usedSetTimestamps.put(String.valueOf(parameterIndex), x);
+
 	}
 
 	@Override
@@ -424,6 +435,8 @@ public class PreparedStatementSpy implements PreparedStatement {
 
 	@Override
 	public void setObject(int parameterIndex, Object x) throws SQLException {
+		usedSetObjects.put(String.valueOf(parameterIndex), x);
+
 		MCR.addCall("parameterIndex", parameterIndex, "x", x);
 	}
 

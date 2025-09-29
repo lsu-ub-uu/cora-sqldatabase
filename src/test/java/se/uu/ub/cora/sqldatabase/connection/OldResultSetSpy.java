@@ -1,21 +1,3 @@
-/*
- * Copyright 2025 Uppsala University Library
- *
- * This file is part of Cora.
- *
- *     Cora is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Cora is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
- */
 package se.uu.ub.cora.sqldatabase.connection;
 
 import java.io.InputStream;
@@ -37,22 +19,21 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
-import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
+public class OldResultSetSpy implements ResultSet {
 
-public class ResultSetSpy implements ResultSet {
-
-	public MethodCallRecorder MCR = new MethodCallRecorder();
-	public MethodReturnValues MRV = new MethodReturnValues();
-
-	public ResultSetSpy() {
-		MCR.useMRV(MRV);
-		MRV.setDefaultReturnValuesSupplier("next", () -> false);
-		MRV.setDefaultReturnValuesSupplier("getString", () -> "someString");
-	}
+	public boolean hasNext = false;
+	public List<String> columnNames = new ArrayList<>();
+	public boolean getMetadataWasCalled = false;
+	public Map<String, String> columnValues = new HashMap<>();
+	public List<Map<String, Object>> rowValues = new ArrayList<>();
+	private int currentRow = -1;
+	public boolean closeWasCalled = false;
 
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -68,12 +49,13 @@ public class ResultSetSpy implements ResultSet {
 
 	@Override
 	public boolean next() throws SQLException {
-		return (boolean) MCR.addCallAndReturnFromMRV();
+		currentRow++;
+		return currentRow < rowValues.size();
 	}
 
 	@Override
 	public void close() throws SQLException {
-		MCR.addCall();
+		closeWasCalled = true;
 	}
 
 	@Override
@@ -180,7 +162,8 @@ public class ResultSetSpy implements ResultSet {
 
 	@Override
 	public String getString(String columnLabel) throws SQLException {
-		return (String) MCR.addCallAndReturnFromMRV("columnLabel", columnLabel);
+		// return null;
+		return (String) rowValues.get(currentRow).get(columnLabel);
 	}
 
 	@Override

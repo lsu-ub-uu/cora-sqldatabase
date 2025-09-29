@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 public class DataSourceSpy implements DataSource {
-	public List<ConnectionSpy> connectionList = new ArrayList<>();
+	public List<OldConnectionSpy> connectionList = new ArrayList<>();
 
 	@Override
 	public PrintWriter getLogWriter() throws SQLException {
@@ -57,7 +57,7 @@ public class DataSourceSpy implements DataSource {
 
 	@Override
 	public Connection getConnection() throws SQLException {
-		ConnectionSpy connectionSpy = new ConnectionSpy();
+		OldConnectionSpy connectionSpy = new OldConnectionSpy();
 		connectionList.add(connectionSpy);
 		return connectionSpy;
 	}

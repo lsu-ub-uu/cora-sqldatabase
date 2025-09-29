@@ -38,9 +38,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import se.uu.ub.cora.logger.LoggerProvider;
-import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
-import se.uu.ub.cora.sqldatabase.connection.PreparedStatementSpy;
-import se.uu.ub.cora.sqldatabase.connection.ResultSetSpy;
+import se.uu.ub.cora.sqldatabase.connection.OldConnectionSpy;
+import se.uu.ub.cora.sqldatabase.connection.OldPreparedStatementSpy;
+import se.uu.ub.cora.sqldatabase.connection.OldResultSetSpy;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
 import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
 import se.uu.ub.cora.testspies.logger.LoggerSpy;
@@ -54,9 +54,9 @@ public class DatabaseFacadeTest {
 	private static final String SOME_SQL = "select x from y";
 	private static final String SELECT_SQL = "select * from someTableName where alpha2code = ?";;
 	private static final String UPDATE_SQL = "update testTable set x=? where y = ?";
-	private PreparedStatementSpy preparedStatementSpy;
-	private ResultSetSpy resultSetSpy;
-	private ConnectionSpy connectionSpy;
+	private OldPreparedStatementSpy preparedStatementSpy;
+	private OldResultSetSpy resultSetSpy;
+	private OldConnectionSpy connectionSpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -271,7 +271,7 @@ public class DatabaseFacadeTest {
 		assertEquals(resultSetSpy.getMetadataWasCalled, true);
 	}
 
-	private void setValuesInResultSetSpy(ResultSetSpy resultSetSpy) {
+	private void setValuesInResultSetSpy(OldResultSetSpy resultSetSpy) {
 		List<String> columnNames = createListOfColumnNames();
 		resultSetSpy.columnNames = columnNames;
 
@@ -571,7 +571,7 @@ public class DatabaseFacadeTest {
 		databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 
 		String generatedSql = sqlConnectionProviderSpy.connection.sql;
-		ConnectionSpy connectionSpy = sqlConnectionProviderSpy.connection;
+		OldConnectionSpy connectionSpy = sqlConnectionProviderSpy.connection;
 
 		assertEquals(generatedSql, UPDATE_SQL);
 		assertTrue(preparedStatementSpy.executeUpdateWasCalled);
