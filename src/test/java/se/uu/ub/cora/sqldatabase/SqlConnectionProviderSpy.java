@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Uppsala University Library
+ * Copyright 2025 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -16,36 +16,28 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package se.uu.ub.cora.sqldatabase;
 
 import java.sql.Connection;
 
-import se.uu.ub.cora.sqldatabase.connection.OldConnectionSpy;
+import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
 public class SqlConnectionProviderSpy implements SqlConnectionProvider {
 
-	public OldConnectionSpy connection = new OldConnectionSpy();
-	public boolean throwErrorGettingConnection = false;
-	public boolean returnErrorConnection = false;
-	public boolean getConnectionHasBeenCalled = false;
-	MethodCallRecorder MCR = new MethodCallRecorder();
+	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public MethodReturnValues MRV = new MethodReturnValues();
+
+	public SqlConnectionProviderSpy() {
+		MCR.useMRV(MRV);
+		MRV.setDefaultReturnValuesSupplier("getConnection", ConnectionSpy::new);
+	}
 
 	@Override
 	public Connection getConnection() {
-		MCR.addCall();
-		getConnectionHasBeenCalled = true;
-		if (throwErrorGettingConnection) {
-			throw SqlDatabaseException
-					.withMessage("error from SqlConnectionProviderSpy getting connection");
-		}
-		if (returnErrorConnection) {
-			connection.throwErrorConnection = true;
-		}
-		MCR.addReturned(connection);
-		return connection;
+		return (Connection) MCR.addCallAndReturnFromMRV();
 	}
 
 }

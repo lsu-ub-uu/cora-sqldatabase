@@ -136,4 +136,16 @@ public interface DatabaseFacade extends AutoCloseable {
 	 */
 	@Override
 	void close();
+
+	/**
+	 * executeSql executes a SQL query that does not return any results.
+	 * 
+	 * @param sql
+	 *            A String with the SQL query to execute.
+	 * 
+	 * @throws {@link
+	 *             SqlDatabaseException} If an exception occurs while interacting with the database
+	 *             .
+	 */
+	void executeSql(String sql);
 }

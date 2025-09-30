@@ -41,8 +41,7 @@ public class RealDbTest {
 
 	private SqlDatabaseFactoryImp createDatabaseFactoryForSystemOne() {
 		SqlDatabaseFactoryImp databaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
-				"jdbc:postgresql://systemone-cora-docker-postgresql:5432/systemone", "systemone",
-				"systemone");
+				"jdbc:postgresql://systemone-postgresql:5432/systemone", "systemone", "systemone");
 		return databaseFactory;
 	}
 
@@ -73,6 +72,31 @@ public class RealDbTest {
 		assertEquals(readNumberOfRows, 2);
 
 		databaseFacade.executeSqlWithValues(deleteSql, Collections.emptyList());
+	}
+
+	@Test(enabled = true)
+	private void testCreateSequence() {
+		DatabaseFacadeImp databaseFacadeImp = (DatabaseFacadeImp) databaseFactory
+				.factorDatabaseFacade();
+		String name = "anotherGeneratorssss";
+
+		// CREATE sequence
+		String createSequence = "create sequence " + name + " start with 526;";
+		databaseFacadeImp.executeSql(createSequence);
+
+		// NEXTVALUE sequence
+		String readSequence = "select nextval('public." + name + "');";
+		List<Row> result = databaseFacadeImp.readUsingSqlAndValues(readSequence,
+				Collections.emptyList());
+
+		for (Row row : result) {
+			System.out.println(row.columnSet());
+			System.out.println(row.getValueByColumn("nextval"));
+		}
+
+		// DELETE sequence
+		String deleteSequence = "drop sequence if exists " + name + ";";
+		databaseFacadeImp.executeSql(deleteSequence);
 	}
 
 	private void insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(

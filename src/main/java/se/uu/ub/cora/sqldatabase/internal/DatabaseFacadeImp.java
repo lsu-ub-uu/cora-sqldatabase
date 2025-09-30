@@ -200,6 +200,24 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		}
 	}
 
+	@Override
+	public void executeSql(String sql) {
+		try {
+			executeUsingSql(sql);
+		} catch (Exception e) {
+			throw SqlDatabaseException.withMessageAndException("Error executing statement: " + sql,
+					e);
+		}
+	}
+
+	private void executeUsingSql(String sql) throws SQLException {
+		createConnectionIfNotCreatedSinceBefore();
+		try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+			preparedStatement.execute();
+		}
+
+	}
+
 	private int executeUsingSqlAndValues(String sql, List<Object> values) throws SQLException {
 		createConnectionIfNotCreatedSinceBefore();
 		try (PreparedStatement prepareStatement = connection.prepareStatement(sql);) {

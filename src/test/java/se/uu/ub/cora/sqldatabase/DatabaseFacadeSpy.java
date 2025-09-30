@@ -137,4 +137,10 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 
 	}
 
+	@Override
+	public void executeSql(String sql) {
+		// TODO Auto-generated method stub
+
+	}
+
 }
