@@ -26,7 +26,7 @@ import se.uu.ub.cora.sqldatabase.SqlNotFoundException;
  * Interface for a sequence generator that can create, retrieve the next value from, and remove
  * sequences.
  */
-public interface Sequence extends AutoCloseable {
+public interface Sequence {
 
 	/**
 	 * createSequence method Creates a new sequence with the specified name and starting value.
@@ -41,6 +41,19 @@ public interface Sequence extends AutoCloseable {
 	void createSequence(String sequenceName, long startValue);
 
 	/**
+	 * getCurrentValueForSequence method retrieves the current value from the sequence.
+	 * 
+	 * @param sequenceName
+	 *            the name of the sequence to get the current value from
+	 * 
+	 * @thows {@link SqlDatabaseException} if there is an error reading current value
+	 * @thows {@link SqlNotFoundException} if the sequence does not exist
+	 *
+	 * @return the current value in the sequence
+	 */
+	long getCurrentValueForSequence(String sequenceName);
+
+	/**
 	 * getNextValueForSequence method retrieves the next value from the sequence.
 	 * 
 	 * @param sequenceName
@@ -52,6 +65,20 @@ public interface Sequence extends AutoCloseable {
 	 * @return the next value in the sequence
 	 */
 	long getNextValueForSequence(String sequenceName);
+
+	/**
+	 * resetSequenceValue method sets the current value of the sequence to the specified value. The
+	 * next call to getNextValueForSequence will return value + 1.
+	 * 
+	 * @param sequenceName
+	 *            the name of the sequence to reset
+	 * @param value
+	 *            the value to set the sequence to
+	 * 
+	 * @thows {@link SqlDatabaseException} if there is an error resetting the sequence value
+	 * @thows {@link SqlNotFoundException} if the sequence does not exist
+	 */
+	void resetSequenceValue(String sequenceName, long value);
 
 	/**
 	 * removeSequence method removes the sequence with the specified name.

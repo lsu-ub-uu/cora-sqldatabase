@@ -18,44 +18,57 @@
  */
 package se.uu.ub.cora.sqldatabase.sequence.internal;
 
-import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
+import java.text.MessageFormat;
+
+import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.sequence.Sequence;
 
 public class SequenceImp implements Sequence {
 
-	private SqlConnectionProvider sqlConnectionProvider;
+	private DatabaseFacade databaseFacade;
 
-	public static SequenceImp usingSqlConnectionProvider(
-			SqlConnectionProvider sqlConnectionProviderSpy) {
-		return new SequenceImp(sqlConnectionProviderSpy);
+	public static SequenceImp usingDatabaseFacade(DatabaseFacade databaseFacade) {
+		return new SequenceImp(databaseFacade);
 	}
 
-	private SequenceImp(SqlConnectionProvider sqlConnectionProvider) {
-		this.sqlConnectionProvider = sqlConnectionProvider;
-	}
-
-	@Override
-	public void close() throws Exception {
-
+	private SequenceImp(DatabaseFacade databaseFacade) {
+		this.databaseFacade = databaseFacade;
 	}
 
 	@Override
 	public void createSequence(String sequenceName, long startValue) {
+		String createStatement = "create sequence {0} start with {1};";
+		String sqlStatementWithValues = MessageFormat.format(createStatement, sequenceName,
+				startValue);
+		databaseFacade.executeSql(sqlStatementWithValues);
+	}
 
+	@Override
+	public long getCurrentValueForSequence(String sequenceName) {
+		// select currval('mySequence');
+		return 0;
 	}
 
 	@Override
 	public long getNextValueForSequence(String sequenceName) {
+		// select nextval('public.mySequence');
 		return 1;
 	}
 
 	@Override
-	public void removeSequence(String sequenceName) {
+	public void resetSequenceValue(String sequenceName, long value) {
+		// alter sequence mySequence restart with 784;
 
 	}
 
-	public SqlConnectionProvider onlyForTestGetSqlConnectionProvider() {
-		return sqlConnectionProvider;
+	@Override
+	public void removeSequence(String sequenceName) {
+		// drop sequence if exists mySequence;
+
+	}
+
+	public DatabaseFacade onlyForTestGetDatabaseFacade() {
+		return databaseFacade;
 	}
 
 }

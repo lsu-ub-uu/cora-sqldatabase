@@ -51,17 +51,18 @@ import se.uu.ub.cora.testspies.logger.LoggerSpy;
 public class DatabaseFacadeTest {
 	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
 	private DatabaseFacade databaseFacade;
-	private OldSqlConnectionProviderSpy sqlConnectionProviderSpy;
-	private List<Object> values;
+	private OldSqlConnectionProviderSpy oldSqlConnectionProvider;
+	private OldPreparedStatementSpy oldPreparedStatement;
+	private OldResultSetSpy oldResultSet;
+	private OldConnectionSpy oldConnection;
+	private SqlConnectionProviderSpy sqlConnectionProvider;
+	private ConnectionSpy connection;
 	private LoggerFactorySpy loggerFactorySpy;
-	private static final String SOME_SQL = "select x from y";
 	private static final String SELECT_SQL = "select * from someTableName where alpha2code = ?";;
 	private static final String UPDATE_SQL = "update testTable set x=? where y = ?";
-	private OldPreparedStatementSpy preparedStatementSpy;
-	private OldResultSetSpy resultSetSpy;
-	private OldConnectionSpy connectionSpy;
-	private ConnectionSpy connection;
-	private SqlConnectionProviderSpy sqlConnectionProvider;
+
+	private static final String SOME_SQL = "select x from y";
+	private List<Object> values;
 
 	@BeforeMethod
 	public void beforeMethod() {
@@ -69,15 +70,15 @@ public class DatabaseFacadeTest {
 		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 
 		values = new ArrayList<>();
-		setupConnectionSpies();
-		databaseFacade = DatabaseFacadeImp.usingSqlConnectionProvider(sqlConnectionProviderSpy);
+		setupOldConnectionSpies();
+		databaseFacade = DatabaseFacadeImp.usingSqlConnectionProvider(oldSqlConnectionProvider);
 	}
 
-	private void setupConnectionSpies() {
-		sqlConnectionProviderSpy = new OldSqlConnectionProviderSpy();
-		connectionSpy = sqlConnectionProviderSpy.connection;
-		preparedStatementSpy = sqlConnectionProviderSpy.connection.preparedStatementSpy;
-		resultSetSpy = preparedStatementSpy.resultSet;
+	private void setupOldConnectionSpies() {
+		oldSqlConnectionProvider = new OldSqlConnectionProviderSpy();
+		oldConnection = oldSqlConnectionProvider.connection;
+		oldPreparedStatement = oldSqlConnectionProvider.connection.preparedStatementSpy;
+		oldResultSet = oldPreparedStatement.resultSet;
 	}
 
 	@Test
@@ -87,9 +88,9 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testCloseThrowsExceptionIfCloseFails() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 		try {
 			databaseFacade.close();
 			fail();
@@ -105,7 +106,7 @@ public class DatabaseFacadeTest {
 		databaseFacade.startTransaction();
 		databaseFacade.endTransaction();
 		databaseFacade.close();
-		assertTrue(connectionSpy.closeWasCalled);
+		assertTrue(oldConnection.closeWasCalled);
 	}
 
 	@Test
@@ -118,21 +119,21 @@ public class DatabaseFacadeTest {
 			assertTrue(e instanceof SqlDatabaseException);
 			assertEquals(e.getMessage(),
 					"Close called on running transaction, rollback perfromed.");
-			connectionSpy.MCR.assertMethodWasCalled("rollback");
-			assertTrue(connectionSpy.closeWasCalled);
+			oldConnection.MCR.assertMethodWasCalled("rollback");
+			assertTrue(oldConnection.closeWasCalled);
 		}
 	}
 
 	@Test
 	public void testCloseOnRunningTransactionShouldRollbackIfFailsCloseShouldBeCalled() {
 		try {
-			connectionSpy.throwErrorRollback = true;
+			oldConnection.throwErrorRollback = true;
 			databaseFacade.startTransaction();
 			databaseFacade.close();
 			fail();
 		} catch (Exception e) {
-			connectionSpy.MCR.assertMethodWasCalled("rollback");
-			assertTrue(connectionSpy.closeWasCalled);
+			oldConnection.MCR.assertMethodWasCalled("rollback");
+			assertTrue(oldConnection.closeWasCalled);
 			assertTrue(e instanceof SqlDatabaseException);
 			assertEquals(e.getMessage(), "Error doing rollBack on connection.");
 		}
@@ -147,7 +148,7 @@ public class DatabaseFacadeTest {
 	@Test
 	public void testGetSqlConnectionProvider() {
 		DatabaseFacadeImp databaseFacadeImp = (DatabaseFacadeImp) databaseFacade;
-		assertEquals(databaseFacadeImp.getSqlConnectionProvider(), sqlConnectionProviderSpy);
+		assertEquals(databaseFacadeImp.getSqlConnectionProvider(), oldSqlConnectionProvider);
 	}
 
 	@Test(expectedExceptions = SqlNotFoundException.class, expectedExceptionsMessageRegExp = ""
@@ -159,13 +160,13 @@ public class DatabaseFacadeTest {
 	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
 			+ ERROR_READING_DATA_USING_SQL + SOME_SQL)
 	public void testReadOneSqlErrorThrowsError() {
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
 	}
 
 	@Test
 	public void testReadOneSqlErrorThrowsErrorAndSendsAlongOriginalError() {
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 		try {
 			databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
 			fail();
@@ -176,17 +177,17 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testSqlPassedOnToConnectionForOneString() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SELECT_SQL, values);
 
-		String generatedSql = sqlConnectionProviderSpy.connection.sql;
+		String generatedSql = oldSqlConnectionProvider.connection.sql;
 		assertEquals(generatedSql, SELECT_SQL);
 	}
 
 	@Test
 	public void testOnlyOneConnectionIsUsed() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SELECT_SQL, values);
 		databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 
@@ -195,12 +196,12 @@ public class DatabaseFacadeTest {
 		databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 		databaseFacade.endTransaction();
 
-		sqlConnectionProviderSpy.MCR.assertNumberOfCallsToMethod("getConnection", 1);
+		oldSqlConnectionProvider.MCR.assertNumberOfCallsToMethod("getConnection", 1);
 	}
 
 	@Test
 	public void testRollbackError() {
-		connectionSpy.throwErrorRollback = true;
+		oldConnection.throwErrorRollback = true;
 		try {
 			databaseFacade.startTransaction();
 			databaseFacade.rollback();
@@ -215,7 +216,7 @@ public class DatabaseFacadeTest {
 	public void testRollback() {
 		databaseFacade.startTransaction();
 		databaseFacade.rollback();
-		connectionSpy.MCR.assertMethodWasCalled("rollback");
+		oldConnection.MCR.assertMethodWasCalled("rollback");
 	}
 
 	@Test
@@ -266,60 +267,60 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testExecuteQueryForOneIsCalled() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
-		assertTrue(preparedStatementSpy.executeQueryWasCalled);
+		assertTrue(oldPreparedStatement.executeQueryWasCalled);
 	}
 
 	@Test
 	public void testExecuteQueryForOneIsCalledUsingValueFromConditions() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 		values.add("SE");
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
-		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
+		assertEquals(oldPreparedStatement.usedSetObjects.get("1"), "SE");
 	}
 
 	@Test
 	public void testExecuteQueryForOneIsCalledUsingValuesFromConditions() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 		values.add("SE");
 		values.add("SWE");
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
-		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
-		assertEquals(preparedStatementSpy.usedSetObjects.get("2"), "SWE");
+		assertEquals(oldPreparedStatement.usedSetObjects.get("1"), "SE");
+		assertEquals(oldPreparedStatement.usedSetObjects.get("2"), "SWE");
 	}
 
 	@Test
 	public void testCloseOfConnectionIsNotCalledAfterReadOne() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
 
-		sqlConnectionProviderSpy.MCR.assertNumberOfCallsToMethod("getConnection", 1);
-		assertFalse(connectionSpy.closeWasCalled);
+		oldSqlConnectionProvider.MCR.assertNumberOfCallsToMethod("getConnection", 1);
+		assertFalse(oldConnection.closeWasCalled);
 	}
 
 	@Test
 	public void testCloseOfPrepareStatementIsCalledAfterReadOne() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
-		assertTrue(preparedStatementSpy.closeWasCalled);
+		assertTrue(oldPreparedStatement.closeWasCalled);
 	}
 
 	@Test
 	public void testCloseOfResultSetIsCalledAfterReadOne() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
-		assertTrue(resultSetSpy.closeWasCalled);
+		assertTrue(oldResultSet.closeWasCalled);
 	}
 
 	@Test
 	public void testIfResultSetContainsDataForOneGetResultSetMetadataIsCalled() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 
-		resultSetSpy.hasNext = true;
+		oldResultSet.hasNext = true;
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
-		assertEquals(resultSetSpy.getMetadataWasCalled, true);
+		assertEquals(oldResultSet.getMetadataWasCalled, true);
 	}
 
 	private void setValuesInResultSetSpy(OldResultSetSpy resultSetSpy) {
@@ -358,8 +359,8 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testIfResultSetContainsDataForOneReturnedDataHasKeysFromResultSet() {
-		resultSetSpy.hasNext = true;
-		setValuesInResultSetSpy(resultSetSpy);
+		oldResultSet.hasNext = true;
+		setValuesInResultSetSpy(oldResultSet);
 
 		Row readRow = databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
 
@@ -369,12 +370,12 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testIfResultSetContainsDataForOneContainsExpectedKeys() {
-		resultSetSpy.hasNext = true;
+		oldResultSet.hasNext = true;
 		List<String> columnNames = createListOfColumnNames();
-		resultSetSpy.columnNames = columnNames;
+		oldResultSet.columnNames = columnNames;
 
 		List<Map<String, Object>> rowValues = createListOfRowValues(columnNames);
-		resultSetSpy.rowValues = rowValues;
+		oldResultSet.rowValues = rowValues;
 
 		Row readRow = databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
 		assertEquals(readRow.columnSet().size(), 4);
@@ -386,12 +387,12 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testIfResultSetContainsDataForOneContainsExptectedValues() {
-		resultSetSpy.hasNext = true;
+		oldResultSet.hasNext = true;
 		List<String> columnNames = createListOfColumnNames();
-		resultSetSpy.columnNames = columnNames;
+		oldResultSet.columnNames = columnNames;
 
 		List<Map<String, Object>> rowValues = createListOfRowValues(columnNames);
-		resultSetSpy.rowValues = rowValues;
+		oldResultSet.rowValues = rowValues;
 
 		Row readRow = databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
 		assertEquals(readRow.columnSet().size(), 4);
@@ -404,16 +405,16 @@ public class DatabaseFacadeTest {
 	@Test(expectedExceptions = SqlDataException.class, expectedExceptionsMessageRegExp = ""
 			+ ERROR_READING_DATA_USING_SQL + SOME_SQL + ": more than one row returned")
 	public void testIfResultSetContainsDataForOneMoreRowsDataReturnedDataContainsValuesFromResultSet() {
-		resultSetSpy.hasNext = true;
+		oldResultSet.hasNext = true;
 		List<String> columnNames = createListOfColumnNames();
-		resultSetSpy.columnNames = columnNames;
+		oldResultSet.columnNames = columnNames;
 
 		List<Map<String, Object>> rowValues = new ArrayList<>();
 		Map<String, Object> columnValues = createMapWithColumnNamesAndValues(columnNames, "");
 		rowValues.add(columnValues);
 		Map<String, Object> columnValues2 = createMapWithColumnNamesAndValues(columnNames, "2");
 		rowValues.add(columnValues2);
-		resultSetSpy.rowValues = rowValues;
+		oldResultSet.rowValues = rowValues;
 
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SOME_SQL, values);
 	}
@@ -427,13 +428,13 @@ public class DatabaseFacadeTest {
 	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
 			+ ERROR_READING_DATA_USING_SQL + SOME_SQL)
 	public void testReadFromTableUsingConditionSqlErrorThrowsError() {
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 		databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
 	}
 
 	@Test
 	public void testReadFromTableUsingConditionSqlErrorThrowsErrorAndSendsAlongOriginalError() {
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 		try {
 			databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
 			fail();
@@ -444,13 +445,13 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testReadFromTableUsingConditionSqlErrorLogs() {
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 
 		executePreparedStatementUsingSqlAndValuesMakeSureErrorIsThrown(SOME_SQL, null);
 
 		LoggerSpy errorLogger = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass",
 				0);
-		Object errorThrownFromConnectionSpy = connectionSpy.MCR.getReturnValue("prepareStatement",
+		Object errorThrownFromConnectionSpy = oldConnection.MCR.getReturnValue("prepareStatement",
 				0);
 		errorLogger.MCR.assertParameters("logErrorUsingMessageAndException", 0,
 				ERROR_READING_DATA_USING_SQL + SOME_SQL, errorThrownFromConnectionSpy);
@@ -471,56 +472,56 @@ public class DatabaseFacadeTest {
 	@Test
 	public void testSqlSetAsPreparedStatement() {
 		databaseFacade.readUsingSqlAndValues(SELECT_SQL, values);
-		String generatedSql = sqlConnectionProviderSpy.connection.sql;
+		String generatedSql = oldSqlConnectionProvider.connection.sql;
 		assertEquals(generatedSql, SELECT_SQL);
 	}
 
 	@Test
 	public void testExecuteQueryIsCalledForExecutePreparedStatement() {
 		databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
-		assertTrue(preparedStatementSpy.executeQueryWasCalled);
+		assertTrue(oldPreparedStatement.executeQueryWasCalled);
 	}
 
 	@Test
 	public void testCloseOfConnectionIsNotCalledForExecutePreparedStatement() {
 		databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
 
-		sqlConnectionProviderSpy.MCR.assertNumberOfCallsToMethod("getConnection", 1);
-		assertFalse(connectionSpy.closeWasCalled);
+		oldSqlConnectionProvider.MCR.assertNumberOfCallsToMethod("getConnection", 1);
+		assertFalse(oldConnection.closeWasCalled);
 	}
 
 	@Test
 	public void testCloseOfPrepareStatementIsCalledForExecutePreparedStatement() {
 		databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
-		assertTrue(preparedStatementSpy.closeWasCalled);
+		assertTrue(oldPreparedStatement.closeWasCalled);
 	}
 
 	@Test
 	public void testCloseOfResultSetIsCalledForExecutePreparedStatement() {
 		databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
-		assertTrue(resultSetSpy.closeWasCalled);
+		assertTrue(oldResultSet.closeWasCalled);
 	}
 
 	@Test
 	public void testIfSetMetadataIsCalledForExecutePreparedStatement() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 
-		resultSetSpy.hasNext = true;
+		oldResultSet.hasNext = true;
 		databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
-		assertEquals(resultSetSpy.getMetadataWasCalled, true);
+		assertEquals(oldResultSet.getMetadataWasCalled, true);
 	}
 
 	@Test
 	public void testIfResultSetContainsDataReturnedDataHasKeysFromResultSetForExecutePreparedStatement() {
 
-		resultSetSpy.hasNext = true;
+		oldResultSet.hasNext = true;
 		List<String> columnNames = createListOfColumnNames();
-		resultSetSpy.columnNames = columnNames;
+		oldResultSet.columnNames = columnNames;
 
 		List<Map<String, Object>> rowValues = new ArrayList<>();
 		Map<String, Object> columnValues = createMapWithColumnNamesAndValues(columnNames, "");
 		rowValues.add(columnValues);
-		resultSetSpy.rowValues = rowValues;
+		oldResultSet.rowValues = rowValues;
 
 		List<Row> readAllFromTable = databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
 		Row row0 = readAllFromTable.get(0);
@@ -535,16 +536,16 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testIfResultSetContainsDataReturnedDataContainsValuesFromResultSetForExecutePreparedStatement() {
-		resultSetSpy.hasNext = true;
+		oldResultSet.hasNext = true;
 		List<String> columnNames = createListOfColumnNames();
-		resultSetSpy.columnNames = columnNames;
+		oldResultSet.columnNames = columnNames;
 
 		List<Map<String, Object>> rowValues = new ArrayList<>();
 
 		Map<String, Object> columnValues = createMapWithColumnNamesAndValues(columnNames, "");
 		rowValues.add(columnValues);
 
-		resultSetSpy.rowValues = rowValues;
+		oldResultSet.rowValues = rowValues;
 
 		List<Row> readAllFromTable = databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
 		Row row0 = readAllFromTable.get(0);
@@ -560,12 +561,12 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testUsingValuesFromConditionsForExecutePreparedStatement() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 		values.add("SE");
 		values.add("SWE");
 		databaseFacade.readUsingSqlAndValues(SOME_SQL, values);
-		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
-		assertEquals(preparedStatementSpy.usedSetObjects.get("2"), "SWE");
+		assertEquals(oldPreparedStatement.usedSetObjects.get("1"), "SE");
+		assertEquals(oldPreparedStatement.usedSetObjects.get("2"), "SWE");
 	}
 
 	@Test
@@ -578,13 +579,13 @@ public class DatabaseFacadeTest {
 	@Test(expectedExceptions = SqlDatabaseException.class, expectedExceptionsMessageRegExp = ""
 			+ "Error executing statement: update testTable set x=\\? where y = \\?")
 	public void testExecuteSqlThrowsError() {
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 		databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 	}
 
 	@Test
 	public void testExecuteSqlThrowsSqlConflictException() {
-		preparedStatementSpy.throwDuplicateKeyException = true;
+		oldPreparedStatement.throwDuplicateKeyException = true;
 		try {
 			databaseFacade.executeSqlWithValues("someSQL", values);
 			fail();
@@ -599,7 +600,7 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testExecuteSqlErrorThrowsErrorAndSendsAlongOriginalError() {
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 		try {
 			databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 			fail();
@@ -612,14 +613,14 @@ public class DatabaseFacadeTest {
 	public void testExecuteUsingSqlAndValuesClosesPrepareStatmentsAndConnection() {
 		databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 
-		String generatedSql = sqlConnectionProviderSpy.connection.sql;
-		OldConnectionSpy connectionSpy = sqlConnectionProviderSpy.connection;
+		String generatedSql = oldSqlConnectionProvider.connection.sql;
+		OldConnectionSpy connectionSpy = oldSqlConnectionProvider.connection;
 
 		assertEquals(generatedSql, UPDATE_SQL);
-		assertTrue(preparedStatementSpy.executeUpdateWasCalled);
-		assertTrue(preparedStatementSpy.closeWasCalled);
+		assertTrue(oldPreparedStatement.executeUpdateWasCalled);
+		assertTrue(oldPreparedStatement.closeWasCalled);
 		// assertTrue(connectionSpy.closeWasCalled);
-		sqlConnectionProviderSpy.MCR.assertNumberOfCallsToMethod("getConnection", 1);
+		oldSqlConnectionProvider.MCR.assertNumberOfCallsToMethod("getConnection", 1);
 		assertFalse(connectionSpy.closeWasCalled);
 	}
 
@@ -630,13 +631,13 @@ public class DatabaseFacadeTest {
 
 		databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 
-		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
-		assertEquals(preparedStatementSpy.usedSetObjects.get("2"), "SWE");
+		assertEquals(oldPreparedStatement.usedSetObjects.get("1"), "SE");
+		assertEquals(oldPreparedStatement.usedSetObjects.get("2"), "SWE");
 	}
 
 	@Test
 	public void testExecuteSqlWithValuesNoOfAffectedRowsAreReturned() {
-		preparedStatementSpy.noOfAffectedRows = 5;
+		oldPreparedStatement.noOfAffectedRows = 5;
 		values.add("SE");
 		values.add("SWE");
 
@@ -652,8 +653,8 @@ public class DatabaseFacadeTest {
 
 		databaseFacade.executeSqlWithValues(UPDATE_SQL, values);
 
-		assertEquals(preparedStatementSpy.usedSetObjects.get("1"), "SE");
-		assertTrue(preparedStatementSpy.usedSetTimestamps.get("2") instanceof Timestamp);
+		assertEquals(oldPreparedStatement.usedSetObjects.get("1"), "SE");
+		assertTrue(oldPreparedStatement.usedSetTimestamps.get("2") instanceof Timestamp);
 	}
 
 	private Timestamp createTimestamp() {
@@ -681,15 +682,15 @@ public class DatabaseFacadeTest {
 
 	private void assertDatabaseNullValue() {
 		int sqlNull = java.sql.Types.NULL;
-		preparedStatementSpy.MCR.assertNumberOfCallsToMethod("setNull", 1);
-		preparedStatementSpy.MCR.assertNumberOfCallsToMethod("setObject", 1);
-		preparedStatementSpy.MCR.assertParameters("setNull", 0, 1, sqlNull);
-		preparedStatementSpy.MCR.assertParameters("setObject", 0, 2, "someValue");
+		oldPreparedStatement.MCR.assertNumberOfCallsToMethod("setNull", 1);
+		oldPreparedStatement.MCR.assertNumberOfCallsToMethod("setObject", 1);
+		oldPreparedStatement.MCR.assertParameters("setNull", 0, 1, sqlNull);
+		oldPreparedStatement.MCR.assertParameters("setObject", 0, 2, "someValue");
 	}
 
 	@Test
 	public void testReadOneRowOrFailUsingSqlAndValuesWithDatabaseNull() {
-		setValuesInResultSetSpy(resultSetSpy);
+		setValuesInResultSetSpy(oldResultSet);
 		List<Object> valuesWithNull = prepareValuesWithDatabaseNullValue();
 
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(SELECT_SQL, valuesWithNull);
@@ -708,7 +709,7 @@ public class DatabaseFacadeTest {
 
 	@Test
 	public void testStartTransactionThrowsError() {
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 		try {
 			databaseFacade.startTransaction();
 			fail();
@@ -722,15 +723,15 @@ public class DatabaseFacadeTest {
 	public void testStartTransaction() throws Exception {
 		databaseFacade.startTransaction();
 		// assertTrue(connectionSpy.getAutoCommit());
-		assertTrue(sqlConnectionProviderSpy.getConnectionHasBeenCalled);
+		assertTrue(oldSqlConnectionProvider.getConnectionHasBeenCalled);
 		// assertFalse(connectionSpy.closeWasCalled);
-		assertFalse(connectionSpy.getAutoCommit());
+		assertFalse(oldConnection.getAutoCommit());
 	}
 
 	@Test
 	public void testEndTransactionThrowsError() {
 		databaseFacade.startTransaction();
-		connectionSpy.throwErrorConnection = true;
+		oldConnection.throwErrorConnection = true;
 		try {
 			databaseFacade.endTransaction();
 			fail();
@@ -743,9 +744,9 @@ public class DatabaseFacadeTest {
 	@Test
 	public void testEndTransaction() throws Exception {
 		databaseFacade.startTransaction();
-		assertFalse(connectionSpy.getAutoCommit());
+		assertFalse(oldConnection.getAutoCommit());
 		databaseFacade.endTransaction();
-		assertTrue(connectionSpy.getAutoCommit());
+		assertTrue(oldConnection.getAutoCommit());
 	}
 
 }

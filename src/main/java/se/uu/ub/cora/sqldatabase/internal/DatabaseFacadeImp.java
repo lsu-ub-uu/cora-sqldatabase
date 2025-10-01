@@ -26,6 +26,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import se.uu.ub.cora.logger.Logger;
@@ -85,7 +86,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		}
 	}
 
-	private boolean resultHasMoreThanOneRow(List<Row> readRows) {
+	private boolean resultHasMoreThanOneRow(Collection<Row> readRows) {
 		return readRows.size() > 1;
 	}
 

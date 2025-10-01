@@ -27,7 +27,7 @@ import java.util.List;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.sqldatabase.DatabaseFacadeSpy;
+import se.uu.ub.cora.sqldatabase.OldDatabaseFacadeSpy;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
@@ -35,13 +35,13 @@ import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class TableFacadeTest {
 	private TableFacade tableFacade;
-	private DatabaseFacadeSpy databaseFacadeSpy;
+	private OldDatabaseFacadeSpy databaseFacadeSpy;
 	private TableQuerySpy tableQuerySpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		tableQuerySpy = new TableQuerySpy();
-		databaseFacadeSpy = new DatabaseFacadeSpy();
+		databaseFacadeSpy = new OldDatabaseFacadeSpy();
 		tableFacade = TableFacadeImp.usingDatabaseFacade(databaseFacadeSpy);
 	}
 
