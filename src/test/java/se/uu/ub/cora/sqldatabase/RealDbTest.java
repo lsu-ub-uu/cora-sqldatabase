@@ -40,9 +40,9 @@ public class RealDbTest {
 	}
 
 	private SqlDatabaseFactoryImp createDatabaseFactoryForSystemOne() {
-		SqlDatabaseFactoryImp databaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
+		SqlDatabaseFactoryImp factory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
 				"jdbc:postgresql://systemone-postgresql:5432/systemone", "systemone", "systemone");
-		return databaseFactory;
+		return factory;
 	}
 
 	@Test(enabled = false)

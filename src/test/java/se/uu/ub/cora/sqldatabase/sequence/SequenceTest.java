@@ -21,7 +21,7 @@ package se.uu.ub.cora.sqldatabase.sequence;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import java.text.MessageFormat;
+import java.util.Collections;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -51,9 +51,38 @@ public class SequenceTest {
 	public void testCreateSequence() {
 		sequence.createSequence(SEQUENCE_NAME, START_VALUE);
 
-		String createStatement = "create sequence {0} start with {1};";
-		String expectedSql = MessageFormat.format(createStatement, SEQUENCE_NAME, START_VALUE);
-		databaseFacade.MCR.assertParameters("executeSql", 0, expectedSql);
+		assertSequenceCreated();
+		assertSequenceNextValue();
+	}
+
+	private void assertSequenceCreated() {
+		String createStatement = "create sequence " + SEQUENCE_NAME + " start with " + START_VALUE
+				+ ";";
+		databaseFacade.MCR.assertParameters("executeSql", 0, createStatement);
+	}
+
+	private void assertSequenceNextValue() {
+		String nextValue = "select nextval('public." + SEQUENCE_NAME + "');";
+		databaseFacade.MCR.assertCalledParameters("readUsingSqlAndValues", nextValue,
+				Collections.emptyList());
+	}
+
+	// public void testGetCurrentValueForSequence_SequenceDoNotExists() {
+
+	@Test
+	public void testGetCurrentValueForSequence_SequenceDoNotExists() {
+		sequence.getCurrentValueForSequence(SEQUENCE_NAME);
+
+		databaseFacade.MCR.assertParameters("readUsingSqlAndValues", 0,
+				"select currval('" + SEQUENCE_NAME + "');", Collections.emptyList());
+	}
+
+	@Test
+	public void test_RemoveSequence() {
+		sequence.removeSequence(SEQUENCE_NAME);
+
+		databaseFacade.MCR.assertParameters("executeSql", 0,
+				"drop sequence if exists " + SEQUENCE_NAME + ";");
 	}
 
 	@Test
@@ -62,8 +91,16 @@ public class SequenceTest {
 		assertEquals(sequenceImp.onlyForTestGetDatabaseFacade(), databaseFacade);
 	}
 
-	// @Test(enabled = true)
-	// private void testCreateSequence() {
+	// private SqlDatabaseFactoryImp createDatabaseFactoryForSystemOne() {
+	// return SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
+	// "jdbc:postgresql://systemone-postgresql:5432/systemone", "systemone", "systemone");
+	// }
+
+	// @Test(enabled = false)
+	// private void realTestCreateSequence() {
+	// LoggerProvider.setLoggerFactory(new LoggerFactorySpy());
+	//
+	// SqlDatabaseFactoryImp databaseFactory = createDatabaseFactoryForSystemOne();
 	// DatabaseFacadeImp databaseFacadeImp = (DatabaseFacadeImp) databaseFactory
 	// .factorDatabaseFacade();
 	// String name = "anotherGeneratorssss";
