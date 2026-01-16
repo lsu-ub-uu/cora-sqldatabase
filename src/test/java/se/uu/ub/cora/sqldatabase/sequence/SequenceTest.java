@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Uppsala University Library
+ * Copyright 2025, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *

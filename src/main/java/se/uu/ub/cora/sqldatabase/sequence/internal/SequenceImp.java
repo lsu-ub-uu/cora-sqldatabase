@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Uppsala University Library
+ * Copyright 2025, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -25,10 +25,6 @@ import se.uu.ub.cora.sqldatabase.sequence.Sequence;
 
 public class SequenceImp implements Sequence {
 
-	private static final String CREATE_SEQUENCE = "create sequence %s start with %s;";
-	private static final String CURRENT_VALUE = "select currval('%s');";
-	private static final String NEXTVAL_IN_SEQUENCE = "select nextval('public.%s');";
-	private static final String DROP_SEQUENCE = "drop sequence if exists %s;";
 	private DatabaseFacade databaseFacade;
 
 	public static SequenceImp usingDatabaseFacade(DatabaseFacade databaseFacade) {
@@ -41,23 +37,27 @@ public class SequenceImp implements Sequence {
 
 	@Override
 	public void createSequence(String sequenceName, long startValue) {
+		// The sequences needs to be initialized on creation using "select nextval()"
 		createSequenceInStorage(sequenceName, startValue);
 		nextValueForSequence(sequenceName);
 	}
 
 	private void nextValueForSequence(String sequenceName) {
-		String statement = String.format(NEXTVAL_IN_SEQUENCE, sequenceName);
+		String nextValInSequenceSql = "select nextval('public.%s');";
+		String statement = String.format(nextValInSequenceSql, sequenceName);
 		databaseFacade.readUsingSqlAndValues(statement, Collections.emptyList());
 	}
 
 	private void createSequenceInStorage(String sequenceName, long startValue) {
-		String sqlStatementWithValues = String.format(CREATE_SEQUENCE, sequenceName, startValue);
+		String createSequenceSql = "create sequence %s start with %s;";
+		String sqlStatementWithValues = String.format(createSequenceSql, sequenceName, startValue);
 		databaseFacade.executeSql(sqlStatementWithValues);
 	}
 
 	@Override
 	public long getCurrentValueForSequence(String sequenceName) {
-		String expectedSql = String.format(CURRENT_VALUE, sequenceName);
+		String getCurrentSequenceValueSql = "select currval('%s');";
+		String expectedSql = String.format(getCurrentSequenceValueSql, sequenceName);
 		databaseFacade.readUsingSqlAndValues(expectedSql, Collections.emptyList());
 		return 0;
 	}
@@ -88,7 +88,8 @@ public class SequenceImp implements Sequence {
 
 	@Override
 	public void removeSequence(String sequenceName) {
-		String statement = String.format(DROP_SEQUENCE, sequenceName);
+		String dropSequenceSql = "drop sequence if exists %s;";
+		String statement = String.format(dropSequenceSql, sequenceName);
 		databaseFacade.executeSql(statement);
 	}
 
