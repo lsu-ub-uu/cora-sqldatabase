@@ -21,6 +21,7 @@ package se.uu.ub.cora.sqldatabase.sequence.internal;
 import java.util.Collections;
 
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
+import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.sequence.Sequence;
 
 public class SequenceImp implements Sequence {
@@ -37,64 +38,48 @@ public class SequenceImp implements Sequence {
 
 	@Override
 	public void createSequence(String sequenceName, long startValue) {
-		// The sequences needs to be initialized on creation using "select nextval()"
+		// Obs: Any sequence needs to be initialized on creation using "select nextval()"
 		createSequenceInStorage(sequenceName, startValue);
-		nextValueForSequence(sequenceName);
-	}
-
-	private void nextValueForSequence(String sequenceName) {
-		String nextValInSequenceSql = "select nextval('public.%s');";
-		String statement = String.format(nextValInSequenceSql, sequenceName);
-		databaseFacade.readUsingSqlAndValues(statement, Collections.emptyList());
+		getNextValueForSequence(sequenceName);
 	}
 
 	private void createSequenceInStorage(String sequenceName, long startValue) {
-		String createSequenceSql = "create sequence %s start with %s;";
-		String sqlStatementWithValues = String.format(createSequenceSql, sequenceName, startValue);
-		databaseFacade.executeSql(sqlStatementWithValues);
+		executeSql("create sequence %s start with %s;", sequenceName, startValue);
 	}
 
-	@Override
-	public long getCurrentValueForSequence(String sequenceName) {
-		String getCurrentSequenceValueSql = "select currval('%s');";
-		String expectedSql = String.format(getCurrentSequenceValueSql, sequenceName);
-		databaseFacade.readUsingSqlAndValues(expectedSql, Collections.emptyList());
-		return 0;
+	private void executeSql(String string, Object... values) {
+		String sql = String.format(string, values);
+		databaseFacade.executeSql(sql);
 	}
 
 	@Override
 	public long getNextValueForSequence(String sequenceName) {
-		// select nextval('public.mySequence');
+		String sql = String.format("select nextval('%s');", sequenceName);
+		return readOneRowAndColumnAsLongUsingSql(sql, "nextval");
+	}
 
-		// String readSequence = "select nextval('public." + name + "');";
-		// List<Row> result = databaseFacadeImp.readUsingSqlAndValues(readSequence,
-		// Collections.emptyList());
-		//
-		//
-		//
-		// for (Row row : result) {
-		// System.out.println(row.columnSet());
-		// System.out.println(row.getValueByColumn("nextval"));
-		// }
-		//
-		return 1;
+	private long readOneRowAndColumnAsLongUsingSql(String sql, String column) {
+		Row row = databaseFacade.readOneRowOrFailUsingSqlAndValues(sql, Collections.emptyList());
+		return (Long) row.getValueByColumn(column);
 	}
 
 	@Override
-	public void resetSequenceValue(String sequenceName, long value) {
-		// alter sequence mySequence restart with 784;
+	public long getCurrentValueForSequence(String sequenceName) {
+		String sql = String.format("select currval('%s');", sequenceName);
+		return readOneRowAndColumnAsLongUsingSql(sql, "currval");
+	}
 
+	@Override
+	public void updateSequenceValue(String sequenceName, long newValue) {
+		executeSql("alter sequence %s restart with %s;", sequenceName, newValue);
 	}
 
 	@Override
 	public void removeSequence(String sequenceName) {
-		String dropSequenceSql = "drop sequence if exists %s;";
-		String statement = String.format(dropSequenceSql, sequenceName);
-		databaseFacade.executeSql(statement);
+		executeSql("drop sequence if exists %s;", sequenceName);
 	}
 
 	public DatabaseFacade onlyForTestGetDatabaseFacade() {
 		return databaseFacade;
 	}
-
 }
