@@ -30,7 +30,7 @@ import se.uu.ub.cora.sqldatabase.sequence.internal.SequenceImp;
 
 public class SequenceTest {
 
-	private static final int START_VALUE = 526;
+	private static final int START_VALUE = 1;
 	private static final String SEQUENCE_NAME = "someSequence";
 	private Sequence sequence;
 	private DatabaseFacadeSpy databaseFacade;
@@ -49,6 +49,8 @@ public class SequenceTest {
 	// TODO handle exceptions
 	@Test
 	public void testCreateSequence() {
+		setReturnValueInRowByName("nextval", 5);
+
 		sequence.createSequence(SEQUENCE_NAME, START_VALUE);
 
 		assertSequenceCreated();
@@ -62,19 +64,52 @@ public class SequenceTest {
 	}
 
 	private void assertSequenceNextValue() {
-		String nextValue = "select nextval('public." + SEQUENCE_NAME + "');";
-		databaseFacade.MCR.assertCalledParameters("readUsingSqlAndValues", nextValue,
+		String nextValue = "select nextval('" + SEQUENCE_NAME + "');";
+		databaseFacade.MCR.assertCalledParameters("readOneRowOrFailUsingSqlAndValues", nextValue,
 				Collections.emptyList());
 	}
 
-	// public void testGetCurrentValueForSequence_SequenceDoNotExists() {
-
 	@Test
 	public void testGetCurrentValueForSequence_SequenceDoNotExists() {
-		sequence.getCurrentValueForSequence(SEQUENCE_NAME);
+		setReturnValueInRowByName("currval", 5);
 
-		databaseFacade.MCR.assertParameters("readUsingSqlAndValues", 0,
+		long currentValue = sequence.getCurrentValueForSequence(SEQUENCE_NAME);
+
+		databaseFacade.MCR.assertParameters("readOneRowOrFailUsingSqlAndValues", 0,
 				"select currval('" + SEQUENCE_NAME + "');", Collections.emptyList());
+
+		assertEquals(currentValue, 5);
+	}
+
+	@Test
+	public void testGetBextValueForSequence() {
+		setReturnValueInRowByName("nextval", 5);
+
+		long nextId = sequence.getNextValueForSequence(SEQUENCE_NAME);
+
+		databaseFacade.MCR.assertParameters("readOneRowOrFailUsingSqlAndValues", 0,
+				"select nextval('" + SEQUENCE_NAME + "');", Collections.emptyList());
+
+		assertEquals(nextId, 5);
+
+	}
+
+	private void setReturnValueInRowByName(String columnName, int value) {
+		RowSpy row = new RowSpy();
+		row.MRV.setSpecificReturnValuesSupplier("getValueByColumn", () -> Long.valueOf(value),
+				columnName);
+		databaseFacade.MRV.setDefaultReturnValuesSupplier("readOneRowOrFailUsingSqlAndValues",
+				() -> row);
+	}
+
+	@Test
+	public void testUpdateSequenceValue() {
+		long newValue = 100;
+
+		sequence.updateSequenceValue(SEQUENCE_NAME, newValue);
+
+		databaseFacade.MCR.assertParameters("executeSql", 0,
+				"alter sequence " + SEQUENCE_NAME + " restart with " + newValue + ";");
 	}
 
 	@Test
@@ -83,6 +118,7 @@ public class SequenceTest {
 
 		databaseFacade.MCR.assertParameters("executeSql", 0,
 				"drop sequence if exists " + SEQUENCE_NAME + ";");
+
 	}
 
 	@Test

@@ -78,7 +78,7 @@ public interface Sequence {
 	 * @thows {@link SqlDatabaseException} if there is an error resetting the sequence value
 	 * @thows {@link SqlNotFoundException} if the sequence does not exist
 	 */
-	void resetSequenceValue(String sequenceName, long value);
+	void updateSequenceValue(String sequenceName, long value);
 
 	/**
 	 * removeSequence method removes the sequence with the specified name.
