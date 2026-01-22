@@ -19,6 +19,7 @@
 package se.uu.ub.cora.sqldatabase.sequence.internal;
 
 import java.util.Collections;
+import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
@@ -38,13 +39,30 @@ public class SequenceImp implements Sequence {
 
 	@Override
 	public void createSequence(String sequenceName, long startValue) {
-		// Obs: Any sequence needs to be initialized on creation using "select nextval()"
 		createSequenceInStorage(sequenceName, startValue);
-		getNextValueForSequence(sequenceName);
+		initializeSequenceToBeAbleToGetNextValueWithoutGettingAnException(sequenceName);
+	}
+
+	private long initializeSequenceToBeAbleToGetNextValueWithoutGettingAnException(
+			String sequenceName) {
+		return getNextValueForSequence(sequenceName);
 	}
 
 	private void createSequenceInStorage(String sequenceName, long startValue) {
-		executeSql("create sequence %s start with %s;", sequenceName, startValue);
+		String sql = "select cora_create_sequence(?,?,?);";
+		List<Object> values = List.of(sequenceName, calculateMinValue(startValue), startValue);
+		databaseFacade.readOneRowOrFailUsingSqlAndValues(sql, values);
+	}
+
+	private long calculateMinValue(long startValue) {
+		if (startValueIsNegative(startValue)) {
+			return startValue;
+		}
+		return 0;
+	}
+
+	private boolean startValueIsNegative(long startValue) {
+		return startValue < 0;
 	}
 
 	private void executeSql(String string, Object... values) {

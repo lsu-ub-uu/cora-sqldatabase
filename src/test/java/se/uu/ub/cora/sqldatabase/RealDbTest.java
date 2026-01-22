@@ -99,15 +99,15 @@ public class RealDbTest {
 		databaseFacadeImp.executeSql(deleteSequence);
 	}
 
-	@Test(enabled = false)
+	@Test(enabled = true)
 	private void testCreateSequenceImp() {
 		DatabaseFacadeImp databaseFacadeImp = (DatabaseFacadeImp) databaseFactory
 				.factorDatabaseFacade();
-		String name = "lasquencia";
+		String name = "lasquencia9";
 
 		SequenceImp sequence = SequenceImp.usingDatabaseFacade(databaseFacadeImp);
 
-		sequence.createSequence(name, 190);
+		sequence.createSequence(name, -19);
 		System.out.println(sequence.getCurrentValueForSequence(name));
 
 		System.out.println(sequence.getNextValueForSequence(name));
