@@ -99,7 +99,7 @@ public class RealDbTest {
 		databaseFacadeImp.executeSql(deleteSequence);
 	}
 
-	@Test(enabled = true)
+	@Test(enabled = false)
 	private void testCreateSequenceImp() {
 		DatabaseFacadeImp databaseFacadeImp = (DatabaseFacadeImp) databaseFactory
 				.factorDatabaseFacade();
