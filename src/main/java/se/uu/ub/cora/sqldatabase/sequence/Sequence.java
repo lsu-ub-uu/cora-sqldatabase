@@ -26,7 +26,7 @@ import se.uu.ub.cora.sqldatabase.SqlNotFoundException;
  * Interface for a sequence generator that can create, retrieve the next value from, and remove
  * sequences.
  */
-public interface Sequence {
+public interface Sequence extends AutoCloseable {
 
 	/**
 	 * createSequence method Creates a new sequence with the specified name and starting value.
@@ -89,5 +89,14 @@ public interface Sequence {
 	 * @thows {@link SqlDatabaseException} if there is an error removing the sequence
 	 */
 	void removeSequence(String sequenceName);
+
+	/**
+	 * close closes the underlying database resources.
+	 * <p>
+	 * If an exception occurs while interacting with the database MUST an
+	 * {@link SqlDatabaseException} be thrown.
+	 */
+	@Override
+	void close();
 
 }

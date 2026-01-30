@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019, 2021 Uppsala University Library
+ * Copyright 2018, 2019, 2021, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -41,11 +41,15 @@ import se.uu.ub.cora.sqldatabase.connection.DriverSpy;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
+import se.uu.ub.cora.sqldatabase.sequence.DatabaseFacadeSpy;
+import se.uu.ub.cora.sqldatabase.sequence.internal.SequenceImp;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
 import se.uu.ub.cora.sqldatabase.table.internal.TableQueryImp;
 import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
 public class SqlDatabaseFactoryTest {
 	private SqlDatabaseFactoryImp sqlDatabaseFactory;
@@ -66,7 +70,7 @@ public class SqlDatabaseFactoryTest {
 	}
 
 	@Test
-	public void testInitFromContextError() throws Exception {
+	public void testInitFromContextError() {
 		SqlDatabaseFactory tableFacadeFactory = new SqlDatabaseFactoryImpForThrowErrorInsteadOfCreatingContext();
 		Exception error = null;
 		try {
@@ -86,7 +90,7 @@ public class SqlDatabaseFactoryTest {
 	}
 
 	@Test
-	public void testConnectionProvider() throws Exception {
+	public void testConnectionProvider() {
 		sqlDatabaseFactory.factorTableFacade();
 
 		ContextConnectionProviderImp sqlConnectionProvider = (ContextConnectionProviderImp) sqlDatabaseFactory
@@ -96,7 +100,7 @@ public class SqlDatabaseFactoryTest {
 	}
 
 	@Test
-	public void testInitFromUriUserPassword() throws Exception {
+	public void testInitFromUriUserPassword() {
 		sqlDatabaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(url, user, password);
 		assertEquals(sqlDatabaseFactory.onlyForTestGetUrl(), url);
 		assertEquals(sqlDatabaseFactory.onlyForTestGetUser(), user);
@@ -122,21 +126,20 @@ public class SqlDatabaseFactoryTest {
 	}
 
 	@Test
-	public void testFactorTableFacade() throws Exception {
+	public void testFactorTableFacade() {
 		TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade();
 		assertTrue(tableFacade instanceof TableFacadeImp);
 	}
 
 	@Test
-	public void testTwoCallsToFactoryReturnsDifferentInstances() throws Exception {
+	public void testTwoCallsToFactoryReturnsDifferentInstances() {
 		TableFacade tableFacade = sqlDatabaseFactory.factorTableFacade();
 		TableFacade tableFacade2 = sqlDatabaseFactory.factorTableFacade();
 		assertNotSame(tableFacade, tableFacade2);
 	}
 
 	@Test
-	public void testWhenInitFromContextFactorMoreThanOnceUsesSameConnectionProvider()
-			throws Exception {
+	public void testWhenInitFromContextFactorMoreThanOnceUsesSameConnectionProvider() {
 		sqlDatabaseFactory = SqlDatabaseFactoryImp.usingLookupNameFromContext(lookupName);
 		ensureSameConnectionProviderForTwoFactoryCalls();
 	}
@@ -149,19 +152,17 @@ public class SqlDatabaseFactoryTest {
 	private SqlConnectionProvider factorTableFacadeAndGetSqlConnectionProviderFromIt() {
 		TableFacadeImp tableFacade = (TableFacadeImp) sqlDatabaseFactory.factorTableFacade();
 		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
-		SqlConnectionProvider sqlConnectionProvider = databaseFacade.getSqlConnectionProvider();
-		return sqlConnectionProvider;
+		return databaseFacade.getSqlConnectionProvider();
 	}
 
 	@Test
-	public void testWhenInitFromParametersFactorMoreThanOnceUsesSameConnectionProvider()
-			throws Exception {
+	public void testWhenInitFromParametersFactorMoreThanOnceUsesSameConnectionProvider() {
 		sqlDatabaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(url, user, password);
 		ensureSameConnectionProviderForTwoFactoryCalls();
 	}
 
 	@Test
-	public void testDataReaderSetWithDependencesInRecordReader() throws Exception {
+	public void testDataReaderSetWithDependencesInRecordReader() {
 		SqlDatabaseFactoryImp tableFacadeFactory = SqlDatabaseFactoryImp
 				.usingLookupNameFromContext("someName");
 
@@ -173,20 +174,20 @@ public class SqlDatabaseFactoryTest {
 	}
 
 	@Test
-	public void testFactorDatabaseFacade() throws Exception {
+	public void testFactorDatabaseFacade() {
 		DatabaseFacade dbFacade = sqlDatabaseFactory.factorDatabaseFacade();
 		assertTrue(dbFacade instanceof DatabaseFacadeImp);
 	}
 
 	@Test
-	public void testTwoCallsToFactoryDatabaseReturnsDifferentInstances() throws Exception {
+	public void testTwoCallsToFactoryDatabaseReturnsDifferentInstances() {
 		DatabaseFacade databaseFacade = sqlDatabaseFactory.factorDatabaseFacade();
 		DatabaseFacade databaseFacade2 = sqlDatabaseFactory.factorDatabaseFacade();
 		assertNotSame(databaseFacade, databaseFacade2);
 	}
 
 	@Test
-	public void testFactoriesUseSameSqlConnectionProvider() throws Exception {
+	public void testFactoriesUseSameSqlConnectionProvider() {
 		DatabaseFacadeImp dbFacade = (DatabaseFacadeImp) sqlDatabaseFactory.factorDatabaseFacade();
 		TableFacadeImp tableFacade = (TableFacadeImp) sqlDatabaseFactory.factorTableFacade();
 		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
@@ -204,23 +205,52 @@ public class SqlDatabaseFactoryTest {
 	}
 
 	@Test
-	public void testFactorTableQuery() throws Exception {
+	public void testFactorTableQuery() {
 		String tableName = "someTableName";
 		TableQuery tableQuery = sqlDatabaseFactory.factorTableQuery(tableName);
 		assertTrue(tableQuery instanceof TableQueryImp);
 	}
 
 	@Test
-	public void testFactorTableQueryNameIsSet() throws Exception {
+	public void testFactorTableQueryNameIsSet() {
 		String tableName = "someTableName";
 		TableQueryImp tableQuery = (TableQueryImp) sqlDatabaseFactory.factorTableQuery(tableName);
 		assertEquals(tableQuery.getTableName(), tableName);
 	}
 
 	@Test
-	public void testOnlyForTestGetLookupName() throws Exception {
+	public void testFactorSequence() {
+		SqlDatabaseFactoryWithMCR sqlDatabaseFactoryWithMCR = new SqlDatabaseFactoryWithMCR();
+
+		SequenceImp sequence = (SequenceImp) sqlDatabaseFactoryWithMCR.factorSequence();
+
+		var databaseFacade = sqlDatabaseFactoryWithMCR.MCR
+				.assertCalledParametersReturn("factorDatabaseFacade");
+		assertEquals(sequence.onlyForTestGetDatabaseFacade(), databaseFacade);
+	}
+
+	@Test
+	public void testOnlyForTestGetLookupName() {
 		assertEquals(sqlDatabaseFactory.onlyForTestGetLookupName(), lookupName);
 	}
+}
+
+class SqlDatabaseFactoryWithMCR extends SqlDatabaseFactoryImp {
+
+	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public MethodReturnValues MRV = new MethodReturnValues();
+
+	public SqlDatabaseFactoryWithMCR() {
+		super("Not important lookup name");
+		MCR.useMRV(MRV);
+		MRV.setDefaultReturnValuesSupplier("factorDatabaseFacade", DatabaseFacadeSpy::new);
+	}
+
+	@Override
+	public DatabaseFacade factorDatabaseFacade() {
+		return (DatabaseFacade) MCR.addCallAndReturnFromMRV();
+	}
+
 }
 
 class SqlDatabaseFactoryImpForThrowErrorInsteadOfCreatingContext extends SqlDatabaseFactoryImp {

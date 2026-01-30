@@ -100,4 +100,9 @@ public class SequenceImp implements Sequence {
 	public DatabaseFacade onlyForTestGetDatabaseFacade() {
 		return databaseFacade;
 	}
+
+	@Override
+	public void close() {
+		databaseFacade.close();
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Uppsala University Library
+ * Copyright 2021, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,6 +19,7 @@
 
 package se.uu.ub.cora.sqldatabase;
 
+import se.uu.ub.cora.sqldatabase.sequence.Sequence;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
@@ -65,5 +66,16 @@ public interface SqlDatabaseFactory {
 	 * @return A TableQuery set up to use the specified table
 	 */
 	TableQuery factorTableQuery(String tableName);
+
+	/**
+	 * factorSequence creates and returns a new instance of Sequence.
+	 * 
+	 * <p>
+	 * <em>Note, TableFacade uses the {@link AutoCloseable} interface so it is adviced to wrapp this
+	 * call in an try-with-resources block.</em>
+	 * 
+	 * @return A Sequence adapter.
+	 */
+	Sequence factorSequence();
 
 }

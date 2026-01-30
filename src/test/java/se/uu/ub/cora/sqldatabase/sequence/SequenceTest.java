@@ -43,7 +43,14 @@ public class SequenceTest {
 
 	@Test
 	public void testDatabaseFacadeExtendsAutoclosable() {
+		assertTrue(sequence instanceof AutoCloseable);
 		assertTrue(sequence instanceof SequenceImp);
+	}
+
+	@Test
+	public void testCloseCallsCloseInDbFacade() {
+		sequence.close();
+		databaseFacade.MCR.assertMethodWasCalled("close");
 	}
 
 	@Test

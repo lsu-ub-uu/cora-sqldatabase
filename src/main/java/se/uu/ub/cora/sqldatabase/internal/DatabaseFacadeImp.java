@@ -223,7 +223,6 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		createConnectionIfNotCreatedSinceBefore();
 		try (PreparedStatement prepareStatement = connection.prepareStatement(sql);) {
 			addValuesToPreparedStatement(values, prepareStatement);
-			System.err.println(prepareStatement.toString());
 			return prepareStatement.executeUpdate();
 		}
 	}
