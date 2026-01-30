@@ -146,7 +146,7 @@ public class SequenceTest {
 
 	@Test
 	public void test_RemoveSequence() {
-		sequence.removeSequence(SEQUENCE_NAME);
+		sequence.deleteSequence(SEQUENCE_NAME);
 
 		databaseFacade.MCR.assertParameters("executeSql", 0,
 				"drop sequence if exists " + SEQUENCE_NAME + ";");

@@ -117,7 +117,7 @@ public class RealDbTest {
 		System.out.println(sequence.getNextValueForSequence(name));
 		System.out.println(sequence.getCurrentValueForSequence(name));
 
-		sequence.removeSequence(name);
+		sequence.deleteSequence(name);
 
 	}
 

@@ -81,14 +81,14 @@ public interface Sequence extends AutoCloseable {
 	void updateSequenceValue(String sequenceName, long value);
 
 	/**
-	 * removeSequence method removes the sequence with the specified name.
+	 * deleteSequence method deletes the sequence with the specified name.
 	 *
 	 * @param sequenceName
 	 *            the name of the sequence to remove
 	 * @thows {@link SqlNotFoundException} if the sequence does not exist
-	 * @thows {@link SqlDatabaseException} if there is an error removing the sequence
+	 * @thows {@link SqlDatabaseException} if there is an error deleting the sequence
 	 */
-	void removeSequence(String sequenceName);
+	void deleteSequence(String sequenceName);
 
 	/**
 	 * close closes the underlying database resources.

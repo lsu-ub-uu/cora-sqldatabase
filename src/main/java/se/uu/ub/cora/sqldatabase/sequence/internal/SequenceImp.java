@@ -93,7 +93,7 @@ public class SequenceImp implements Sequence {
 	}
 
 	@Override
-	public void removeSequence(String sequenceName) {
+	public void deleteSequence(String sequenceName) {
 		executeSql("drop sequence if exists %s;", sequenceName);
 	}
 
