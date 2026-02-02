@@ -27,7 +27,7 @@ import java.util.List;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.sqldatabase.DatabaseFacadeSpy;
+import se.uu.ub.cora.sqldatabase.OldDatabaseFacadeSpy;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
@@ -35,47 +35,47 @@ import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class TableFacadeTest {
 	private TableFacade tableFacade;
-	private DatabaseFacadeSpy databaseFacadeSpy;
+	private OldDatabaseFacadeSpy databaseFacadeSpy;
 	private TableQuerySpy tableQuerySpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		tableQuerySpy = new TableQuerySpy();
-		databaseFacadeSpy = new DatabaseFacadeSpy();
+		databaseFacadeSpy = new OldDatabaseFacadeSpy();
 		tableFacade = TableFacadeImp.usingDatabaseFacade(databaseFacadeSpy);
 	}
 
 	@Test
-	public void testTableFacadeUsesAutoclosable() throws Exception {
+	public void testTableFacadeUsesAutoclosable() {
 		assertTrue(tableFacade instanceof AutoCloseable);
 	}
 
 	@Test
-	public void testCloseCallsCloseInDbFacade() throws Exception {
+	public void testCloseCallsCloseInDbFacade() {
 		tableFacade.close();
 		databaseFacadeSpy.MCR.assertMethodWasCalled("close");
 	}
 
 	@Test
-	public void testStartTransactionCallsDbFacade() throws Exception {
+	public void testStartTransactionCallsDbFacade() {
 		tableFacade.startTransaction();
 		databaseFacadeSpy.MCR.assertMethodWasCalled("startTransaction");
 	}
 
 	@Test
-	public void testEndTransactionCallsDbFacade() throws Exception {
+	public void testEndTransactionCallsDbFacade() {
 		tableFacade.endTransaction();
 		databaseFacadeSpy.MCR.assertMethodWasCalled("endTransaction");
 	}
 
 	@Test
-	public void testRollback() throws Exception {
+	public void testRollback() {
 		tableFacade.rollback();
 		databaseFacadeSpy.MCR.assertMethodWasCalled("rollback");
 	}
 
 	@Test
-	public void testReadSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
+	public void testReadSqlErrorThrowsErrorAndSendsAlongOriginalError() {
 		databaseFacadeSpy.throwError = true;
 		try {
 			tableFacade.readRowsForQuery(tableQuerySpy);
@@ -88,7 +88,7 @@ public class TableFacadeTest {
 	}
 
 	@Test
-	public void testReadRowsForQuery() throws Exception {
+	public void testReadRowsForQuery() {
 		List<Row> results = tableFacade.readRowsForQuery(tableQuerySpy);
 
 		databaseFacadeSpy.MCR.assertParameters("readUsingSqlAndValues", 0,
@@ -99,7 +99,7 @@ public class TableFacadeTest {
 	}
 
 	@Test
-	public void testReadOneSqlErrorThrowsErrorAndSendsAlongOriginalError() throws Exception {
+	public void testReadOneSqlErrorThrowsErrorAndSendsAlongOriginalError() {
 		databaseFacadeSpy.throwError = true;
 		try {
 			tableFacade.readOneRowForQuery(tableQuerySpy);
@@ -112,7 +112,7 @@ public class TableFacadeTest {
 	}
 
 	@Test
-	public void testReadOneRowForQuery() throws Exception {
+	public void testReadOneRowForQuery() {
 		Row results = tableFacade.readOneRowForQuery(tableQuerySpy);
 
 		databaseFacadeSpy.MCR.assertParameters("readOneRowOrFailUsingSqlAndValues", 0,
@@ -123,7 +123,7 @@ public class TableFacadeTest {
 	}
 
 	@Test
-	public void testReadNumberOfRowsSqlErrorThrowsError() throws Exception {
+	public void testReadNumberOfRowsSqlErrorThrowsError() {
 		databaseFacadeSpy.throwError = true;
 		try {
 			tableFacade.readNumberOfRows(tableQuerySpy);
@@ -150,7 +150,7 @@ public class TableFacadeTest {
 	}
 
 	@Test
-	public void testDeleteWithError() throws Exception {
+	public void testDeleteWithError() {
 		databaseFacadeSpy.throwError = true;
 		try {
 			tableFacade.deleteRowsForQuery(tableQuerySpy);
@@ -175,7 +175,7 @@ public class TableFacadeTest {
 	}
 
 	@Test
-	public void testInsertWithError() throws Exception {
+	public void testInsertWithError() {
 		databaseFacadeSpy.throwError = true;
 		try {
 			tableFacade.insertRowUsingQuery(tableQuerySpy);
@@ -188,7 +188,7 @@ public class TableFacadeTest {
 	}
 
 	@Test
-	public void testInsertWithDuplicatedKeyError() throws Exception {
+	public void testInsertWithDuplicatedKeyError() {
 		databaseFacadeSpy.throwDuplicatedKeyError = true;
 		try {
 			tableFacade.insertRowUsingQuery(tableQuerySpy);
@@ -212,7 +212,7 @@ public class TableFacadeTest {
 	}
 
 	@Test
-	public void testUpdateWithError() throws Exception {
+	public void testUpdateWithError() {
 		databaseFacadeSpy.throwError = true;
 		try {
 			tableFacade.updateRowsUsingQuery(tableQuerySpy);
@@ -225,7 +225,7 @@ public class TableFacadeTest {
 	}
 
 	@Test
-	public void testUpdateWithDuplicatedKeyError() throws Exception {
+	public void testUpdateWithDuplicatedKeyError() {
 		databaseFacadeSpy.throwDuplicatedKeyError = true;
 		try {
 			tableFacade.updateRowsUsingQuery(tableQuerySpy);
@@ -252,7 +252,7 @@ public class TableFacadeTest {
 	}
 
 	@Test(expectedExceptions = SqlDatabaseException.class)
-	public void testReadNextFromSequenceError() throws Exception {
+	public void testReadNextFromSequenceError() {
 		databaseFacadeSpy.throwError = true;
 
 		tableFacade.nextValueFromSequence("someSequence");

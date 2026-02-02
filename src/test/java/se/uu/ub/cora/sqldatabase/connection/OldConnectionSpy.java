@@ -1,21 +1,3 @@
-/*
- * Copyright 2025 Uppsala University Library
- *
- * This file is part of Cora.
- *
- *     Cora is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Cora is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
- */
 package se.uu.ub.cora.sqldatabase.connection;
 
 import java.sql.Array;
@@ -38,19 +20,16 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
-import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
-public class ConnectionSpy implements Connection {
+public class OldConnectionSpy implements Connection {
 
+	public boolean throwErrorConnection = false;
+	public String sql;
+	public OldPreparedStatementSpy preparedStatementSpy = new OldPreparedStatementSpy();
+	public boolean closeWasCalled = false;
+	private boolean autoCommit = true;
 	public MethodCallRecorder MCR = new MethodCallRecorder();
-	public MethodReturnValues MRV = new MethodReturnValues();
-
-	public ConnectionSpy() {
-		MCR.useMRV(MRV);
-		MRV.setDefaultReturnValuesSupplier("prepareStatement", PreparedStatementSpy::new);
-		MRV.setDefaultReturnValuesSupplier("getAutoCommit", () -> true);
-		MRV.setDefaultReturnValuesSupplier("createArrayOf", ArraySpy::new);
-	}
+	public boolean throwErrorRollback = false;
 
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -72,7 +51,18 @@ public class ConnectionSpy implements Connection {
 
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
-		return (PreparedStatement) MCR.addCallAndReturnFromMRV("sql", sql);
+		MCR.addCall("sql", sql);
+
+		this.sql = sql;
+		if (throwErrorConnection) {
+			SQLException sqlException = new SQLException(
+					"error thrown from prepareStatement in spy");
+			MCR.addReturned(sqlException);
+			throw sqlException;
+		}
+
+		MCR.addReturned(preparedStatementSpy);
+		return preparedStatementSpy;
 	}
 
 	@Override
@@ -89,17 +79,15 @@ public class ConnectionSpy implements Connection {
 
 	@Override
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
-		MCR.addCall("autoCommit", autoCommit);
-		// if (throwErrorConnection) {
-		// throw new SQLException("error thrown from setAutoCommit in spy");
-		// }
-		// this.autoCommit = autoCommit;
+		if (throwErrorConnection) {
+			throw new SQLException("error thrown from setAutoCommit in spy");
+		}
+		this.autoCommit = autoCommit;
 	}
 
 	@Override
 	public boolean getAutoCommit() throws SQLException {
-		// return autoCommit;
-		return (boolean) MCR.addCallAndReturnFromMRV();
+		return autoCommit;
 	}
 
 	@Override
@@ -110,20 +98,19 @@ public class ConnectionSpy implements Connection {
 
 	@Override
 	public void rollback() throws SQLException {
-		// MCR.addCall();
-		// if (throwErrorRollback) {
-		// throw new SQLException("error thrown from rollback in ConnectionSpy");
-		// }
 		MCR.addCall();
+		if (throwErrorRollback) {
+			throw new SQLException("error thrown from rollback in ConnectionSpy");
+		}
+
 	}
 
 	@Override
 	public void close() throws SQLException {
-		// closeWasCalled = true;
-		// if (throwErrorConnection) {
-		// throw new SQLException("error thrown from close in ConnectionSpy");
-		// }
-		MCR.addCall();
+		closeWasCalled = true;
+		if (throwErrorConnection) {
+			throw new SQLException("error thrown from close in ConnectionSpy");
+		}
 	}
 
 	@Override
@@ -352,7 +339,11 @@ public class ConnectionSpy implements Connection {
 
 	@Override
 	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-		return (Array) MCR.addCallAndReturnFromMRV("typeName", typeName, "elements", elements);
+		MCR.addCall("typeName", typeName, "elements", elements);
+		// TODO Auto-generated method stub
+		Array sqlArray = new ArraySpy();
+		MCR.addReturned(sqlArray);
+		return sqlArray;
 	}
 
 	@Override

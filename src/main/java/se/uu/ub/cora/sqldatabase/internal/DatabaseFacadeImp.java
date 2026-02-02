@@ -26,6 +26,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import se.uu.ub.cora.logger.Logger;
@@ -85,7 +86,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		}
 	}
 
-	private boolean resultHasMoreThanOneRow(List<Row> readRows) {
+	private boolean resultHasMoreThanOneRow(Collection<Row> readRows) {
 		return readRows.size() > 1;
 	}
 
@@ -198,6 +199,24 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 			}
 			throw throwSqlDatabaseException("Error executing statement: " + sql, e);
 		}
+	}
+
+	@Override
+	public void executeSql(String sql) {
+		try {
+			executeUsingSql(sql);
+		} catch (Exception e) {
+			throw SqlDatabaseException.withMessageAndException("Error executing statement: " + sql,
+					e);
+		}
+	}
+
+	private void executeUsingSql(String sql) throws SQLException {
+		createConnectionIfNotCreatedSinceBefore();
+		try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+			preparedStatement.execute();
+		}
+
 	}
 
 	private int executeUsingSqlAndValues(String sql, List<Object> values) throws SQLException {

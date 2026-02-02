@@ -10,4 +10,5 @@ module se.uu.ub.cora.sqldatabase {
 
 	exports se.uu.ub.cora.sqldatabase;
 	exports se.uu.ub.cora.sqldatabase.table;
+	exports se.uu.ub.cora.sqldatabase.sequence;
 }

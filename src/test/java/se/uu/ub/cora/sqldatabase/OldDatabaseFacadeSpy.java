@@ -24,7 +24,7 @@ import java.util.List;
 import se.uu.ub.cora.sqldatabase.internal.RowImp;
 import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
 
-public class DatabaseFacadeSpy implements DatabaseFacade {
+public class OldDatabaseFacadeSpy implements DatabaseFacade {
 
 	public boolean executePreparedStatementQueryUsingSqlAndValuesWasCalled = false;
 	public String sql = "";
@@ -134,6 +134,12 @@ public class DatabaseFacadeSpy implements DatabaseFacade {
 		if (throwError) {
 			throw SqlDatabaseException.withMessage("Error from rollback in DatabaseFacadeSpy");
 		}
+
+	}
+
+	@Override
+	public void executeSql(String sql) {
+		// TODO Auto-generated method stub
 
 	}
 

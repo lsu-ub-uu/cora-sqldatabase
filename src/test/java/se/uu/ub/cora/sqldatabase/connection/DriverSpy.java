@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 
 public class DriverSpy implements Driver {
 
-	public ConnectionSpy connectionSpy;
+	public OldConnectionSpy connectionSpy;
 	public String url;
 	public Properties info;
 
@@ -40,7 +40,7 @@ public class DriverSpy implements Driver {
 
 		this.url = url;
 		this.info = info;
-		connectionSpy = new ConnectionSpy();
+		connectionSpy = new OldConnectionSpy();
 		return connectionSpy;
 
 	}

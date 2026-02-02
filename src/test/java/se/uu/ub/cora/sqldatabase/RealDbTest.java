@@ -16,6 +16,7 @@ import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
+import se.uu.ub.cora.sqldatabase.sequence.internal.SequenceImp;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
 import se.uu.ub.cora.sqldatabase.table.internal.TableFacadeImp;
@@ -40,10 +41,9 @@ public class RealDbTest {
 	}
 
 	private SqlDatabaseFactoryImp createDatabaseFactoryForSystemOne() {
-		SqlDatabaseFactoryImp databaseFactory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
-				"jdbc:postgresql://systemone-cora-docker-postgresql:5432/systemone", "systemone",
-				"systemone");
-		return databaseFactory;
+		SqlDatabaseFactoryImp factory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
+				"jdbc:postgresql://systemone-postgresql:5432/systemone", "systemone", "systemone");
+		return factory;
 	}
 
 	@Test(enabled = false)
@@ -73,6 +73,52 @@ public class RealDbTest {
 		assertEquals(readNumberOfRows, 2);
 
 		databaseFacade.executeSqlWithValues(deleteSql, Collections.emptyList());
+	}
+
+	@Test(enabled = false)
+	private void testCreateSequence() {
+		DatabaseFacadeImp databaseFacadeImp = (DatabaseFacadeImp) databaseFactory
+				.factorDatabaseFacade();
+		String name = "anotherGeneratorssss";
+
+		// CREATE sequence
+		String createSequence = "create sequence " + name + " start with 526;";
+		databaseFacadeImp.executeSql(createSequence);
+
+		// NEXTVALUE sequence
+		String readSequence = "select nextval('public." + name + "');";
+		Row row = databaseFacadeImp.readOneRowOrFailUsingSqlAndValues(readSequence,
+				Collections.emptyList());
+		Long valueByColumn = (Long) row.getValueByColumn("nextval");
+		System.out.println(valueByColumn);
+		System.err.println(valueByColumn.getClass());
+		long a = valueByColumn.longValue();
+
+		// DELETE sequence
+		String deleteSequence = "drop sequence if exists " + name + ";";
+		databaseFacadeImp.executeSql(deleteSequence);
+	}
+
+	@Test(enabled = false)
+	private void testCreateSequenceImp() {
+		DatabaseFacadeImp databaseFacadeImp = (DatabaseFacadeImp) databaseFactory
+				.factorDatabaseFacade();
+		String name = "lasquencia9";
+
+		SequenceImp sequence = SequenceImp.usingDatabaseFacade(databaseFacadeImp);
+
+		sequence.createSequence(name, -19);
+		System.out.println(sequence.getCurrentValueForSequence(name));
+
+		System.out.println(sequence.getNextValueForSequence(name));
+		System.out.println(sequence.getCurrentValueForSequence(name));
+
+		sequence.updateSequenceValue(name, 26);
+		System.out.println(sequence.getNextValueForSequence(name));
+		System.out.println(sequence.getCurrentValueForSequence(name));
+
+		sequence.deleteSequence(name);
+
 	}
 
 	private void insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(
