@@ -104,12 +104,12 @@ public class SequenceTest {
 
 	@Test
 	public void testGetCurrentValueForSequence_SequenceDoNotExists() {
-		setReturnValueInRowByName("currval", 5);
+		setReturnValueInRowByName("last_value", 5);
 
 		long currentValue = sequence.getCurrentValueForSequence(SEQUENCE_NAME);
 
 		databaseFacade.MCR.assertParameters("readOneRowOrFailUsingSqlAndValues", 0,
-				"select currval('" + SEQUENCE_NAME + "');", Collections.emptyList());
+				"select last_value FROM " + SEQUENCE_NAME + ";", Collections.emptyList());
 
 		assertEquals(currentValue, 5);
 	}

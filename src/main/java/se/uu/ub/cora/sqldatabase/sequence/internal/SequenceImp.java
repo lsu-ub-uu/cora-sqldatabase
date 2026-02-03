@@ -83,8 +83,8 @@ public class SequenceImp implements Sequence {
 
 	@Override
 	public long getCurrentValueForSequence(String sequenceName) {
-		String sql = String.format("select currval('%s');", sequenceName);
-		return readOneRowAndColumnAsLongUsingSql(sql, "currval");
+		String sql = String.format("select last_value FROM %s;", sequenceName);
+		return readOneRowAndColumnAsLongUsingSql(sql, "last_value");
 	}
 
 	@Override
