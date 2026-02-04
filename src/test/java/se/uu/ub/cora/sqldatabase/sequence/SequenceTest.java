@@ -61,7 +61,9 @@ public class SequenceTest {
 
 		sequence.createSequence(SEQUENCE_NAME, currentValue);
 
+		databaseFacade.MCR.assertMethodWasCalled("startTransaction");
 		assertSequenceCreatedWithStartAndMinValue(currentValue, 0);
+		databaseFacade.MCR.assertMethodWasCalled("endTransaction");
 		assertSequenceNextValueCalled();
 	}
 

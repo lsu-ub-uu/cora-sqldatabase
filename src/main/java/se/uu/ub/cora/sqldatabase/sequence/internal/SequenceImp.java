@@ -49,6 +49,12 @@ public class SequenceImp implements Sequence {
 	}
 
 	private void createSequenceInStorage(String sequenceName, long startValue) {
+		databaseFacade.startTransaction();
+		createSequenceInDatabase(sequenceName, startValue);
+		databaseFacade.endTransaction();
+	}
+
+	private void createSequenceInDatabase(String sequenceName, long startValue) {
 		String sql = "select cora_create_sequence(?,?,?);";
 		List<Object> values = List.of(sequenceName, calculateMinValue(startValue), startValue);
 		databaseFacade.readOneRowOrFailUsingSqlAndValues(sql, values);
