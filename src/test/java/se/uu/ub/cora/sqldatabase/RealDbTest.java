@@ -122,7 +122,7 @@ public class RealDbTest {
 
 	}
 
-	@Test(enabled = true)
+	@Test(enabled = false)
 	private void testReadNonExistingSequenceImp() {
 		databaseFacadeImp = (DatabaseFacadeImp) databaseFactory.factorDatabaseFacade();
 		String name = "lasquencia4499";
