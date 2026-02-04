@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import se.uu.ub.cora.logger.Logger;
-import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.DatabaseValues;
 import se.uu.ub.cora.sqldatabase.Row;
@@ -43,7 +41,6 @@ import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 public final class DatabaseFacadeImp implements DatabaseFacade {
 	private SqlConnectionProvider sqlConnectionProvider;
 	private Connection connection;
-	private Logger log = LoggerProvider.getLoggerForClass(DatabaseFacadeImp.class);
 	private static final int SQL_NULL = java.sql.Types.NULL;
 	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
 
@@ -100,7 +97,6 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 			return tryToReadUsingSqlAndValues(sql, values);
 		} catch (SQLException e) {
 			String message = ERROR_READING_DATA_USING_SQL + sql;
-			log.logErrorUsingMessageAndException(message, e);
 			throw throwSqlDatabaseException(message, e);
 		}
 	}

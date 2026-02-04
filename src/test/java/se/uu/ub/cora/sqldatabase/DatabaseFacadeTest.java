@@ -22,7 +22,6 @@ package se.uu.ub.cora.sqldatabase;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -38,15 +37,12 @@ import java.util.Set;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.connection.ConnectionSpy;
 import se.uu.ub.cora.sqldatabase.connection.OldConnectionSpy;
 import se.uu.ub.cora.sqldatabase.connection.OldPreparedStatementSpy;
 import se.uu.ub.cora.sqldatabase.connection.OldResultSetSpy;
 import se.uu.ub.cora.sqldatabase.connection.PreparedStatementSpy;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
-import se.uu.ub.cora.testspies.logger.LoggerFactorySpy;
-import se.uu.ub.cora.testspies.logger.LoggerSpy;
 
 public class DatabaseFacadeTest {
 	private static final String ERROR_READING_DATA_USING_SQL = "Error reading data using sql: ";
@@ -57,7 +53,6 @@ public class DatabaseFacadeTest {
 	private OldConnectionSpy oldConnection;
 	private SqlConnectionProviderSpy sqlConnectionProvider;
 	private ConnectionSpy connection;
-	private LoggerFactorySpy loggerFactorySpy;
 	private static final String SELECT_SQL = "select * from someTableName where alpha2code = ?";;
 	private static final String UPDATE_SQL = "update testTable set x=? where y = ?";
 
@@ -66,9 +61,6 @@ public class DatabaseFacadeTest {
 
 	@BeforeMethod
 	public void beforeMethod() {
-		loggerFactorySpy = new LoggerFactorySpy();
-		LoggerProvider.setLoggerFactory(loggerFactorySpy);
-
 		values = new ArrayList<>();
 		setupOldConnectionSpies();
 		databaseFacade = DatabaseFacadeImp.usingSqlConnectionProvider(oldSqlConnectionProvider);
@@ -441,32 +433,6 @@ public class DatabaseFacadeTest {
 		} catch (Exception e) {
 			assertEquals(e.getCause().getMessage(), "error thrown from prepareStatement in spy");
 		}
-	}
-
-	@Test
-	public void testReadFromTableUsingConditionSqlErrorLogs() {
-		oldConnection.throwErrorConnection = true;
-
-		executePreparedStatementUsingSqlAndValuesMakeSureErrorIsThrown(SOME_SQL, null);
-
-		LoggerSpy errorLogger = (LoggerSpy) loggerFactorySpy.MCR.getReturnValue("factorForClass",
-				0);
-		Object errorThrownFromConnectionSpy = oldConnection.MCR.getReturnValue("prepareStatement",
-				0);
-		errorLogger.MCR.assertParameters("logErrorUsingMessageAndException", 0,
-				ERROR_READING_DATA_USING_SQL + SOME_SQL, errorThrownFromConnectionSpy);
-	}
-
-	private void executePreparedStatementUsingSqlAndValuesMakeSureErrorIsThrown(String sql,
-			List<Object> values) {
-		Exception caughtException = null;
-		try {
-			databaseFacade.readUsingSqlAndValues(sql, values);
-			fail();
-		} catch (Exception e) {
-			caughtException = e;
-		}
-		assertNotNull(caughtException);
 	}
 
 	@Test

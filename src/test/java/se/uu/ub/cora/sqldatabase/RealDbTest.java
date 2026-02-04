@@ -16,6 +16,7 @@ import se.uu.ub.cora.logger.LoggerProvider;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
+import se.uu.ub.cora.sqldatabase.sequence.Sequence;
 import se.uu.ub.cora.sqldatabase.sequence.internal.SequenceImp;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
@@ -119,6 +120,57 @@ public class RealDbTest {
 
 		sequence.deleteSequence(name);
 
+	}
+
+	@Test(enabled = true)
+	private void testReadNonExistingSequenceImp() {
+		databaseFacadeImp = (DatabaseFacadeImp) databaseFactory.factorDatabaseFacade();
+		String name = "lasquencia4499";
+
+		SequenceImp sequence = SequenceImp.usingDatabaseFacade(databaseFacadeImp);
+		//
+		// sequence.createSequence(name, -19);
+		// System.out.println(sequence.getCurrentValueForSequence(name));
+		//
+		// System.out.println(sequence.getNextValueForSequence(name));
+		// System.out.println(sequence.getCurrentValueForSequence(name));
+		//
+		// sequence.updateSequenceValue(name, 26);
+		// System.out.println(sequence.getNextValueForSequence(name));
+		// System.out.println(sequence.getCurrentValueForSequence(name));
+		//
+		// sequence.deleteSequence(name);
+		readCurrentNumberFromSequence(name);
+
+	}
+
+	DatabaseFacadeImp databaseFacadeImp;
+
+	private long readCurrentNumberFromSequence(String id) {
+		// String id = dataRecordGroup.getId();
+		try (Sequence sequence = databaseFactory.factorSequence()) {
+			return tryToReadCurrentValueAndIfFailsCreateSequenceAndRetry(id, sequence);
+		} catch (Exception e) {
+			// throw IdSourceException.withMessageAndException(
+			// "Error reading current value for sequence with id: " + id, e);
+			throw new RuntimeException("Error reading current value for sequence with id: " + id,
+					e);
+		}
+	}
+
+	private long tryToReadCurrentValueAndIfFailsCreateSequenceAndRetry(String id,
+			Sequence sequence) {
+		try {
+			return sequence.getCurrentValueForSequence(id);
+		} catch (Exception _) {
+			createSequence(sequence, id);
+			return sequence.getCurrentValueForSequence(id);
+		}
+	}
+
+	private void createSequence(Sequence sequence, String id) {
+		throw new RuntimeException("created crash");
+		// sequence.createSequence(id, Long.valueOf(333));
 	}
 
 	private void insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(
