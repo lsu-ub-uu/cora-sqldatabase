@@ -64,6 +64,7 @@ public class TableQueryTest {
 		textsWithAllowedCharacters.add("table-Name");
 		textsWithAllowedCharacters.add("table_Name");
 		textsWithAllowedCharacters.add("table.Name");
+		textsWithAllowedCharacters.add("table1234Name");
 	}
 
 	@BeforeMethod
