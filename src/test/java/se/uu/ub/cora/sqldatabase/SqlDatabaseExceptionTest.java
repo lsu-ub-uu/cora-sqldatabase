@@ -1,5 +1,3 @@
-package se.uu.ub.cora.sqldatabase;
-
 /*
  * Copyright 2017 Olov McKie
  * Copyright 2018 Uppsala Universietet
@@ -19,25 +17,27 @@ package se.uu.ub.cora.sqldatabase;
  *     You should have received a copy of the GNU General Public License
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
+package se.uu.ub.cora.sqldatabase;
+
 import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
 public class SqlDatabaseExceptionTest {
+	private static final String MESSAGE = "message";
+
 	@Test
 	public void testInit() {
-		String message = "message";
-		SqlDatabaseException exception = SqlDatabaseException.withMessage(message);
-		assertEquals(exception.getMessage(), "message");
+		SqlDatabaseException exception = SqlDatabaseException.withMessage(MESSAGE);
+		assertEquals(exception.getMessage(), MESSAGE);
 	}
 
 	@Test
-	public void testMessageAndError() throws Exception {
-		String message = "message";
+	public void testMessageAndError() {
 		Exception exception = new RuntimeException();
-		SqlDatabaseException storageException = SqlDatabaseException.withMessageAndException(message,
-				exception);
-		assertEquals(storageException.getMessage(), "message");
+		SqlDatabaseException storageException = SqlDatabaseException
+				.withMessageAndException(MESSAGE, exception);
+		assertEquals(storageException.getMessage(), MESSAGE);
 		assertEquals(storageException.getCause(), exception);
 	}
 

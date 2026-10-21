@@ -36,6 +36,7 @@ import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDataException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.SqlNotFoundException;
+import se.uu.ub.cora.sqldatabase.SqlTransactionException;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 
 public final class DatabaseFacadeImp implements DatabaseFacade {
@@ -101,8 +102,20 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		}
 	}
 
-	private SqlDatabaseException throwSqlDatabaseException(String message, SQLException e) {
+	private SqlDatabaseException throwSqlDatabaseException(String message, Exception e) {
+		if (isTransactionError(e)) {
+			return SqlTransactionException.withMessageAndException("Transaction interrupted.", e);
+		}
 		return SqlDatabaseException.withMessageAndException(message, e);
+	}
+
+	private boolean isTransactionError(Exception e) {
+		return e instanceof SQLException sqlexception && isTranscationExceptionState(sqlexception);
+	}
+
+	private boolean isTranscationExceptionState(SQLException e) {
+		String sqlState = e.getSQLState();
+		return sqlState.equals("40001");
 	}
 
 	private List<Row> tryToReadUsingSqlAndValues(String sql, List<Object> values)
@@ -202,8 +215,10 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		try {
 			executeUsingSql(sql);
 		} catch (Exception e) {
-			throw SqlDatabaseException.withMessageAndException("Error executing statement: " + sql,
-					e);
+			throw throwSqlDatabaseException("Error executing statement: " + sql, e);
+			// throw SqlDatabaseException.withMessageAndException("Error executing statement: " +
+			// sql,
+			// e);
 		}
 	}
 
@@ -267,6 +282,10 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		try {
 			createConnectionIfNotCreatedSinceBefore();
 			connection.setAutoCommit(false);
+			connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+			int transactionIsolation = connection.getTransactionIsolation();
+			System.err.println("Transaction Isolation " + transactionIsolation);
+			System.err.println("connection " + connection);
 		} catch (SQLException e) {
 			throw throwSqlDatabaseException("Error starting transaction.", e);
 		}
@@ -277,6 +296,8 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		try {
 			connection.setAutoCommit(true);
 		} catch (SQLException e) {
+			String sqlState = e.getSQLState();
+			System.err.println("SQL state :" + sqlState);
 			throw throwSqlDatabaseException("Error ending transaction.", e);
 		}
 

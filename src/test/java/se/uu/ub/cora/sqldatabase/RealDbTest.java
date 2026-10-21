@@ -1,12 +1,17 @@
 package se.uu.ub.cora.sqldatabase;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
@@ -45,6 +50,117 @@ public class RealDbTest {
 		SqlDatabaseFactoryImp factory = SqlDatabaseFactoryImp.usingUriAndUserAndPassword(
 				"jdbc:postgresql://systemone-postgresql:5432/systemone", "systemone", "systemone");
 		return factory;
+	}
+
+	@Test(enabled = false)
+	private void testTransactionConflict() {
+		DatabaseFacade databaseFacade = databaseFactory.factorDatabaseFacade();
+		DatabaseFacade databaseFacade2 = databaseFactory.factorDatabaseFacade();
+
+		String deleteSql = "delete from public.record where type='tramsType';";
+		databaseFacade.executeSqlWithValues(deleteSql, Collections.emptyList());
+		System.out.println("1");
+		databaseFacade.startTransaction();
+		System.out.println("2");
+		databaseFacade2.startTransaction();
+		System.out.println("3");
+
+		insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(databaseFacade, "tramsType",
+				"tramsId", "test", "{\"trams1\":\"trams1\"}");
+		System.out.println("4");
+
+		insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(databaseFacade2, "tramsType",
+				"tramsId", "test", "{\"trams2\":\"trams2\"}");
+		System.out.println("5");
+
+		databaseFacade.endTransaction();
+		System.out.println("6");
+
+		databaseFacade2.endTransaction();
+		System.out.println("7");
+	}
+
+	@Test
+	public void testTransactionConflictWithTwoThreads() throws Exception {
+		DatabaseFacade tx1 = databaseFactory.factorDatabaseFacade();
+		DatabaseFacade tx2 = databaseFactory.factorDatabaseFacade();
+
+		CountDownLatch tx2ReadyToInsert = new CountDownLatch(1);
+		CountDownLatch allowTx2Insert = new CountDownLatch(1);
+
+		AtomicReference<Throwable> tx2Failure = new AtomicReference<>();
+
+		// Optional but recommended: fail fast instead of waiting forever
+		// tx2.executeSqlWithValues("SET LOCAL lock_timeout = '3s'", Collections.emptyList());
+
+		Thread t2 = new Thread(() -> {
+			try {
+				System.out.println("starting transaction thread 2");
+				tx2.startTransaction();
+				tx2ReadyToInsert.countDown(); // signal thread is ready
+				allowTx2Insert.await(); // wait until tx1 insert is done
+				System.out.println("delete thread 2");
+				String deleteSql2 = "delete from public.record where type='tramsType'";
+				// tx2.executeSqlWithValues(deleteSql2, Collections.emptyList());
+				tx2.readOneRowOrFailUsingSqlAndValues("select * from public.record where type=?",
+						List.of("tramsType"));
+
+				System.out.println("insert thread 2");
+				insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(tx2, "tramsType", "tramsId",
+						"test", "{\"trams2\":\"trams2\"}");
+				System.out.println("delete and insert thread 2 DONE!");
+
+				// If this succeeds unexpectedly, commit so cleanup is safe
+				System.out.println("ending transaction thread 2");
+				tx2.endTransaction();
+			} catch (Exception e) {
+				System.out.println("Retry" + e.getClass());
+				System.out.println("Retry" + e.getCause().getMessage());
+				SQLException cause = (SQLException) e.getCause();
+				System.err.println("SQL state :" + cause.getSQLState());
+
+				tx2Failure.set(e);
+				try {
+					tx2.rollback();
+				} catch (Throwable ignored) {
+				}
+			}
+		});
+
+		t2.start();
+
+		// Ensure t2 is waiting before we proceed
+		assertTrue(tx2ReadyToInsert.await(2, TimeUnit.SECONDS), "t2 did not start in time");
+
+		System.out.println("starting transaction thread 1");
+		tx1.startTransaction();
+		System.out.println("delete and insert thread 1");
+		String deleteSql = "delete from public.record where type='tramsType'";
+		tx1.executeSqlWithValues(deleteSql, Collections.emptyList());
+
+		// tx1 inserts first and keeps transaction open
+		insertIntoRecordUsingTypeAndIdAndDividerAndDataAsJson(tx1, "tramsType", "tramsId", "test",
+				"{\"trams1\":\"trams1\"}");
+		System.out.println("delete and insert thread 1 DONE!");
+
+		// Let tx2 attempt conflicting insert (it will block until tx1 commits/rolls back)
+		allowTx2Insert.countDown();
+
+		// Give tx2 a short chance to hit the blocked state
+		Thread.sleep(200);
+
+		// Resolve blocker: commit tx1, then tx2 should fail with duplicate key
+		System.out.println("ending transaction thread 1");
+		tx1.endTransaction();
+
+		t2.join(5000);
+		assertFalse(t2.isAlive(), "t2 did not finish in time");
+
+		Throwable failure = tx2Failure.get();
+		assertNotNull(failure, "Expected tx2 to fail with unique constraint violation");
+
+		// Adapt to your facade exception wrapping:
+		// assertEquals(extractSqlState(failure), "23505");
 	}
 
 	@Test(enabled = false)

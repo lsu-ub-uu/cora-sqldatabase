@@ -22,6 +22,7 @@ package se.uu.ub.cora.sqldatabase;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -705,6 +706,89 @@ public class DatabaseFacadeTest {
 			assertEquals(e.getMessage(), "Error ending transaction.");
 			assertEquals(e.getCause().getMessage(), "error thrown from setAutoCommit in spy");
 		}
+	}
+
+	@Test
+	public void testReadOneRowOrFailUsingSqlAndValuesThrowsSqlTransactionExceptionError() {
+		SqlExceptionSpy exceptionSpy = new SqlExceptionSpy();
+		DatabaseFacadeImp customDatabaseFacade = setUpDatabaseFacadeThrowException(exceptionSpy,
+				"executeQuery");
+		try {
+			customDatabaseFacade.readOneRowOrFailUsingSqlAndValues("someSql", List.of("someValue"));
+			fail();
+
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(), "Transaction interrupted.");
+			assertSame(e.getCause(), exceptionSpy);
+		}
+	}
+
+	@Test
+	public void testReadUsingSqlAndValuesThrowsSqlTransactionExceptionError() {
+		SqlExceptionSpy exceptionSpy = new SqlExceptionSpy();
+		DatabaseFacadeImp customDatabaseFacade = setUpDatabaseFacadeThrowException(exceptionSpy,
+				"executeQuery");
+		try {
+			customDatabaseFacade.readUsingSqlAndValues("someSql", List.of("someValue"));
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(), "Transaction interrupted.");
+			assertSame(e.getCause(), exceptionSpy);
+		}
+	}
+
+	@Test
+	public void testExecuteSqlWithValuesThrowsSqlTransactionExceptionError() {
+		SqlExceptionSpy exceptionSpy = new SqlExceptionSpy();
+		DatabaseFacadeImp customDatabaseFacade = setUpDatabaseFacadeThrowException(exceptionSpy,
+				"executeUpdate");
+		try {
+			customDatabaseFacade.executeSqlWithValues("someSql", List.of("someValue"));
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(), "Transaction interrupted.");
+			assertSame(e.getCause(), exceptionSpy);
+		}
+	}
+
+	@Test
+	public void testExecuteSqlThrowsSqlTransactionExceptionError() {
+		SqlExceptionSpy exceptionSpy = new SqlExceptionSpy();
+		DatabaseFacadeImp customDatabaseFacade = setUpDatabaseFacadeThrowException(exceptionSpy,
+				"execute");
+		try {
+			customDatabaseFacade.executeSql("someSql");
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(), "Transaction interrupted.");
+			assertSame(e.getCause(), exceptionSpy);
+		}
+	}
+
+	private DatabaseFacadeImp setUpDatabaseFacadeThrowException(SqlExceptionSpy exceptionSpy,
+			String methodName) {
+		setUpSqlConnectionProvider();
+		PreparedStatementSpy statementSpy = new PreparedStatementSpy();
+		connection.MRV.setDefaultReturnValuesSupplier("prepareStatement", () -> statementSpy);
+		exceptionSpy.MRV.setDefaultReturnValuesSupplier("getSQLState", () -> "40001");
+		setThrowSqlException(statementSpy, exceptionSpy, methodName);
+		return DatabaseFacadeImp.usingSqlConnectionProvider(sqlConnectionProvider);
+	}
+
+	private void setThrowSqlException(PreparedStatementSpy statementSpy,
+			SqlExceptionSpy exceptionSpy, String methodName) {
+		statementSpy.MRV.setDefaultReturnValuesSupplier(methodName, () -> {
+			sneakyThrow(exceptionSpy);
+			return null;
+		});
+	}
+
+	public static <T extends Throwable> void sneakyThrow(Throwable t) throws T {
+		throw (T) t;
 	}
 
 	@Test
