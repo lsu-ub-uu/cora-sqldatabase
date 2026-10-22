@@ -109,6 +109,7 @@ public class OldConnectionSpy implements Connection {
 	public void close() throws SQLException {
 		closeWasCalled = true;
 		if (throwErrorConnection) {
+			// SqlExceptionSpy sqlExceptionSpy = new SqlExceptionSpy();
 			throw new SQLException("error thrown from close in ConnectionSpy");
 		}
 	}

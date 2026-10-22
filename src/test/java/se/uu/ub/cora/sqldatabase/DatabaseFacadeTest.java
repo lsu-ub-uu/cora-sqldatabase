@@ -1,6 +1,6 @@
 /*
 
- * Copyright 2018, 2019, 2021 Uppsala University Library
+ * Copyright 2018, 2019, 2021, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -54,7 +54,7 @@ public class DatabaseFacadeTest {
 	private OldConnectionSpy oldConnection;
 	private SqlConnectionProviderSpy sqlConnectionProvider;
 	private ConnectionSpy connection;
-	private static final String SELECT_SQL = "select * from someTableName where alpha2code = ?";;
+	private static final String SELECT_SQL = "select * from someTableName where alpha2code = ?";
 	private static final String UPDATE_SQL = "update testTable set x=? where y = ?";
 
 	private static final String SOME_SQL = "select x from y";
@@ -141,7 +141,8 @@ public class DatabaseFacadeTest {
 	@Test
 	public void testGetSqlConnectionProvider() {
 		DatabaseFacadeImp databaseFacadeImp = (DatabaseFacadeImp) databaseFacade;
-		assertEquals(databaseFacadeImp.getSqlConnectionProvider(), oldSqlConnectionProvider);
+		assertEquals(databaseFacadeImp.onlyForTestGetSqlConnectionProvider(),
+				oldSqlConnectionProvider);
 	}
 
 	@Test(expectedExceptions = SqlNotFoundException.class, expectedExceptionsMessageRegExp = ""
@@ -586,7 +587,6 @@ public class DatabaseFacadeTest {
 		assertEquals(generatedSql, UPDATE_SQL);
 		assertTrue(oldPreparedStatement.executeUpdateWasCalled);
 		assertTrue(oldPreparedStatement.closeWasCalled);
-		// assertTrue(connectionSpy.closeWasCalled);
 		oldSqlConnectionProvider.MCR.assertNumberOfCallsToMethod("getConnection", 1);
 		assertFalse(connectionSpy.closeWasCalled);
 	}
@@ -627,8 +627,7 @@ public class DatabaseFacadeTest {
 	private Timestamp createTimestamp() {
 		Date today = new Date();
 		long time = today.getTime();
-		Timestamp timestamp = new Timestamp(time);
-		return timestamp;
+		return new Timestamp(time);
 	}
 
 	@Test
@@ -689,9 +688,7 @@ public class DatabaseFacadeTest {
 	@Test
 	public void testStartTransaction() throws Exception {
 		databaseFacade.startTransaction();
-		// assertTrue(connectionSpy.getAutoCommit());
 		assertTrue(oldSqlConnectionProvider.getConnectionHasBeenCalled);
-		// assertFalse(connectionSpy.closeWasCalled);
 		assertFalse(oldConnection.getAutoCommit());
 	}
 
@@ -787,6 +784,7 @@ public class DatabaseFacadeTest {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T extends Throwable> void sneakyThrow(Throwable t) throws T {
 		throw (T) t;
 	}

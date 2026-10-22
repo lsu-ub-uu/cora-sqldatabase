@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019, 2021 Uppsala University Library
+ * Copyright 2018, 2019, 2021, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -114,8 +114,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	}
 
 	private boolean isTranscationExceptionState(SQLException e) {
-		String sqlState = e.getSQLState();
-		return sqlState.equals("40001");
+		return "40001".equals(e.getSQLState());
 	}
 
 	private List<Row> tryToReadUsingSqlAndValues(String sql, List<Object> values)
@@ -216,9 +215,6 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 			executeUsingSql(sql);
 		} catch (Exception e) {
 			throw throwSqlDatabaseException("Error executing statement: " + sql, e);
-			// throw SqlDatabaseException.withMessageAndException("Error executing statement: " +
-			// sql,
-			// e);
 		}
 	}
 
@@ -227,7 +223,6 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 			preparedStatement.execute();
 		}
-
 	}
 
 	private int executeUsingSqlAndValues(String sql, List<Object> values) throws SQLException {
@@ -283,9 +278,6 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 			createConnectionIfNotCreatedSinceBefore();
 			connection.setAutoCommit(false);
 			connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-			int transactionIsolation = connection.getTransactionIsolation();
-			System.err.println("Transaction Isolation " + transactionIsolation);
-			System.err.println("connection " + connection);
 		} catch (SQLException e) {
 			throw throwSqlDatabaseException("Error starting transaction.", e);
 		}
@@ -296,15 +288,11 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		try {
 			connection.setAutoCommit(true);
 		} catch (SQLException e) {
-			String sqlState = e.getSQLState();
-			System.err.println("SQL state :" + sqlState);
 			throw throwSqlDatabaseException("Error ending transaction.", e);
 		}
-
 	}
 
-	public SqlConnectionProvider getSqlConnectionProvider() {
-		// needed for test
+	public SqlConnectionProvider onlyForTestGetSqlConnectionProvider() {
 		return sqlConnectionProvider;
 	}
 
@@ -315,7 +303,5 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		} catch (SQLException e) {
 			throw throwSqlDatabaseException("Error doing rollBack on connection.", e);
 		}
-
 	}
-
 }

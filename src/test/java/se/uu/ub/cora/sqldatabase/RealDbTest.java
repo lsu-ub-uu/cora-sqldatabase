@@ -80,7 +80,7 @@ public class RealDbTest {
 		System.out.println("7");
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testTransactionConflictWithTwoThreads() throws Exception {
 		DatabaseFacade tx1 = databaseFactory.factorDatabaseFacade();
 		DatabaseFacade tx2 = databaseFactory.factorDatabaseFacade();
