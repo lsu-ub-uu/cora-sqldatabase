@@ -23,7 +23,7 @@ public class SqlDatabaseException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	private SqlDatabaseException(String message) {
+	SqlDatabaseException(String message) {
 		super(message);
 	}
 
@@ -35,7 +35,8 @@ public class SqlDatabaseException extends RuntimeException {
 		return new SqlDatabaseException(message);
 	}
 
-	public static SqlDatabaseException withMessageAndException(String message, Exception exception) {
+	public static SqlDatabaseException withMessageAndException(String message,
+			Exception exception) {
 		return new SqlDatabaseException(message, exception);
 	}
 
