@@ -27,7 +27,9 @@
 	<properties>
 		<postgres.version>42.7.14</postgres.version>
 		
+		<initialize.version>1.7.0</initialize.version>
 		<logger.version>2.10.0</logger.version>
+		<recordlock.version>1.0-SNAPSHOT</recordlock.version>
 		<testutils.version>1.14.0</testutils.version>
 		<testspies.version>1.2.0</testspies.version>
 	</properties>
@@ -45,6 +47,18 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>logger</artifactId>
 			<version>${logger.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>initialize</artifactId>
+			<version>${initialize.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>recordlock</artifactId>
+			<version>${recordlock.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
