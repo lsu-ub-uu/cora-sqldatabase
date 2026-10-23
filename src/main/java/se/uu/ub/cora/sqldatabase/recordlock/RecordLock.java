@@ -44,9 +44,11 @@ public interface RecordLock extends AutoCloseable {
 	 *            A String with the type of the record to lock
 	 * @param id
 	 *            A String with the id of the record to lock
+	 * @throws RecordLockException
+	 *             if the lock could not be acquired within the maximum waiting time, or if the
+	 *             thread is interrupted while waiting to retry
 	 * @throws SqlDatabaseException
-	 *             if the lock could not be acquired within the maximum waiting time, or if an error
-	 *             occurs while interacting with the database
+	 *             if any other error occurs while interacting with the database
 	 */
 	void acquire(String type, String id);
 

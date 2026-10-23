@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.recordlock.RecordLock;
+import se.uu.ub.cora.sqldatabase.recordlock.RecordLockException;
 import se.uu.ub.cora.sqldatabase.sequence.DatabaseFacadeSpy;
 
 public class RecordLockTest {
@@ -135,7 +136,7 @@ public class RecordLockTest {
 	}
 
 	@Test
-	public void testAcquireThrowsSqlDatabaseExceptionWhenTimeLimitIsReached() {
+	public void testAcquireThrowsRecordLockExceptionWhenTimeLimitIsReached() {
 		SqlConflictException conflict = SqlConflictException.withMessage("duplicate key");
 		databaseFacade.MRV.setAlwaysThrowException("executeSqlWithValues", conflict);
 		timeSource.MRV.setReturnValues("currentTimeMillis",
@@ -143,9 +144,9 @@ public class RecordLockTest {
 
 		try {
 			recordLock.acquire(SOME_TYPE, SOME_ID);
-			fail("SqlDatabaseException should have been thrown");
+			fail("RecordLockException should have been thrown");
 		} catch (Exception e) {
-			assertTrue(e instanceof SqlDatabaseException);
+			assertTrue(e instanceof RecordLockException);
 			assertEquals(e.getMessage(), "Could not acquire lock for type: " + SOME_TYPE
 					+ " and id: " + SOME_ID + " within " + MAX_WAIT_MILLIS + " ms.");
 			assertSame(e.getCause(), conflict);

@@ -18,7 +18,7 @@
  */
 package se.uu.ub.cora.sqldatabase.recordlock.internal;
 
-import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.recordlock.RecordLockException;
 
 public class ThreadSleeper implements Sleeper {
 
@@ -28,7 +28,7 @@ public class ThreadSleeper implements Sleeper {
 			Thread.sleep(milliseconds);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw SqlDatabaseException.withMessageAndException("Interrupted while waiting to retry.",
+			throw RecordLockException.withMessageAndException("Interrupted while waiting to retry.",
 					e);
 		}
 	}

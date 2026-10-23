@@ -25,7 +25,7 @@ import static org.testng.Assert.fail;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.recordlock.RecordLockException;
 
 public class ThreadSleeperTest {
 	private ThreadSleeper sleeper = new ThreadSleeper();
@@ -46,14 +46,14 @@ public class ThreadSleeperTest {
 	}
 
 	@Test
-	public void testInterruptedSleepThrowsSqlDatabaseExceptionAndKeepsInterruptFlag() {
+	public void testInterruptedSleepThrowsRecordLockExceptionAndKeepsInterruptFlag() {
 		Thread.currentThread().interrupt();
 
 		try {
 			sleeper.sleepMilliseconds(1_000);
-			fail("SqlDatabaseException should have been thrown");
+			fail("RecordLockException should have been thrown");
 		} catch (Exception e) {
-			assertTrue(e instanceof SqlDatabaseException);
+			assertTrue(e instanceof RecordLockException);
 			assertEquals(e.getMessage(), "Interrupted while waiting to retry.");
 			assertTrue(e.getCause() instanceof InterruptedException);
 			assertTrue(Thread.currentThread().isInterrupted());

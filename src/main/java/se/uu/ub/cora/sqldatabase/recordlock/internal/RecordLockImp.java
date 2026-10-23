@@ -22,8 +22,8 @@ import java.util.List;
 
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.SqlConflictException;
-import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
 import se.uu.ub.cora.sqldatabase.recordlock.RecordLock;
+import se.uu.ub.cora.sqldatabase.recordlock.RecordLockException;
 
 public class RecordLockImp implements RecordLock {
 	private static final String INSERT_SQL = "insert into recordlock (type, id) values (?, ?);";
@@ -75,7 +75,7 @@ public class RecordLockImp implements RecordLock {
 	private void throwIfTimeLimitReached(long deadline, String type, String id,
 			SqlConflictException conflict) {
 		if (timeSource.currentTimeMillis() >= deadline) {
-			throw SqlDatabaseException.withMessageAndException(
+			throw RecordLockException.withMessageAndException(
 					"Could not acquire lock for type: " + type + " and id: " + id + " within "
 							+ MAX_WAIT_MILLIS + " ms.",
 					conflict);
