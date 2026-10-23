@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019 Uppsala University Library
+ * Copyright 2018, 2019, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -26,6 +26,7 @@ import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.SqlTransactionException;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
 
@@ -50,6 +51,9 @@ public final class TableFacadeImp implements TableFacade {
 		} catch (SqlConflictException e) {
 			throw SqlConflictException.withMessageAndException(
 					"Error inserting row, duplicated key, using sql: " + sql, e);
+		} catch (SqlTransactionException e) {
+			throw SqlTransactionException
+					.withMessageAndException("Error inserting row using sql: " + sql, e);
 		} catch (SqlDatabaseException e) {
 			throw SqlDatabaseException
 					.withMessageAndException("Error inserting row using sql: " + sql, e);
@@ -62,6 +66,9 @@ public final class TableFacadeImp implements TableFacade {
 		List<Object> values = tableQuery.getQueryValues();
 		try {
 			return dbFacade.readOneRowOrFailUsingSqlAndValues(sql, values);
+		} catch (SqlTransactionException e) {
+			throw SqlTransactionException
+					.withMessageAndException("Error reading one row using sql: " + sql, e);
 		} catch (SqlDatabaseException e) {
 			throw SqlDatabaseException
 					.withMessageAndException("Error reading one row using sql: " + sql, e);
@@ -78,6 +85,9 @@ public final class TableFacadeImp implements TableFacade {
 		List<Object> queryValues = tableQuery.getQueryValues();
 		try {
 			return dbFacade.readUsingSqlAndValues(sql, queryValues);
+		} catch (SqlTransactionException e) {
+			throw SqlTransactionException
+					.withMessageAndException("Error reading data using sql: " + sql, e);
 		} catch (SqlDatabaseException e) {
 			throw SqlDatabaseException
 					.withMessageAndException("Error reading data using sql: " + sql, e);
@@ -91,6 +101,9 @@ public final class TableFacadeImp implements TableFacade {
 		try {
 			Row count = dbFacade.readOneRowOrFailUsingSqlAndValues(sql, values);
 			return (long) count.getValueByColumn("count");
+		} catch (SqlTransactionException e) {
+			throw SqlTransactionException
+					.withMessageAndException("Error reading number of rows using sql: " + sql, e);
 		} catch (SqlDatabaseException e) {
 			throw SqlDatabaseException
 					.withMessageAndException("Error reading number of rows using sql: " + sql, e);
@@ -106,6 +119,9 @@ public final class TableFacadeImp implements TableFacade {
 		} catch (SqlConflictException e) {
 			throw SqlConflictException.withMessageAndException(
 					"Error updating rows, duplicated key, using sql: " + sql, e);
+		} catch (SqlTransactionException e) {
+			throw SqlTransactionException
+					.withMessageAndException("Error updating rows using sql: " + sql, e);
 		} catch (SqlDatabaseException e) {
 			throw SqlDatabaseException
 					.withMessageAndException("Error updating rows using sql: " + sql, e);
@@ -118,6 +134,9 @@ public final class TableFacadeImp implements TableFacade {
 		List<Object> values = tableQuery.getQueryValues();
 		try {
 			return dbFacade.executeSqlWithValues(sql, values);
+		} catch (SqlTransactionException e) {
+			throw SqlTransactionException
+					.withMessageAndException("Error deleting rows using sql: " + sql, e);
 		} catch (SqlDatabaseException e) {
 			throw SqlDatabaseException
 					.withMessageAndException("Error deleting rows using sql: " + sql, e);
@@ -129,11 +148,6 @@ public final class TableFacadeImp implements TableFacade {
 		String statement = "select nextval('" + sequenceName + "') as " + NEXTVAL_COLUMN_NAME;
 		Row row = dbFacade.readOneRowOrFailUsingSqlAndValues(statement, Collections.emptyList());
 		return (long) row.getValueByColumn(NEXTVAL_COLUMN_NAME);
-	}
-
-	public DatabaseFacade getDatabaseFacade() {
-		// needed for test
-		return dbFacade;
 	}
 
 	@Override
@@ -156,4 +170,7 @@ public final class TableFacadeImp implements TableFacade {
 		dbFacade.rollback();
 	}
 
+	public DatabaseFacade onlyForTestGetDatabaseFacade() {
+		return dbFacade;
+	}
 }

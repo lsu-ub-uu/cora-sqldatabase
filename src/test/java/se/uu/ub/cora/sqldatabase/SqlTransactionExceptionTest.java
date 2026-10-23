@@ -30,7 +30,7 @@ public class SqlTransactionExceptionTest {
 
 	@Test
 	public void testExtendsSqlDatabaseException() {
-		SqlDatabaseException exception = SqlTransactionException.withMessage(MESSAGE);
+		SqlTransactionException exception = SqlTransactionException.withMessage(MESSAGE);
 		assertTrue(exception instanceof SqlDatabaseException);
 		assertTrue(exception instanceof SqlTransactionException);
 	}
@@ -38,7 +38,7 @@ public class SqlTransactionExceptionTest {
 	@Test
 	public void testInit() {
 		String message = MESSAGE;
-		SqlDatabaseException exception = SqlDatabaseException.withMessage(message);
+		SqlTransactionException exception = SqlTransactionException.withMessage(message);
 		assertEquals(exception.getMessage(), MESSAGE);
 	}
 
@@ -46,7 +46,7 @@ public class SqlTransactionExceptionTest {
 	public void testMessageAndError() {
 		String message = MESSAGE;
 		Exception exception = new RuntimeException();
-		SqlDatabaseException storageException = SqlDatabaseException
+		SqlTransactionException storageException = SqlTransactionException
 				.withMessageAndException(message, exception);
 		assertEquals(storageException.getMessage(), MESSAGE);
 		assertEquals(storageException.getCause(), exception);

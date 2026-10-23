@@ -31,11 +31,11 @@ public class SqlTransactionException extends SqlDatabaseException {
 		super(message, exception);
 	}
 
-	public static SqlDatabaseException withMessage(String message) {
+	public static SqlTransactionException withMessage(String message) {
 		return new SqlTransactionException(message);
 	}
 
-	public static SqlDatabaseException withMessageAndException(String message,
+	public static SqlTransactionException withMessageAndException(String message,
 			Exception exception) {
 		return new SqlTransactionException(message, exception);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, 2019, 2021 Uppsala University Library
+ * Copyright 2018, 2019, 2021, 2026 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -21,27 +21,35 @@ package se.uu.ub.cora.sqldatabase.table.internal;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.sqldatabase.OldDatabaseFacadeSpy;
 import se.uu.ub.cora.sqldatabase.Row;
 import se.uu.ub.cora.sqldatabase.SqlConflictException;
 import se.uu.ub.cora.sqldatabase.SqlDatabaseException;
+import se.uu.ub.cora.sqldatabase.SqlTransactionException;
+import se.uu.ub.cora.sqldatabase.sequence.DatabaseFacadeSpy;
+import se.uu.ub.cora.sqldatabase.sequence.RowSpy;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 
 public class TableFacadeTest {
 	private TableFacade tableFacade;
-	private OldDatabaseFacadeSpy databaseFacadeSpy;
 	private TableQuerySpy tableQuerySpy;
+	private DatabaseFacadeSpy databaseFacadeSpy;
+	private RowSpy rowSpy;
 
 	@BeforeMethod
 	public void beforeMethod() {
 		tableQuerySpy = new TableQuerySpy();
-		databaseFacadeSpy = new OldDatabaseFacadeSpy();
+		rowSpy = new RowSpy();
+		databaseFacadeSpy = new DatabaseFacadeSpy();
+		databaseFacadeSpy.MRV.setDefaultReturnValuesSupplier("readOneRowOrFailUsingSqlAndValues",
+				() -> rowSpy);
 		tableFacade = TableFacadeImp.usingDatabaseFacade(databaseFacadeSpy);
 	}
 
@@ -76,14 +84,26 @@ public class TableFacadeTest {
 
 	@Test
 	public void testReadSqlErrorThrowsErrorAndSendsAlongOriginalError() {
-		databaseFacadeSpy.throwError = true;
+		var error = setupDatabaseFasadeToThrowSqlErrorOnMethod("readUsingSqlAndValues");
 		try {
 			tableFacade.readRowsForQuery(tableQuerySpy);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertEquals(e.getMessage(), "Error reading data using sql: sql for read from spy");
-			assertEquals(e.getCause().getMessage(),
-					"Error from executePreparedStatementQueryUsingSqlAndValues in DatabaseFacadeSpy");
+			assertEquals(e.getCause(), error);
+		}
+	}
+
+	@Test
+	public void testReadSqlTransactionErrorThrowsErrorAndSendsAlongOriginalError() {
+		var error = setupDatabaseFasadeToThrowSqlTransactionOnMethod("readUsingSqlAndValues");
+		try {
+			tableFacade.readRowsForQuery(tableQuerySpy);
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(), "Error reading data using sql: sql for read from spy");
+			assertEquals(e.getCause(), error);
 		}
 	}
 
@@ -100,14 +120,28 @@ public class TableFacadeTest {
 
 	@Test
 	public void testReadOneSqlErrorThrowsErrorAndSendsAlongOriginalError() {
-		databaseFacadeSpy.throwError = true;
+		var error = setupDatabaseFasadeToThrowSqlErrorOnMethod("readOneRowOrFailUsingSqlAndValues");
+
 		try {
 			tableFacade.readOneRowForQuery(tableQuerySpy);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertEquals(e.getMessage(), "Error reading one row using sql: sql for read from spy");
-			assertEquals(e.getCause().getMessage(),
-					"Error from readOneRowOrFailUsingSqlAndValues in DatabaseFacadeSpy");
+			assertEquals(e.getCause(), error);
+		}
+	}
+
+	@Test
+	public void testReadOneSqlTransactionErrorThrowsErrorAndSendsAlongOriginalError() {
+		var error = setupDatabaseFasadeToThrowSqlTransactionOnMethod(
+				"readOneRowOrFailUsingSqlAndValues");
+		try {
+			tableFacade.readOneRowForQuery(tableQuerySpy);
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(), "Error reading one row using sql: sql for read from spy");
+			assertEquals(e.getCause(), error);
 		}
 	}
 
@@ -124,47 +158,76 @@ public class TableFacadeTest {
 
 	@Test
 	public void testReadNumberOfRowsSqlErrorThrowsError() {
-		databaseFacadeSpy.throwError = true;
+		var error = setupDatabaseFasadeToThrowSqlErrorOnMethod("readOneRowOrFailUsingSqlAndValues");
+
 		try {
 			tableFacade.readNumberOfRows(tableQuerySpy);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertEquals(e.getMessage(),
 					"Error reading number of rows using sql: sql for count from spy");
-			assertEquals(e.getCause().getMessage(),
-					"Error from readOneRowOrFailUsingSqlAndValues in DatabaseFacadeSpy");
+			assertEquals(e.getCause(), error);
+		}
+	}
+
+	@Test
+	public void testReadNumberOfRowsSqlTransactionErrorThrowsError() {
+		var error = setupDatabaseFasadeToThrowSqlTransactionOnMethod(
+				"readOneRowOrFailUsingSqlAndValues");
+		try {
+			tableFacade.readNumberOfRows(tableQuerySpy);
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(),
+					"Error reading number of rows using sql: sql for count from spy");
+			assertEquals(e.getCause(), error);
 		}
 	}
 
 	@Test
 	public void testReadNumberOfRows() {
+		long count = 423L;
+		rowSpy.MRV.setSpecificReturnValuesSupplier("getValueByColumn", () -> count, "count");
+
 		long numberOfRows = tableFacade.readNumberOfRows(tableQuerySpy);
 
-		databaseFacadeSpy.MCR.assertParameters("readOneRowOrFailUsingSqlAndValues", 0,
+		databaseFacadeSpy.MCR.assertCalledParametersReturn("readOneRowOrFailUsingSqlAndValues",
 				tableQuerySpy.MCR.getReturnValue("assembleCountSql", 0),
 				tableQuerySpy.MCR.getReturnValue("getQueryValues", 0));
-
-		Row row = (Row) databaseFacadeSpy.MCR.getReturnValue("readOneRowOrFailUsingSqlAndValues",
-				0);
-		assertEquals(numberOfRows, (long) row.getValueByColumn("count"));
+		assertEquals(numberOfRows, count);
 	}
 
 	@Test
 	public void testDeleteWithError() {
-		databaseFacadeSpy.throwError = true;
+		var error = setupDatabaseFasadeToThrowSqlErrorOnMethod("executeSqlWithValues");
+
 		try {
 			tableFacade.deleteRowsForQuery(tableQuerySpy);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertEquals(e.getMessage(), "Error deleting rows using sql: sql for delete from spy");
-			assertEquals(e.getCause().getMessage(),
-					"Error from executeSqlWithValues in DatabaseFacadeSpy");
+			assertEquals(e.getCause(), error);
+		}
+	}
+
+	@Test
+	public void testDeleteWithTransactionError() {
+		var error = setupDatabaseFasadeToThrowSqlTransactionOnMethod("executeSqlWithValues");
+		try {
+			tableFacade.deleteRowsForQuery(tableQuerySpy);
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(), "Error deleting rows using sql: sql for delete from spy");
+			assertEquals(e.getCause(), error);
 		}
 	}
 
 	@Test
 	public void testDeleteRowsForQuery() {
-		databaseFacadeSpy.numberOfAffectedRows = 23;
+		int count = 423;
+		databaseFacadeSpy.MRV.setDefaultReturnValuesSupplier("executeSqlWithValues", () -> count);
 
 		int deletedRows = tableFacade.deleteRowsForQuery(tableQuerySpy);
 
@@ -176,29 +239,41 @@ public class TableFacadeTest {
 
 	@Test
 	public void testInsertWithError() {
-		databaseFacadeSpy.throwError = true;
+		var error = setupDatabaseFasadeToThrowSqlErrorOnMethod("executeSqlWithValues");
+
 		try {
 			tableFacade.insertRowUsingQuery(tableQuerySpy);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertEquals(e.getMessage(), "Error inserting row using sql: sql for create from spy");
-			assertEquals(e.getCause().getMessage(),
-					"Error from executeSqlWithValues in DatabaseFacadeSpy");
+			assertEquals(e.getCause(), error);
 		}
 	}
 
 	@Test
 	public void testInsertWithDuplicatedKeyError() {
-		databaseFacadeSpy.throwDuplicatedKeyError = true;
+		var error = setupDatabaseFasadeToThrowSqlConclictOnMethod("executeSqlWithValues");
 		try {
 			tableFacade.insertRowUsingQuery(tableQuerySpy);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertTrue(e instanceof SqlConflictException);
 			assertEquals(e.getMessage(),
 					"Error inserting row, duplicated key, using sql: sql for create from spy");
-			assertEquals(e.getCause().getMessage(),
-					"Error from executeSqlWithValues in DatabaseFacadeSpy");
+			assertEquals(e.getCause(), error);
+		}
+	}
+
+	@Test
+	public void testInsertWithTransactionError() {
+		var error = setupDatabaseFasadeToThrowSqlTransactionOnMethod("executeSqlWithValues");
+		try {
+			tableFacade.insertRowUsingQuery(tableQuerySpy);
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(), "Error inserting row using sql: sql for create from spy");
+			assertEquals(e.getCause(), error);
 		}
 	}
 
@@ -213,35 +288,49 @@ public class TableFacadeTest {
 
 	@Test
 	public void testUpdateWithError() {
-		databaseFacadeSpy.throwError = true;
+		var error = setupDatabaseFasadeToThrowSqlErrorOnMethod("executeSqlWithValues");
+
 		try {
 			tableFacade.updateRowsUsingQuery(tableQuerySpy);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertEquals(e.getMessage(), "Error updating rows using sql: sql for update from spy");
-			assertEquals(e.getCause().getMessage(),
-					"Error from executeSqlWithValues in DatabaseFacadeSpy");
+			assertEquals(e.getCause(), error);
 		}
 	}
 
 	@Test
 	public void testUpdateWithDuplicatedKeyError() {
-		databaseFacadeSpy.throwDuplicatedKeyError = true;
+		var error = setupDatabaseFasadeToThrowSqlConclictOnMethod("executeSqlWithValues");
+
 		try {
 			tableFacade.updateRowsUsingQuery(tableQuerySpy);
-			assertTrue(false);
+			fail();
 		} catch (Exception e) {
 			assertTrue(e instanceof SqlConflictException);
 			assertEquals(e.getMessage(),
 					"Error updating rows, duplicated key, using sql: sql for update from spy");
-			assertEquals(e.getCause().getMessage(),
-					"Error from executeSqlWithValues in DatabaseFacadeSpy");
+			assertEquals(e.getCause(), error);
+		}
+	}
+
+	@Test
+	public void testUpdateWithTransactionError() {
+		var error = setupDatabaseFasadeToThrowSqlTransactionOnMethod("executeSqlWithValues");
+		try {
+			tableFacade.updateRowsUsingQuery(tableQuerySpy);
+			fail();
+		} catch (Exception e) {
+			assertTrue(e instanceof SqlTransactionException);
+			assertEquals(e.getMessage(), "Error updating rows using sql: sql for update from spy");
+			assertEquals(e.getCause(), error);
 		}
 	}
 
 	@Test
 	public void testUpdateRowsForQuery() {
-		databaseFacadeSpy.numberOfAffectedRows = 19;
+		int count = 423;
+		databaseFacadeSpy.MRV.setDefaultReturnValuesSupplier("executeSqlWithValues", () -> count);
 
 		int updateRows = tableFacade.updateRowsUsingQuery(tableQuerySpy);
 
@@ -253,18 +342,40 @@ public class TableFacadeTest {
 
 	@Test(expectedExceptions = SqlDatabaseException.class)
 	public void testReadNextFromSequenceError() {
-		databaseFacadeSpy.throwError = true;
+		setupDatabaseFasadeToThrowSqlErrorOnMethod("readOneRowOrFailUsingSqlAndValues");
 
 		tableFacade.nextValueFromSequence("someSequence");
 	}
 
 	@Test
 	public void testReadNextFromSequence() {
+		long count = 423L;
+		rowSpy.MRV.setSpecificReturnValuesSupplier("getValueByColumn", () -> count, "nextval");
+
 		long result = tableFacade.nextValueFromSequence("someSequence");
-		assertTrue(databaseFacadeSpy.readOneRowFromDbUsingTableAndConditionsWasCalled);
-		assertTrue(databaseFacadeSpy.values.isEmpty());
-		assertEquals(databaseFacadeSpy.sql, "select nextval('someSequence') as nextval");
-		long resultInSpy = 438234090L;
-		assertEquals(result, resultInSpy);
+
+		databaseFacadeSpy.MCR.assertCalledParameters("readOneRowOrFailUsingSqlAndValues",
+				"select nextval('someSequence') as nextval", Collections.emptyList());
+		assertEquals(result, count);
+	}
+
+	private SqlDatabaseException setupDatabaseFasadeToThrowSqlErrorOnMethod(String method) {
+		SqlDatabaseException error = SqlDatabaseException.withMessage("Some db error!");
+		databaseFacadeSpy.MRV.setAlwaysThrowException(method, error);
+		return error;
+	}
+
+	private SqlConflictException setupDatabaseFasadeToThrowSqlConclictOnMethod(String method) {
+		SqlConflictException error = SqlConflictException.withMessage("Some conflict error!");
+		databaseFacadeSpy.MRV.setAlwaysThrowException(method, error);
+		return error;
+	}
+
+	private SqlTransactionException setupDatabaseFasadeToThrowSqlTransactionOnMethod(
+			String method) {
+		SqlTransactionException error = SqlTransactionException
+				.withMessage("Some transaction error!");
+		databaseFacadeSpy.MRV.setAlwaysThrowException(method, error);
+		return error;
 	}
 }

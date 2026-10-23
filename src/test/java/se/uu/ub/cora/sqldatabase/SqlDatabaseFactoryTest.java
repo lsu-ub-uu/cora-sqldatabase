@@ -151,7 +151,7 @@ public class SqlDatabaseFactoryTest {
 
 	private SqlConnectionProvider factorTableFacadeAndGetSqlConnectionProviderFromIt() {
 		TableFacadeImp tableFacade = (TableFacadeImp) sqlDatabaseFactory.factorTableFacade();
-		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
+		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.onlyForTestGetDatabaseFacade();
 		return databaseFacade.onlyForTestGetSqlConnectionProvider();
 	}
 
@@ -168,7 +168,7 @@ public class SqlDatabaseFactoryTest {
 
 		TableFacadeImp tableFacade = (TableFacadeImp) tableFacadeFactory.factorTableFacade();
 
-		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
+		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.onlyForTestGetDatabaseFacade();
 		assertSame(databaseFacade.onlyForTestGetSqlConnectionProvider(),
 				tableFacadeFactory.getSqlConnectionProvider());
 	}
@@ -190,7 +190,7 @@ public class SqlDatabaseFactoryTest {
 	public void testFactoriesUseSameSqlConnectionProvider() {
 		DatabaseFacadeImp dbFacade = (DatabaseFacadeImp) sqlDatabaseFactory.factorDatabaseFacade();
 		TableFacadeImp tableFacade = (TableFacadeImp) sqlDatabaseFactory.factorTableFacade();
-		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.getDatabaseFacade();
+		DatabaseFacadeImp databaseFacade = (DatabaseFacadeImp) tableFacade.onlyForTestGetDatabaseFacade();
 
 		assertSame(dbFacade.onlyForTestGetSqlConnectionProvider(), databaseFacade.onlyForTestGetSqlConnectionProvider());
 
