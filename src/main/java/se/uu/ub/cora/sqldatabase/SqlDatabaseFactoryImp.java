@@ -26,6 +26,8 @@ import se.uu.ub.cora.sqldatabase.connection.ContextConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
+import se.uu.ub.cora.sqldatabase.recordlock.RecordLock;
+import se.uu.ub.cora.sqldatabase.recordlock.internal.RecordLockImp;
 import se.uu.ub.cora.sqldatabase.sequence.Sequence;
 import se.uu.ub.cora.sqldatabase.sequence.internal.SequenceImp;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
@@ -154,6 +156,11 @@ public class SqlDatabaseFactoryImp implements SqlDatabaseFactory {
 	@Override
 	public Sequence factorSequence() {
 		return SequenceImp.usingDatabaseFacade(factorDatabaseFacade());
+	}
+
+	@Override
+	public RecordLock factorRecordLock() {
+		return RecordLockImp.usingDatabaseFacade(factorDatabaseFacade());
 	}
 
 	public String onlyForTestGetLookupName() {
