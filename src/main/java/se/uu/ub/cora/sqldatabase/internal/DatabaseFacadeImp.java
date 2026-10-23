@@ -277,7 +277,6 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 		try {
 			createConnectionIfNotCreatedSinceBefore();
 			connection.setAutoCommit(false);
-			connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 		} catch (SQLException e) {
 			throw throwSqlDatabaseException("Error starting transaction.", e);
 		}
