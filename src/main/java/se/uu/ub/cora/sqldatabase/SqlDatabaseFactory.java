@@ -19,6 +19,7 @@
 
 package se.uu.ub.cora.sqldatabase;
 
+import se.uu.ub.cora.sqldatabase.recordlock.RecordLock;
 import se.uu.ub.cora.sqldatabase.sequence.Sequence;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
 import se.uu.ub.cora.sqldatabase.table.TableQuery;
@@ -77,5 +78,18 @@ public interface SqlDatabaseFactory {
 	 * @return A Sequence adapter.
 	 */
 	Sequence factorSequence();
+
+	/**
+	 * factorRecordLock creates and returns a new instance of RecordLock, using its own
+	 * DatabaseFacade so that acquiring and releasing locks are not affected by transactions in
+	 * other DatabaseFacades.
+	 * 
+	 * <p>
+	 * <em>Note, RecordLock uses the {@link AutoCloseable} interface so it is adviced to wrapp this
+	 * call in an try-with-resources block.</em>
+	 * 
+	 * @return A RecordLock adapter.
+	 */
+	RecordLock factorRecordLock();
 
 }
