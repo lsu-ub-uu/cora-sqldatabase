@@ -41,6 +41,9 @@ import se.uu.ub.cora.sqldatabase.connection.DriverSpy;
 import se.uu.ub.cora.sqldatabase.connection.ParameterConnectionProviderImp;
 import se.uu.ub.cora.sqldatabase.connection.SqlConnectionProvider;
 import se.uu.ub.cora.sqldatabase.internal.DatabaseFacadeImp;
+import se.uu.ub.cora.sqldatabase.recordlock.internal.RecordLockImp;
+import se.uu.ub.cora.sqldatabase.recordlock.internal.SystemTimeSource;
+import se.uu.ub.cora.sqldatabase.recordlock.internal.ThreadSleeper;
 import se.uu.ub.cora.sqldatabase.sequence.DatabaseFacadeSpy;
 import se.uu.ub.cora.sqldatabase.sequence.internal.SequenceImp;
 import se.uu.ub.cora.sqldatabase.table.TableFacade;
@@ -227,6 +230,19 @@ public class SqlDatabaseFactoryTest {
 		var databaseFacade = sqlDatabaseFactoryWithMCR.MCR
 				.assertCalledParametersReturn("factorDatabaseFacade");
 		assertEquals(sequence.onlyForTestGetDatabaseFacade(), databaseFacade);
+	}
+
+	@Test
+	public void testFactorRecordLock() {
+		SqlDatabaseFactoryWithMCR sqlDatabaseFactoryWithMCR = new SqlDatabaseFactoryWithMCR();
+
+		RecordLockImp recordLock = (RecordLockImp) sqlDatabaseFactoryWithMCR.factorRecordLock();
+
+		var databaseFacade = sqlDatabaseFactoryWithMCR.MCR
+				.assertCalledParametersReturn("factorDatabaseFacade");
+		assertEquals(recordLock.onlyForTestGetDatabaseFacade(), databaseFacade);
+		assertTrue(recordLock.onlyForTestGetSleeper() instanceof ThreadSleeper);
+		assertTrue(recordLock.onlyForTestGetTimeSource() instanceof SystemTimeSource);
 	}
 
 	@Test
