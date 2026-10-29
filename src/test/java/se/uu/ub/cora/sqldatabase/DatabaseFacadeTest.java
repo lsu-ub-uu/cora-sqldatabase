@@ -771,7 +771,7 @@ public class DatabaseFacadeTest {
 		setUpSqlConnectionProvider();
 		PreparedStatementSpy statementSpy = new PreparedStatementSpy();
 		connection.MRV.setDefaultReturnValuesSupplier("prepareStatement", () -> statementSpy);
-		exceptionSpy.MRV.setDefaultReturnValuesSupplier("getSQLState", () -> "40001");
+		exceptionSpy.MRV.setDefaultReturnValuesSupplier("getSQLState", () -> "40");
 		setThrowSqlException(statementSpy, exceptionSpy, methodName);
 		return DatabaseFacadeImp.usingSqlConnectionProvider(sqlConnectionProvider);
 	}

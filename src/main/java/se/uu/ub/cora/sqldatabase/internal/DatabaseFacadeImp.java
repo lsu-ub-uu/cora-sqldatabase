@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import se.uu.ub.cora.sqldatabase.DatabaseFacade;
 import se.uu.ub.cora.sqldatabase.DatabaseValues;
@@ -114,7 +115,7 @@ public final class DatabaseFacadeImp implements DatabaseFacade {
 	}
 
 	private boolean isTranscationExceptionState(SQLException e) {
-		return "40001".equals(e.getSQLState());
+		return Objects.toString(e.getSQLState(), "").startsWith("40");
 	}
 
 	private List<Row> tryToReadUsingSqlAndValues(String sql, List<Object> values)
